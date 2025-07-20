@@ -1,8 +1,6 @@
-
-import {
-	ChangeEmailConfirmationEmail,
-	OtpEmail,
-} from "@optima/email";
+import { stripe } from "@better-auth/stripe";
+import { ChangeEmailConfirmationEmail, OtpEmail } from "@optima/email";
+import { createServerClient } from "@optima/supabase/clients/server";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import {
@@ -13,14 +11,11 @@ import {
 	organization,
 	phoneNumber,
 } from "better-auth/plugins";
+import { headers } from "next/headers";
 import { Pool } from "pg";
+import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import { resend } from "@/lib/resend";
-
-import { stripe } from "@better-auth/stripe";
-import { createServerClient } from "@optima/supabase/clients/server";
-import { headers } from "next/headers";
-import Stripe from "stripe";
 import { env } from "../env";
 
 const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -29,7 +24,6 @@ const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
 
 export const auth = betterAuth({
 	appName: "Staff Optima",
-	secret: env.JWT_SIGN_SECRET,
 	database: new Pool({
 		connectionString: env.DATABASE_URL,
 	}),

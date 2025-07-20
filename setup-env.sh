@@ -9,8 +9,8 @@ cat > apps/dashboard/.env << 'EOF'
 # Database
 DATABASE_URL="postgresql://postgres:password@localhost:5432/staff_optima"
 
-# JWT
-JWT_SIGN_SECRET="your-jwt-secret-key-here"
+# Better Auth
+BETTER_AUTH_SECRET="your-better-auth-secret-key-here"
 
 # Environment
 NODE_ENV="development"
