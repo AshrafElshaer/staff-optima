@@ -16,4 +16,4 @@ url = "https://registry.npmjs.org/"
 
 [install.trustedDependencies]
 # Trust workspace dependencies
-"@workspace/*" = true 
+"@optima/*" = true 

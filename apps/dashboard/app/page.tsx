@@ -1,4 +1,5 @@
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@optima/ui/components/button";
+import { Input } from "@optima/ui/components/inputs";
 
 export default function Page() {
 	return (
@@ -6,6 +7,7 @@ export default function Page() {
 			<div className="flex flex-col items-center justify-center gap-4">
 				<h1 className="text-2xl font-bold">Hello World</h1>
 				<Button size="sm">Button</Button>
+				<Input />
 			</div>
 		</div>
 	);

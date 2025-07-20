@@ -7,14 +7,18 @@
 		"config": "",
 		"css": "src/styles/globals.css",
 		"baseColor": "neutral",
-		"cssVariables": true
+		"cssVariables": true,
+		"includeLanguages": {
+			"typescriptreact": "html",
+			"typescript": "html"
+		}
 	},
 	"iconLibrary": "lucide",
 	"aliases": {
-		"components": "@workspace/ui/components",
-		"utils": "@workspace/ui/lib/utils",
-		"hooks": "@workspace/ui/hooks",
-		"lib": "@workspace/ui/lib",
-		"ui": "@workspace/ui/components"
+		"components": "@optima/ui/components",
+		"utils": "@optima/ui/lib/utils",
+		"hooks": "@optima/ui/hooks",
+		"lib": "@optima/ui/lib",
+		"ui": "@optima/ui/components"
 	}
 }
