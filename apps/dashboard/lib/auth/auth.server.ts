@@ -24,6 +24,7 @@ const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
 
 export const auth = betterAuth({
 	appName: "Staff Optima",
+	baseURL: env.BETTER_AUTH_URL,
 	database: new Pool({
 		connectionString: env.DATABASE_URL,
 	}),
