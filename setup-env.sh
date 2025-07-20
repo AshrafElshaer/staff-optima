@@ -11,6 +11,7 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/staff_optima"
 
 # Better Auth
 BETTER_AUTH_SECRET="your-better-auth-secret-key-here"
+BETTER_AUTH_URL="http://localhost:3000"
 
 # Environment
 NODE_ENV="development"
@@ -19,6 +20,7 @@ NODE_ENV="development"
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 NEXT_PUBLIC_SUPABASE_SERVICE_KEY="your-supabase-service-key"
+DATABASE_URL="your-database-url"
 
 # Stripe
 STRIPE_SECRET_KEY="sk_test_your-stripe-secret-key"
@@ -40,7 +42,8 @@ echo "✅ Created apps/dashboard/.env file"
 echo ""
 echo "⚠️  IMPORTANT: Please update the values in apps/dashboard/.env with your actual credentials:"
 echo "   - DATABASE_URL: Your PostgreSQL connection string"
-echo "   - JWT_SIGN_SECRET: A secure random string for JWT signing"
+echo "   - BETTER_AUTH_SECRET: A secure random string for JWT signing"
+echo "   - BETTER_AUTH_URL: Your Better Auth URL"
 echo "   - Supabase credentials from your Supabase project"
 echo "   - Stripe credentials from your Stripe dashboard"
 echo "   - Resend API key from your Resend account"
@@ -52,7 +55,4 @@ echo "   - Supabase: https://supabase.com"
 echo "   - Stripe: https://stripe.com"
 echo "   - Resend: https://resend.com"
 echo "   - Upstash: https://upstash.com"
-echo ""
-echo "After updating the .env file, run:"
-echo "  bun run auth:generate"
-echo "  cd packages/supabase && bun run ts:generate" 
+
