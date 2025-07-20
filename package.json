@@ -1,0 +1,33 @@
+{
+	"name": "@optima/monorepo",
+	"version": "0.0.1",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"build": "turbo build",
+		"dev": "turbo dev",
+		"dev:app": "turbo dev --filter=@optima/app",
+		"clean": "git clean -xdf node_modules",
+		"clean:workspaces": "turbo clean",
+		"format": "biome format --write .",
+		"lint:fix": "biome lint --write",
+		"lint": "turbo lint && bun lint:repo",
+		"lint:repo": "bunx sherif@latest",
+		"typecheck": "turbo typecheck",
+		"test": "turbo test"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"@optima/typescript-config": "workspace:*",
+		"husky": "^9.1.7",
+		"turbo": "^2.5.5",
+		"typescript": "5.8.3"
+	},
+	"packageManager": "bun@1.0.0",
+	"engines": {
+		"node": ">=20"
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"globalDependencies": ["**/.env"],
+	"ui": "stream",
+	"tasks": {
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"build": {
+			"env": [
+				"NEXT_PUBLIC_SUPABASE_URL",
+				"NEXT_PUBLIC_SUPABASE_ANON_KEY",
+				"DATABASE_URL",
+				"RESEND_API_KEY",
+				"STRIPE_SECRET_KEY",
+				"STRIPE_WEBHOOK_SECRET",
+				"UPSTASH_REDIS_REST_URL",
+				"UPSTASH_REDIS_REST_TOKEN",
+				"DUB_API_KEY",
+				"NEXT_PUBLIC_OPENPANEL_CLIENT_ID",
+				"OPENPANEL_SECRET_KEY",
+				"TRIGGER_SECRET_KEY",
+				"SENTRY_AUTH_TOKEN",
+				"NEXT_PUBLIC_SENTRY_DSN",
+				"SENTRY_ORG",
+				"SENTRY_PROJECT",
+				"CLERK_SECRET_KEY",
+				"CLERK_WEBHOOK_SIGNING_SECRET",
+				"BETTER_AUTH_SECRET",
+				"STRIPE_PUBLISH_KEY",
+				"GOOGLE_CLIENT_ID",
+				"GOOGLE_CLIENT_SECRET"
+			],
+			"inputs": ["$TURBO_DEFAULT$", ".env"],
+			"dependsOn": ["^build"]
+		},
+		"start": {
+			"cache": false
+		},
+		"test": {
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		},
+		"dev": {
+			"inputs": ["$TURBO_DEFAULT$", ".env"],
+			"persistent": true,
+			"cache": false
+		},
+		"jobs": {
+			"persistent": true,
+			"cache": false
+		},
+		"lint": {
+			"dependsOn": ["^topo"]
+		},
+		"typecheck": {
+			"dependsOn": ["^topo"]
+		}
+	}
+}

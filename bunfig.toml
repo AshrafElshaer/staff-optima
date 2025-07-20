@@ -1,0 +1,19 @@
+[install]
+# Enable workspace hoisting for better performance
+hoistingLimits = "workspaces"
+
+[install.scopes]
+# Configure workspace scopes
+workspace = "workspace:*"
+
+[install.cache]
+# Enable caching for faster installs
+dir = ".bun/install/cache"
+
+[install.registry]
+# Use npm registry
+url = "https://registry.npmjs.org/"
+
+[install.trustedDependencies]
+# Trust workspace dependencies
+"@workspace/*" = true 
