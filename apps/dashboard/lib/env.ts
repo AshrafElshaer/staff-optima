@@ -13,7 +13,7 @@ export const env = createEnv({
 		UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 		GOOGLE_CLIENT_ID: z.string().min(1),
 		GOOGLE_CLIENT_SECRET: z.string().min(1),
-		BETTER_AUTH_URL: z.url(),
+		BETTER_AUTH_URL: z.string().url().optional(),
 	},
 	client: {
 		NEXT_PUBLIC_SUPABASE_URL: z.url(),
@@ -31,7 +31,11 @@ export const env = createEnv({
 
 		// BETTER AUTH
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+		BETTER_AUTH_URL:
+			process.env.BETTER_AUTH_URL ||
+			(process.env.VERCEL_URL
+				? `https://${process.env.VERCEL_URL}`
+				: "http://localhost:3000"),
 
 		// STRIPE
 		STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
