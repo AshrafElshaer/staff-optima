@@ -26,7 +26,7 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "supabase/supabase-js",
+		"@supabase/supabase-js": "^2.52.0",
 		"libphonenumber-js": "^1.12.10",
 		"supabase": "^2.31.4",
 		"zod": "^4.0.5"
