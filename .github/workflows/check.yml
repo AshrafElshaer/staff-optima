@@ -1,0 +1,24 @@
+name: Check
+on:
+  push:
+    paths:
+      - '**'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: 🔦 Run linter
+        run: bun run lint
+      - name: 🧪 Run tests
+        run: bun run test
+        env:
+          NEXT_PUBLIC_ROOT_DOMAIN: staffoptima.co
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck
+     
