@@ -13,7 +13,7 @@ export const env = createEnv({
 		UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 		GOOGLE_CLIENT_ID: z.string().min(1),
 		GOOGLE_CLIENT_SECRET: z.string().min(1),
-		BETTER_AUTH_URL: z.string().min(1),
+		BETTER_AUTH_URL: z.url(),
 	},
 	client: {
 		NEXT_PUBLIC_SUPABASE_URL: z.url(),
