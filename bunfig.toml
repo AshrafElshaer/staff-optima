@@ -17,3 +17,6 @@ url = "https://registry.npmjs.org/"
 [install.trustedDependencies]
 # Trust workspace dependencies
 "@optima/*" = true 
+
+[test]
+preload = ["./test-setup.ts"] 

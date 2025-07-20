@@ -3,6 +3,10 @@
 	"globalDependencies": ["**/.env"],
 	"ui": "stream",
 	"tasks": {
+	
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
 		"topo": {
 			"dependsOn": ["^topo"]
 		},
@@ -38,7 +42,8 @@
 			"cache": false
 		},
 		"test": {
-			"cache": false
+			"cache": false,
+			"dependsOn": ["transit"]
 		},
 		"clean": {
 			"cache": false
