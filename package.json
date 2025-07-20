@@ -17,7 +17,8 @@
 		"lint": "turbo lint && bun lint:repo",
 		"lint:repo": "bunx sherif@latest",
 		"typecheck": "turbo typecheck",
-		"test": "turbo test"
+		"test": "turbo test",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
