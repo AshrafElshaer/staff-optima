@@ -1,0 +1,34 @@
+{
+	"name": "@optima/supabase",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"db:push": "bunx supabase db push",
+		"deploy:functions": "bunx supabase functions deploy --no-verify-jwt",
+		"lint": "biome check . ",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit ",
+		"ts:generate": "bunx supabase gen types typescript --project-id dnhgezpaotfenrnbtiyy --schema public > src/types/database.ts"
+	},
+	"exports": {
+		"./mutations": "./src/mutations/index.ts",
+		"./queries/*": "./src/queries/*.ts",
+		"./types": "./src/types/index.ts",
+		"./validations/*": "./src/validation/*.ts",
+		"./clients/*": "./src/clients/*.ts",
+		"./utils/*": "./src/utlis/*.ts"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "supabase/supabase-js",
+		"libphonenumber-js": "^1.12.10",
+		"supabase": "^2.31.4",
+		"zod": "^4.0.5"
+	}
+}

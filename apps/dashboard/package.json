@@ -16,6 +16,7 @@
 	},
 	"dependencies": {
 		"@optima/ui": "workspace:*",
+		"@t3-oss/env-nextjs": "^0.13.8",
 		"@tanstack/react-query": "^5.83.0",
 		"@tanstack/react-query-devtools": "^5.83.0",
 		"lucide-react": "^0.525.0",
@@ -23,7 +24,8 @@
 		"next-themes": "^0.4.6",
 		"nuqs": "^2.4.3",
 		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"react-dom": "^19.0.0",
+		"zod": "^4.0.5"
 	},
 	"devDependencies": {
 		"@optima/typescript-config": "workspace:*",
