@@ -1,4 +1,5 @@
 import { Img } from "@react-email/components";
+// biome-ignore lint/correctness/noUnusedImports: needed for react
 import React from "react";
 
 const baseUrl = "https://app.staffoptima.co";

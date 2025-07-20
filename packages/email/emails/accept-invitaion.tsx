@@ -3,7 +3,6 @@ import {
 	Button,
 	Container,
 	Font,
-	Head,
 	Heading,
 	Html,
 	Preview,
@@ -11,7 +10,8 @@ import {
 	Tailwind,
 	Text,
 } from "@react-email/components";
-import * as React from "react";
+// biome-ignore lint/correctness/noUnusedImports: needed for react
+import React from "react";
 import { colors } from "../components/colors";
 import Logo from "../components/logo";
 
