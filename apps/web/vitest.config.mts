@@ -11,7 +11,6 @@ export default defineConfig({
 	],
 	test: {
 		environment: "jsdom",
-		setupFiles: ["./__tests__/test-setup.ts"],
 		globals: true,
 		exclude: [
 			"node_modules",
@@ -21,5 +20,6 @@ export default defineConfig({
 			"coverage",
 			"**/tsconfig.json", // optional: avoid parsing package tsconfigs
 		],
+		setupFiles: ["./__tests__/test-setup.ts"],
 	},
 });
