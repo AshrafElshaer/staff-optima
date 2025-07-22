@@ -1,3 +1,17 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { AuthComponent } from "@/features/auth/views";
+
+export const metadata: Metadata = {
+	title: "Authentication",
+};
+
 export default function AuthPage() {
-	return <div>AuthPage</div>;
+	return (
+		<div className="flex h-screen w-screen items-center justify-center">
+			<Suspense>
+				<AuthComponent />
+			</Suspense>
+		</div>
+	);
 }
