@@ -103,7 +103,6 @@ export const auth = betterAuth({
 		freshAge: 0,
 		cookieCache: {
 			enabled: false, // Disable cookie cache to avoid issues
-
 		},
 	},
 	databaseHooks: {
