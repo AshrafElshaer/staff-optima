@@ -20,7 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 					enableColorScheme
 				>
 					{children}
-					<Toaster duration={5000} closeButton />
+					<Toaster duration={5000} closeButton position="top-right" />
 					<ReactQueryDevtools initialIsOpen={false} />
 				</NextThemesProvider>
 			</QueryClientProvider>

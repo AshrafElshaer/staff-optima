@@ -71,8 +71,8 @@ export function SignIn() {
 	const signInWith = async (strategy: "google") => {
 		await authClient.signIn.social({
 			provider: strategy,
-			callbackURL: `${window.location.origin}${redirectUrl}`,
-			newUserCallbackURL: `${window.location.origin}/onboarding`,
+			callbackURL: redirectUrl ?? "/",
+			newUserCallbackURL: "/onboarding",
 		});
 	};
 

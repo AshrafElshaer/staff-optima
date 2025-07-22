@@ -161,7 +161,7 @@ export const auth = betterAuth({
 
 			return {
 				user: {
-					...data?.user,
+					...user,
 				},
 				session: {
 					...session,

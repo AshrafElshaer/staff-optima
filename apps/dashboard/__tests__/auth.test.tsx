@@ -5,6 +5,11 @@ import { VerifyOtp } from "@/features/auth/views/verify-otp";
 import { TestWrapper } from "./test-wrapper";
 
 // Mock nuqs with proper adapter and query state implementations
+vi.mock("next/navigation", () => ({
+	useRouter: vi.fn().mockReturnValue({
+		push: vi.fn(),
+	}),
+}));
 vi.mock("nuqs", () => ({
 	useQueryStates: vi.fn().mockReturnValue([
 		{

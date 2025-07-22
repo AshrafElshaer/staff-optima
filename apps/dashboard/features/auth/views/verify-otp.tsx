@@ -83,7 +83,7 @@ export function VerifyOtp() {
 					onError(error) {
 						toast.error(error.error.message);
 					},
-					onSuccess() {
+					onSuccess(data) {
 						router.push(redirectUrl ?? "/");
 					},
 				},
