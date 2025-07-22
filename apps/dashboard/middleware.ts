@@ -17,7 +17,6 @@ export async function middleware(request: NextRequest) {
 	const session = await auth.api.getSession({
 		headers: request.headers,
 	});
-	console.log({ session });
 
 	// If no session and not on a public route, redirect to auth
 	if (!session && !isPublicRoute(pathname)) {

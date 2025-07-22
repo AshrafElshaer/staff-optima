@@ -29,7 +29,12 @@ export const auth = betterAuth({
 		connectionString: env.DATABASE_URL,
 	}),
 
-	trustedOrigins: ["http://*.localhost:3000", "https://*.staffoptima.co"],
+	trustedOrigins: [
+		"http://localhost:3000",
+		"http://127.0.0.1:3000",
+		"https://app.staffoptima.co",
+		"https://staffoptima.co",
+	],
 	user: {
 		deleteUser: {
 			enabled: true,
@@ -84,11 +89,11 @@ export const auth = betterAuth({
 		ipAddress: {
 			ipAddressHeaders: ["x-client-ip", "x-forwarded-for"],
 		},
-		useSecureCookies: true,
+		useSecureCookies: env.NODE_ENV === "production",
 		defaultCookieAttributes: {
 			httpOnly: true,
-			secure: true,
-			sameSite: "strict",
+			secure: env.NODE_ENV === "production",
+			sameSite: "lax",
 		},
 	},
 	session: {
@@ -97,32 +102,50 @@ export const auth = betterAuth({
 		storeSessionInDatabase: true,
 		freshAge: 0,
 		cookieCache: {
-			enabled: true, // Enable caching session in cookie (default: `false`)
-			maxAge: 300, // 5 minutes
+			enabled: false, // Disable cookie cache to avoid issues
+
 		},
 	},
 	databaseHooks: {
 		session: {
 			create: {
 				before: async (session) => {
-					const ipAddress = (await headers()).get("x-forwarded-for");
-					const supabase = await createServerClient();
-					const { data } = await supabase
-						.from("member")
-						.select(`
-							*,
-							organization (id),  
-							user (*)
-						`)
-						.eq("userId", session.userId)
-						.single();
-					return {
-						data: {
-							...session,
-							ipAddress: ipAddress || null,
-							activeOrganizationId: data?.organizationId || null,
-						},
-					};
+					try {
+						const ipAddress = (await headers()).get("x-forwarded-for");
+						const supabase = await createServerClient();
+						const { data, error } = await supabase
+							.from("member")
+							.select(`
+								*,
+								organization (id),  
+								user (*)
+							`)
+							.eq("userId", session.userId)
+							.single();
+
+						// If no member record exists (new user), that's fine
+						if (error && error.code !== "PGRST116") {
+							console.error("Error fetching member data:", error);
+						}
+
+						return {
+							data: {
+								...session,
+								ipAddress: ipAddress || null,
+								activeOrganizationId: data?.organizationId || null,
+							},
+						};
+					} catch (error) {
+						console.error("Error in session creation hook:", error);
+						// Return session data without additional fields if there's an error
+						return {
+							data: {
+								...session,
+								ipAddress: null,
+								activeOrganizationId: null,
+							},
+						};
+					}
 				},
 			},
 		},
@@ -132,6 +155,8 @@ export const auth = betterAuth({
 			prompt: "select_account",
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
+			// Ensure proper callback URL
+			callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 		},
 		// microsoft: {
 		// 	clientId: process.env.MICROSOFT_CLIENT_ID as string,
@@ -148,26 +173,45 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		customSession(async ({ user, session }) => {
-			const supabase = await createServerClient();
-			const { data } = await supabase
-				.from("member")
-				.select(`
-							*,
-							organization (id),
-							user (*)
-						`)
-				.eq("userId", user.id)
-				.single();
+			try {
+				const supabase = await createServerClient();
+				const { data, error } = await supabase
+					.from("member")
+					.select(`
+						*,
+						organization (id),
+						user (*)
+					`)
+					.eq("userId", user.id)
+					.single();
 
-			return {
-				user: {
-					...user,
-				},
-				session: {
-					...session,
-					activeOrganizationId: data?.organizationId || null,
-				},
-			};
+				// If no member record exists (new user), that's fine
+				if (error && error.code !== "PGRST116") {
+					console.error("Error fetching member data in customSession:", error);
+				}
+
+				return {
+					user: {
+						...user,
+					},
+					session: {
+						...session,
+						activeOrganizationId: data?.organizationId || null,
+					},
+				};
+			} catch (error) {
+				console.error("Error in customSession plugin:", error);
+				// Return session data without additional fields if there's an error
+				return {
+					user: {
+						...user,
+					},
+					session: {
+						...session,
+						activeOrganizationId: null,
+					},
+				};
+			}
 		}),
 		phoneNumber({
 			// biome-ignore lint/correctness/noUnusedFunctionParameters: Will implement later
