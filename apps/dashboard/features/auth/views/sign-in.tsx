@@ -22,7 +22,6 @@ import {
 import { Icons } from "@optima/ui/components/icons";
 import { Input } from "@optima/ui/components/inputs/input";
 import { Separator } from "@optima/ui/components/separator";
-import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -38,7 +37,6 @@ const signInSchema = z.object({
 });
 
 export function SignIn() {
-	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [{ redirectUrl }, setAuthParams] = useQueryStates(authSearchParams, {
 		shallow: true,
@@ -71,18 +69,11 @@ export function SignIn() {
 	}
 
 	const signInWith = async (strategy: "google") => {
-		const { data, error } = await authClient.signIn.social({
+		await authClient.signIn.social({
 			provider: strategy,
 			callbackURL: `${window.location.origin}${redirectUrl}`,
 			newUserCallbackURL: `${window.location.origin}/onboarding`,
 		});
-		if (error) {
-			toast.error(error.message);
-		}
-		console.log(data);
-		if (data) {
-			router.push(redirectUrl ?? "/");
-		}
 	};
 
 	return (
