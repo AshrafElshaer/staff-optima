@@ -77,7 +77,7 @@ export function SignIn() {
 	};
 
 	return (
-		<div className="w-full max-w-sm space-y-8">
+		<Card className="w-full max-w-md">
 			<CardHeader className="justify-center">
 				<Icons.Logo className="size-12 mx-auto mt-8 mb-4" />
 				<CardTitle className="text-center">Welcome Back</CardTitle>
@@ -120,7 +120,11 @@ export function SignIn() {
 					</form>
 				</Form>
 			</CardContent>
-
+			<div className="flex items-center justify-center gap-6">
+				<Separator className="flex-1" />
+				<span className="text-secondary-foreground">Or continue with</span>
+				<Separator className="flex-1" />
+			</div>
 			<CardFooter className="flex flex-col  items-start">
 				<div className="flex items-center justify-center gap-4 w-full">
 					<Button
@@ -129,7 +133,6 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
-						className="flex-1"
 					>
 						<FcGoogle className="size-4" />
 						Google
@@ -140,12 +143,12 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending || true}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
-						className="flex-1"
 					>
 						<FaLinkedin className="size-3.5 text-blue-500" />
 						LinkedIn
 					</Button>
 				</div>
+
 				<div className="flex items-center flex-wrap  gap-2 mt-6">
 					<p className="text-sm text-secondary-foreground">
 						By signing in you agree to our{" "}
@@ -159,8 +162,7 @@ export function SignIn() {
 						</Button>
 					</p>
 				</div>
-				<div className="flex items-center  gap-2"></div>
 			</CardFooter>
-		</div>
+		</Card>
 	);
 }

@@ -101,15 +101,17 @@ export function VerifyOtp() {
 	}
 
 	return (
-		<div className="flex flex-col items-center max-w-sm w-full mx-auto pt-6 gap-6">
+		<Card className="flex flex-col items-center max-w-sm w-full mx-auto pt-6 ">
 			<CardHeader className="flex flex-col  items-center w-full">
 				<CardTitle>Check your email</CardTitle>
-				<CardDescription>We&apos;ve sent a pass code to </CardDescription>
+				<CardDescription>
+					We&apos;ve sent a one time pass code to{" "}
+				</CardDescription>
 				<CardDescription className="text-foreground">
 					<strong>{email}</strong>
 				</CardDescription>
 				<Button
-					className="text-secondary-foreground mt-4"
+					className="text-secondary-foreground"
 					size="sm"
 					onClick={() => {
 						setAuthParams({
@@ -232,6 +234,6 @@ export function VerifyOtp() {
 					</AnimatePresence>
 				</Button>
 			</CardFooter>
-		</div>
+		</Card>
 	);
 }
