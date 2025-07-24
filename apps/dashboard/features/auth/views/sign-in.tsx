@@ -77,7 +77,7 @@ export function SignIn() {
 	};
 
 	return (
-		<Card className="w-full max-w-md">
+		<Card className="w-full max-w-sm">
 			<CardHeader className="justify-center">
 				<Icons.Logo className="size-12 mx-auto mt-8 mb-4" />
 				<CardTitle className="text-center">Welcome Back</CardTitle>
@@ -133,6 +133,7 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
+						className="flex-1"
 					>
 						<FcGoogle className="size-4" />
 						Google
@@ -143,6 +144,7 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending || true}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
+						className="flex-1"
 					>
 						<FaLinkedin className="size-3.5 text-blue-500" />
 						LinkedIn
