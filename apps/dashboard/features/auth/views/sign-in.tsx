@@ -25,7 +25,7 @@ import { Separator } from "@optima/ui/components/separator";
 import { useQueryStates } from "nuqs";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { FaGithub } from "react-icons/fa6";
+import { FaLinkedin } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { z } from "zod/v4";
@@ -77,7 +77,7 @@ export function SignIn() {
 	};
 
 	return (
-		<Card className="w-full max-w-md">
+		<div className="w-full max-w-sm space-y-8">
 			<CardHeader className="justify-center">
 				<Icons.Logo className="size-12 mx-auto mt-8 mb-4" />
 				<CardTitle className="text-center">Welcome Back</CardTitle>
@@ -120,11 +120,7 @@ export function SignIn() {
 					</form>
 				</Form>
 			</CardContent>
-			<div className="flex items-center justify-center gap-6">
-				<Separator className="flex-1" />
-				<span className="text-secondary-foreground">Or continue with</span>
-				<Separator className="flex-1" />
-			</div>
+
 			<CardFooter className="flex flex-col  items-start">
 				<div className="flex items-center justify-center gap-4 w-full">
 					<Button
@@ -133,6 +129,7 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
+						className="flex-1"
 					>
 						<FcGoogle className="size-4" />
 						Google
@@ -143,49 +140,27 @@ export function SignIn() {
 						disabled={form.formState.isSubmitting || isPending || true}
 						onClick={() => startTransition(() => signInWith("google"))}
 						type="button"
+						className="flex-1"
 					>
-						<Icons.Microsoft className="size-3.5" />
-						Microsoft
-					</Button>
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={form.formState.isSubmitting || isPending || true}
-						onClick={() => startTransition(() => signInWith("google"))}
-						type="button"
-					>
-						<FaGithub className="size-3.5" />
-						Github
+						<FaLinkedin className="size-3.5 text-blue-500" />
+						LinkedIn
 					</Button>
 				</div>
-
-				{/* <div className="flex items-center  gap-2 mt-6">
-					<p className=" text-sm text-secondary-foreground">
-						Don't have an account ?{" - "}
+				<div className="flex items-center flex-wrap  gap-2 mt-6">
+					<p className="text-sm text-secondary-foreground">
+						By signing in you agree to our{" "}
+						<Button variant="link" className="p-0" type="button">
+							Terms of Service
+						</Button>
+						{" · "}
+						Need help?{" "}
+						<Button variant="link" className="p-0" type="button">
+							Contact Support
+						</Button>
 					</p>
-					<Button
-						variant="link"
-						className="p-0"
-						onClick={() => setAuthParams({ activeTab: "sign-up" })}
-					>
-						Sign up
-					</Button>
-				</div> */}
-				<div className="flex items-center  gap-2 mt-6">
-					<p className=" text-sm text-secondary-foreground">
-						By signing in you agree to our{" - "}
-					</p>
-					<Button variant="link" className="p-0">
-						Terms of Service
-					</Button>
 				</div>
-				<div className="flex items-center  gap-2">
-					<p className=" text-sm text-secondary-foreground">Need help ?</p>
-					<Button variant="link" className="p-0">
-						Contact Support
-					</Button>
-				</div>
+				<div className="flex items-center  gap-2"></div>
 			</CardFooter>
-		</Card>
+		</div>
 	);
 }
