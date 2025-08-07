@@ -16,6 +16,7 @@ import {
 	PopoverTrigger,
 } from "@optima/ui/components/popover";
 import { cn } from "@optima/ui/lib/utils";
+import type { CountryCode, E164Number } from "libphonenumber-js";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import * as RPNInput from "react-phone-number-input";
@@ -159,4 +160,4 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
 	);
 };
 
-export { PhoneInput, PhoneInputSimple };
+export { PhoneInput, PhoneInputSimple, type CountryCode, type E164Number };

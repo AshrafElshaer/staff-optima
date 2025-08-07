@@ -157,18 +157,6 @@ export const auth = betterAuth({
 			// Ensure proper callback URL
 			callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 		},
-		// microsoft: {
-		// 	clientId: process.env.MICROSOFT_CLIENT_ID as string,
-		// 	clientSecret: process.env.MICROSOFT_CLIENT_SECRET as string,
-		// 	// Optional
-		// 	tenantId: "common",
-		// 	prompt: "select_account", // Forces account selection
-		// },
-		// github: {
-		// 	clientId: process.env.GITHUB_CLIENT_ID as string,
-		// 	clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-
-		// },
 	},
 	plugins: [
 		customSession(async ({ user, session }) => {
@@ -192,6 +180,8 @@ export const auth = betterAuth({
 				return {
 					user: {
 						...user,
+						phoneNumber: data?.user?.phoneNumber || null,
+						jobTitle: data?.user?.jobTitle || null,
 					},
 					session: {
 						...session,
@@ -204,6 +194,8 @@ export const auth = betterAuth({
 				return {
 					user: {
 						...user,
+						phoneNumber: null,
+						jobTitle: null,
 					},
 					session: {
 						...session,

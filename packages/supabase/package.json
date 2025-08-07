@@ -15,9 +15,9 @@
 		"./mutations": "./src/mutations/index.ts",
 		"./queries/*": "./src/queries/*.ts",
 		"./types": "./src/types/index.ts",
-		"./validations/*": "./src/validation/*.ts",
+		"./validations/*": "./src/validations/*.ts",
 		"./clients/*": "./src/clients/*.ts",
-		"./utils/*": "./src/utlis/*.ts"
+		"./utils/*": "./src/utils/*.ts"
 	},
 	"devDependencies": {
 		"@types/bun": "latest"
