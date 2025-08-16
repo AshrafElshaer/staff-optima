@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import { Button } from "@optima/ui/components/button";
 import {
 	Card,

@@ -1,8 +1,5 @@
-// import { createServerClient } from "@/lib/supabase/server";
-import { getCountryCode } from "@optima/location/index";
-// import { getCurrentUser } from "@optima/supabase/queries";
+import { getCountryCode } from "@optima/location";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { UserOnboarding } from "@/features/onboarding/user-onboarding";
 
 export const metadata: Metadata = {

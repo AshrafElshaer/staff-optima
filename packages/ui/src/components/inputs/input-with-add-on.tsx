@@ -2,7 +2,7 @@ import { BaseInput } from "@optima/ui/components/inputs/base-input";
 import { cn } from "@optima/ui/lib/utils";
 import type { ComponentProps } from "react";
 
-interface InputWithAddOnProps extends ComponentProps<"input"> {
+export interface InputWithAddOnProps extends ComponentProps<"input"> {
 	addOn: string;
 	addOnDirection?: "start" | "end";
 	wrapperClassName?: string;
@@ -29,7 +29,7 @@ export function InputWithAddOn({
 			{addOn && (
 				<span
 					className={cn(
-						"text-muted-foreground pointer-events-none absolute inset-y-0 flex items-center justify-center text-sm peer-disabled:opacity-50",
+						"text-muted-foreground pointer-events-none absolute inset-y-0 flex items-center justify-center text-sm peer-disabled:opacity-50 h-full",
 						addOnDirection === "start" && "start-0 ps-3",
 						addOnDirection === "end" && "end-0 pe-3",
 					)}

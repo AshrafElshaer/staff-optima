@@ -3,6 +3,7 @@ import {
 	customSessionClient,
 	emailOTPClient,
 	inferAdditionalFields,
+	inferOrgAdditionalFields,
 	multiSessionClient,
 	organizationClient,
 	phoneNumberClient,
@@ -18,6 +19,7 @@ export const authClient = createAuthClient({
 		phoneNumberClient(),
 		multiSessionClient(),
 		organizationClient({
+			schema: inferOrgAdditionalFields<typeof auth>(),
 			teams: {
 				enabled: true,
 				allowRemovingAllTeams: false,
@@ -28,3 +30,5 @@ export const authClient = createAuthClient({
 		}),
 	],
 });
+
+export type Session = typeof authClient.$Infer.Session;

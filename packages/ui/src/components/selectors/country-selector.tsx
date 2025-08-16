@@ -1,6 +1,6 @@
 "use client";
 
-import { continents } from "@optima/location/index";
+import { continents } from "@optima/location";
 import { Button } from "@optima/ui/components/button";
 import {
 	Command,

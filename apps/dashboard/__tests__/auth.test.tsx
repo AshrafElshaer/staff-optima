@@ -1,7 +1,6 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { SignIn } from "@/features/auth/views/sign-in";
-import { VerifyOtp } from "@/features/auth/views/verify-otp";
 import { TestWrapper } from "./test-wrapper";
 
 vi.mock("next/navigation", () => ({

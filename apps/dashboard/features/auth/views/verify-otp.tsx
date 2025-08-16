@@ -83,12 +83,12 @@ export function VerifyOtp() {
 					onError(error) {
 						toast.error(error.error.message);
 					},
-					onSuccess(data) {
+					onSuccess() {
 						router.push(redirectUrl ?? "/");
 					},
 				},
 			});
-		} catch (err) {
+		} catch {
 			toast.error("An unknown error occurred");
 			return;
 		} finally {

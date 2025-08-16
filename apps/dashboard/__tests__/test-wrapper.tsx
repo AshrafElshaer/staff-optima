@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 // Mock the nuqs adapter for testing
 const MockNuqsAdapter = ({ children }: { children: React.ReactNode }) => {

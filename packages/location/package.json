@@ -14,9 +14,9 @@
 		"typescript": "5.8.3"
 	},
 	"exports": {
+		".": "./src/index.ts",
 		"./countries": "./src/countries.json",
 		"./continents": "./src/continents.json",
-		"./timezones": "./src/timezones.json",
-		"./index": "./src/index.ts"
+		"./timezones": "./src/timezones.json"
 	}
 }

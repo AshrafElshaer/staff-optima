@@ -1,5 +1,6 @@
+import { betterFetch } from "@better-fetch/fetch";
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth.server";
+import type { Session } from "./lib/auth/auth.client";
 
 const publicRoutes = ["/auth", "/api/auth"];
 const onboardingRoutes = ["/onboarding"];
@@ -14,10 +15,15 @@ function isOnboardingRoute(pathname: string) {
 
 export async function middleware(request: NextRequest) {
 	const pathname = request.nextUrl.pathname;
-	const session = await auth.api.getSession({
-		headers: request.headers,
-	});
-
+	const { data: session } = await betterFetch<Session>(
+		"/api/auth/get-session",
+		{
+			baseURL: request.nextUrl.origin,
+			headers: {
+				cookie: request.headers.get("cookie") || "", // Forward the cookies from the request
+			},
+		},
+	);
 	// If no session and not on a public route, redirect to auth
 	if (!session && !isPublicRoute(pathname)) {
 		return NextResponse.redirect(
@@ -38,7 +44,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	runtime: "nodejs",
 	matcher: [
 		// Skip Next.js internals, static files, and auth API routes
 		"/((?!_next|api\\/auth|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
