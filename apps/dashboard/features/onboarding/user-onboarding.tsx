@@ -173,8 +173,6 @@ function UserForm({ countryCode }: { countryCode: string }) {
 		form.reset({
 			email: session?.user.email ?? "",
 			name: session?.user.name ?? "",
-			jobTitle: session?.user.jobTitle ?? "",
-			phoneNumber: session?.user.phoneNumber ?? "",
 			image: session?.user.image ?? "",
 		});
 	}, [session?.user]);

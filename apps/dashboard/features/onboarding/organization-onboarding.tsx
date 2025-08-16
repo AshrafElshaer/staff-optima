@@ -125,6 +125,9 @@ function OrganizationForm() {
 			console.log("org error", error);
 			return;
 		}
+		await authClient.organization.setActive({
+			organizationId: organization.id,
+		});
 		router.push(`/onboarding/congrats`);
 	}
 
