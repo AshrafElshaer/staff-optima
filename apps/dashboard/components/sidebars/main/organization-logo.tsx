@@ -22,9 +22,14 @@ export function OrganizationLogo() {
 
 	if (!organization) {
 		return (
-			<div className={cn("flex items-center gap-2 px-2")}>
-				<Skeleton className="size-6 rounded-sm" />
-				<Skeleton className="w-full h-6 rounded-sm" />
+			<div className={cn("flex items-center gap-2 px-2 h-full")}>
+				<Skeleton className="size-9 rounded-sm" />
+				<Skeleton
+					className={cn(
+						"w-full h-8 rounded-sm",
+						state === "collapsed" && !isMobile && "hidden",
+					)}
+				/>
 			</div>
 		);
 	}
@@ -41,15 +46,13 @@ export function OrganizationLogo() {
 				<span
 					className={cn(
 						"text-lg font-bold",
-						state === "collapsed"
+						state === "collapsed" && !isMobile
 							? "opacity-0  pointer-events-none"
 							: "opacity-100  delay-150",
 					)}
 				>
 					{organization?.name}
 				</span>
-				{/* {(state === "expanded" || (isMobile && state === "collapsed")) && (
-				)} */}
 			</SidebarMenuItem>
 		</SidebarMenu>
 	);
