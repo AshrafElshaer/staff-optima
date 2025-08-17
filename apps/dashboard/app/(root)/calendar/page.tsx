@@ -5,9 +5,5 @@ export default async function CalendarPage() {
 		headers: await headers(),
 	});
 
-	return (
-		<div>
-			Calendar
-		</div>
-	);
+	return <div>Calendar</div>;
 }
