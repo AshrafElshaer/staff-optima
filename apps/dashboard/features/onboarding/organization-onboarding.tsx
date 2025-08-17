@@ -2,6 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { countries } from "@optima/location";
+import { useSupabase } from "@optima/supabase/clients/use-supabase";
+import { updateMembership } from "@optima/supabase/mutations/membership.mutations";
+import { createRole } from "@optima/supabase/mutations/roles.mutations";
 import { organizationInsertSchema } from "@optima/supabase/validations/organization.validations";
 import { Button } from "@optima/ui/components/button";
 import { Form } from "@optima/ui/components/form";
@@ -13,7 +16,6 @@ import {
 	FormTimezoneSelector,
 } from "@optima/ui/components/form-controls";
 import { Icons } from "@optima/ui/components/icons";
-
 import { TextGenerateEffect } from "@optima/ui/components/text-animate";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -76,8 +78,9 @@ const EMPLOYEE_COUNT_OPTIONS = [
 type OrganizationFormValues = z.infer<typeof organizationInsertSchema>;
 
 function OrganizationForm() {
+	const supabase = useSupabase();
 	const router = useRouter();
-
+	const { data: session } = authClient.useSession();
 	const form = useForm<OrganizationFormValues>({
 		resolver: zodResolver(organizationInsertSchema),
 		defaultValues: {
@@ -128,6 +131,20 @@ function OrganizationForm() {
 		await authClient.organization.setActive({
 			organizationId: organization.id,
 		});
+
+		const role = await createRole(supabase, {
+			name: "owner",
+			organizationId: organization.id,
+			permissions: JSON.stringify([{ action: "manage", subject: "all" }]),
+		});
+
+		if (session && role) {
+			await updateMembership(supabase, {
+				userId: session.user.id,
+				roleId: role.id,
+			});
+		}
+
 		router.push(`/onboarding/congrats`);
 	}
 

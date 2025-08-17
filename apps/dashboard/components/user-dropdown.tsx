@@ -6,7 +6,6 @@ import {
 	Moon02Icon,
 	Sun01Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import {
 	Avatar,
 	AvatarFallback,
@@ -30,6 +29,7 @@ import { useTheme } from "next-themes";
 import { useTransition } from "react";
 import { authSearchParamsSerializer } from "@/features/auth/auth.searchParams";
 import { authClient } from "@/lib/auth/auth.client";
+import { HugeIcon } from "./huge-icon";
 
 export function UserDropdown() {
 	const { data: session, isPending } = authClient.useSession();
@@ -83,8 +83,8 @@ export function UserDropdown() {
 				<DropdownMenuSeparator />
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger>
-						<HugeiconsIcon
-							size={18}
+						<HugeIcon
+							size={16}
 							icon={
 								theme === "dark"
 									? Moon02Icon
@@ -92,34 +92,34 @@ export function UserDropdown() {
 										? Sun01Icon
 										: AiComputerIcon
 							}
-							className="text-current mr-2"
+							className="mr-2"
 						/>
 						Theme
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent>
 						<DropdownMenuItem onClick={() => setTheme("light")}>
-							<HugeiconsIcon icon={Sun01Icon} className="text-current" />
+							<HugeIcon icon={Sun01Icon} />
 							Light
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => setTheme("dark")}>
-							<HugeiconsIcon icon={Moon02Icon} className="text-current" />
+							<HugeIcon icon={Moon02Icon} />
 							Dark
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => setTheme("system")}>
-							<HugeiconsIcon icon={AiComputerIcon} className="text-current" />
+							<HugeIcon icon={AiComputerIcon} />
 							System
 						</DropdownMenuItem>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub>
 				<DropdownMenuItem>
-					<HugeiconsIcon icon={AccountSetting03Icon} className="text-current" />
+					<HugeIcon icon={AccountSetting03Icon} />
 					Account
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={handleLogout} disabled={isLogoutPending}>
 					{isLogoutPending ? (
 						<Icons.Loader className="animate-spin" />
 					) : (
-						<HugeiconsIcon icon={Door01Icon} className="text-current" />
+						<HugeIcon icon={Door01Icon} />
 					)}
 					Logout
 				</DropdownMenuItem>

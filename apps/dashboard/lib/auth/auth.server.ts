@@ -5,6 +5,7 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import {
 	type BetterAuthPlugin,
+	createAuthMiddleware,
 	customSession,
 	emailOTP,
 	multiSession,
@@ -96,6 +97,34 @@ export const auth = betterAuth({
 			sameSite: "lax",
 		},
 	},
+	hooks: {
+		after: createAuthMiddleware(async (context) => {
+			const userId = context.context.session?.user.id;
+			if (!userId) return;
+			const supabase = await createServerClient();
+			const { data, error } = await supabase
+				.from("member")
+				.select(`
+					*,
+					organization (id),
+					role (id, name, permissions)
+				`)
+				.eq("userId", userId)
+				.single();
+			if (error) {
+				console.error("Error fetching user data:", error);
+				return;
+			}
+			await supabase.rpc("set_current_user", {
+				user_data: JSON.stringify({
+					id: data.userId,
+					role: data.role?.name,
+					permissions: data.role?.permissions,
+					organization: data.organization?.id,
+				}),
+			});
+		}),
+	},
 	session: {
 		expiresIn: 604800, // 7 days
 		updateAge: 86400, // 1 day
@@ -117,7 +146,8 @@ export const auth = betterAuth({
 							.select(`
 								*,
 								organization (id),  
-								user (*)
+								user (*),
+								role (id, name, permissions)
 							`)
 							.eq("userId", session.userId)
 							.single();
@@ -131,7 +161,9 @@ export const auth = betterAuth({
 							data: {
 								...session,
 								ipAddress: ipAddress || null,
-								activeOrganizationId: data?.organizationId || null,
+								activeOrganizationId: data?.organization?.id || null,
+								role: data?.role || null,
+								permissions: data?.role?.permissions || null,
 							},
 						};
 					} catch (error) {
@@ -142,6 +174,8 @@ export const auth = betterAuth({
 								...session,
 								ipAddress: null,
 								activeOrganizationId: null,
+								role: null,
+								permissions: null,
 							},
 						};
 					}
@@ -167,7 +201,8 @@ export const auth = betterAuth({
 					.select(`
 						*,
 						organization (id),
-						user (*)
+						user (*),
+						role (id, name, permissions)
 					`)
 					.eq("userId", user.id)
 					.single();
@@ -185,7 +220,9 @@ export const auth = betterAuth({
 					},
 					session: {
 						...session,
-						activeOrganizationId: data?.organizationId || null,
+						activeOrganizationId: data?.organization?.id || null,
+						role: data?.role?.name || null,
+						permissions: data?.role?.permissions || null,
 					},
 				};
 			} catch (error) {
@@ -200,6 +237,8 @@ export const auth = betterAuth({
 					session: {
 						...session,
 						activeOrganizationId: null,
+						role: null,
+						permissions: null,
 					},
 				};
 			}

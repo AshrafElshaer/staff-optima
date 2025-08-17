@@ -12,7 +12,7 @@
 		"ts:generate": "bunx supabase gen types typescript --project-id dnhgezpaotfenrnbtiyy --schema public > src/types/database.ts"
 	},
 	"exports": {
-		"./mutations": "./src/mutations/index.ts",
+		"./mutations/*": "./src/mutations/*.ts",
 		"./queries/*": "./src/queries/*.ts",
 		"./types": "./src/types/index.ts",
 		"./validations/*": "./src/validations/*.ts",

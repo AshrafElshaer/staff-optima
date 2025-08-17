@@ -195,8 +195,8 @@ function UserForm({ countryCode }: { countryCode: string }) {
 			>
 				<div className="flex items-start gap-4">
 					<FileDropZone className="w-fit relative" config={userProfileDropZone}>
-						<Avatar className="size-20 rounded">
-							<AvatarImage src={avatarUrlWithCacheBust} />
+						<Avatar className="size-20 ">
+							<AvatarImage src={avatarUrlWithCacheBust} className="rounded" />
 							<AvatarFallback className="rounded text-3xl">
 								{form.watch("name")?.split(" ")[0]?.charAt(0)}
 								{form.watch("name")?.split(" ")[1]?.charAt(0)}
