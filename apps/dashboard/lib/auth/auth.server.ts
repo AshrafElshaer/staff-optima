@@ -248,6 +248,17 @@ export const auth = betterAuth({
 			teams: {
 				enabled: true,
 				allowRemovingAllTeams: false, // Prevent removing the last team
+				defaultTeam: {
+					enabled: true,
+					async customCreateDefaultTeam(organization) {
+						return {
+							id: crypto.randomUUID(),
+							name: "Executives",
+							organizationId: organization.id,
+							createdAt: new Date(),
+						};
+					},
+				},
 			},
 			schema: {
 				organization: {

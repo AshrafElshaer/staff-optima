@@ -68,6 +68,7 @@ export const permissions = [
 	{ action: "update", subject: "team" },
 	{ action: "delete", subject: "team" },
 	{ action: "assign_members", subject: "team" },
+	{ action: "manage", subject: "team" },
 
 	// Settings permissions
 	{ action: "update", subject: "settings" },
