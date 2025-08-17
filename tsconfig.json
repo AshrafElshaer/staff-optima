@@ -1,6 +1,9 @@
 {
 	"extends": "@optima/typescript-config/base.json",
 	"compilerOptions": {
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"paths": {
+			"@optima/ui/*": ["./packages/ui/src/*"]
+		}
 	}
 }

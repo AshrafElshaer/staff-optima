@@ -8,20 +8,12 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@optima/ui/components/breadcrumb";
-// import { UserDropdown } from "@/components/user-dropdown";
-// import { SetupMenu } from "@/features/onboarding/views/setup-menu";
+
 import { Separator } from "@optima/ui/components/separator";
-import {
-	SidebarInset,
-	SidebarTrigger,
-	useSidebar,
-} from "@optima/ui/components/sidebar";
-import { Switch } from "@optima/ui/components/switch";
-import { cn } from "@optima/ui/lib/utils";
-import { useTheme } from "next-themes";
+import { SidebarInset, SidebarTrigger } from "@optima/ui/components/sidebar";
+import { UserDropdown } from "../user-dropdown";
 
 export function DashboardInset({ children }: { children: React.ReactNode }) {
-	const { resolvedTheme, setTheme } = useTheme();
 	return (
 		<SidebarInset>
 			<header className="flex h-14.25 bg-sidebar shrink-0 border-b items-center gap-2 transition-[width,height] ease-linear  px-2">
@@ -47,15 +39,8 @@ export function DashboardInset({ children }: { children: React.ReactNode }) {
 					<OrganizationBreadcrumb />
 					<HomeBreadcrumb /> */}
 				</div>
-				<div className="flex items-center gap-2">
-					<Switch
-						checked={resolvedTheme === "dark"}
-						onCheckedChange={(checked) => {
-							setTheme(checked ? "dark" : "light");
-						}}
-					/>
-				</div>
-				{/* <UserDropdown /> */}
+
+				<UserDropdown />
 			</header>
 			<div className="flex flex-1 flex-col p-4">{children}</div>
 			{/* <SetupMenu /> */}

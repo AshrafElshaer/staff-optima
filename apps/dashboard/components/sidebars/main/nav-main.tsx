@@ -25,7 +25,7 @@ export function NavMain({
 	label: string;
 }) {
 	const pathname = usePathname();
-	const { setOpenMobile, isMobile, state } = useSidebar();
+	const { setOpenMobile, state } = useSidebar();
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>{label}</SidebarGroupLabel>

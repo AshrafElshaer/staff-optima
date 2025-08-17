@@ -15,10 +15,10 @@
 	},
 	"iconLibrary": "lucide",
 	"aliases": {
-		"components": "@optima/ui/components",
-		"utils": "@optima/ui/lib/utils",
-		"hooks": "@optima/ui/hooks",
-		"lib": "@optima/ui/lib",
-		"ui": "@optima/ui/components"
+		"components": "/src/components",
+		"utils": "/src/lib/utils",
+		"hooks": "/src/hooks",
+		"lib": "/src/lib",
+		"ui": "/src/components"
 	}
 }
