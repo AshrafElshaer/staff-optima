@@ -121,7 +121,7 @@ export function UserDropdown() {
 					) : (
 						<HugeIcon icon={Door01Icon} />
 					)}
-					Logout
+					Sign out
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
