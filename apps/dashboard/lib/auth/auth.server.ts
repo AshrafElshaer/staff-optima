@@ -152,7 +152,6 @@ export const auth = betterAuth({
 							.eq("userId", session.userId)
 							.single();
 
-						// If no member record exists (new user), that's fine
 						if (error && error.code !== "PGRST116") {
 							console.error("Error fetching member data:", error);
 						}
@@ -168,7 +167,6 @@ export const auth = betterAuth({
 						};
 					} catch (error) {
 						console.error("Error in session creation hook:", error);
-						// Return session data without additional fields if there's an error
 						return {
 							data: {
 								...session,
@@ -188,7 +186,6 @@ export const auth = betterAuth({
 			prompt: "select_account",
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
-			// Ensure proper callback URL
 			callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 		},
 	},
@@ -207,7 +204,6 @@ export const auth = betterAuth({
 					.eq("userId", user.id)
 					.single();
 
-				// If no member record exists (new user), that's fine
 				if (error && error.code !== "PGRST116") {
 					console.error("Error fetching member data in customSession:", error);
 				}
@@ -227,7 +223,6 @@ export const auth = betterAuth({
 				};
 			} catch (error) {
 				console.error("Error in customSession plugin:", error);
-				// Return session data without additional fields if there's an error
 				return {
 					user: {
 						...user,
@@ -342,6 +337,7 @@ export const auth = betterAuth({
 		stripe({
 			stripeClient,
 			stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+			createCustomerOnSignUp: true,
 			subscription: {
 				enabled: true,
 				organization: {
@@ -359,12 +355,42 @@ export const auth = betterAuth({
 					//TODO: SEND EMAIL TO OWNER OF THE ORGANIZATION
 					console.log(data, request);
 				},
+				authorizeReference: async ({ user, session, referenceId, action }) => {
+					const supabase = await createServerClient();
+					// Check if the user has permission to manage subscriptions for this reference
+					if (
+						action === "upgrade-subscription" ||
+						action === "cancel-subscription" ||
+						action === "restore-subscription"
+					) {
+						const { data, error } = await supabase
+							.from("member")
+							.select("role (name)")
+							.eq("organizationId", referenceId)
+							.eq("userId", user.id)
+							.single();
+						if (error) {
+							console.error("Error fetching member data:", error);
+							return false;
+						}
+						return data?.role?.name === "owner";
+					}
+					return true;
+				},
+				getCheckoutSessionParams: async () => {
+					return {
+						params: {
+							automatic_tax: {
+								enabled: true,
+							},
+						},
+					};
+				},
 
 				plans: [
 					{
 						name: "basic", // the name of the plan, it'll be automatically lower cased when stored in the database
-						priceId: "price_1234567890", // the price ID from stripe
-						annualDiscountPriceId: "price_1234567890", // (optional) the price ID for annual billing with a discount
+						priceId: "price_1RxAZa6BqsBbNKLOGPGYLPzi", // the price ID from stripe
 						limits: {
 							members: 3,
 						},
@@ -384,9 +410,9 @@ export const auth = betterAuth({
 		emailOTP({
 			// biome-ignore lint/correctness/noUnusedFunctionParameters: Will implement later
 			async sendVerificationOTP({ email, otp, type }) {
-				await resend.emails.send(
+				const res = await resend.emails.send(
 					{
-						from: "Staff Optima <security@staffoptima.co>",
+						from: "Staff Optima <security@www.staffoptima.co>",
 						to: [email],
 						subject: "OTP Code for Staff Optima",
 						react: OtpEmail({
@@ -400,11 +426,12 @@ export const auth = betterAuth({
 						idempotencyKey: otp,
 					},
 				);
+				console.log(res);
 			},
 			sendVerificationOnSignUp: false,
 			otpLength: 6,
 			expiresIn: 600, // 10 minutes
 		}),
 		nextCookies(),
-	], // make sure this is the last plugin in the array
+	],
 });

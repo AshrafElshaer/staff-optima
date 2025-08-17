@@ -145,6 +145,25 @@ function OrganizationForm() {
 			});
 		}
 
+		const {  error: subscriptionError } =
+			await authClient.subscription.upgrade({
+				plan: "basic", // required
+				referenceId: organization.id,
+				metadata: {
+					organizationId: organization.id,
+					userId: session?.user.id,
+				},
+				seats: 1,
+				successUrl: `${window.location.origin}/onboarding/congrats`, // required
+				cancelUrl: `${window.location.origin}/onboarding/congrats`, // required
+				returnUrl: `${window.location.origin}/onboarding/congrats`,
+				disableRedirect: true, // required
+			});
+
+		if (subscriptionError) {
+			console.log({ subscriptionError });
+		}
+
 		router.push(`/onboarding/congrats`);
 	}
 
