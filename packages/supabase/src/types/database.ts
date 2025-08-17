@@ -70,6 +70,47 @@ export type Database = {
 					},
 				];
 			};
+			domain_verification: {
+				Row: {
+					created_at: string | null;
+					domain: string;
+					id: string;
+					organization_id: string;
+					updated_at: string | null;
+					verification_date: string | null;
+					verification_status: Database["public"]["Enums"]["domain_verification_status_enum"];
+					verification_token: string;
+				};
+				Insert: {
+					created_at?: string | null;
+					domain: string;
+					id?: string;
+					organization_id: string;
+					updated_at?: string | null;
+					verification_date?: string | null;
+					verification_status?: Database["public"]["Enums"]["domain_verification_status_enum"];
+					verification_token: string;
+				};
+				Update: {
+					created_at?: string | null;
+					domain?: string;
+					id?: string;
+					organization_id?: string;
+					updated_at?: string | null;
+					verification_date?: string | null;
+					verification_status?: Database["public"]["Enums"]["domain_verification_status_enum"];
+					verification_token?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "domain_verification_organization_id_fkey";
+						columns: ["organization_id"];
+						isOneToOne: false;
+						referencedRelation: "organization";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			invitation: {
 				Row: {
 					email: string;
@@ -511,7 +552,7 @@ export type Database = {
 			};
 		};
 		Enums: {
-			[_ in never]: never;
+			domain_verification_status_enum: "pending" | "verified" | "failed";
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -641,6 +682,8 @@ export type CompositeTypes<
 
 export const Constants = {
 	public: {
-		Enums: {},
+		Enums: {
+			domain_verification_status_enum: ["pending", "verified", "failed"],
+		},
 	},
 } as const;

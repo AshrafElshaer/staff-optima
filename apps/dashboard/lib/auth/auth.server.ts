@@ -355,7 +355,7 @@ export const auth = betterAuth({
 					//TODO: SEND EMAIL TO OWNER OF THE ORGANIZATION
 					console.log(data, request);
 				},
-				authorizeReference: async ({ user, session, referenceId, action }) => {
+				authorizeReference: async ({ user, referenceId, action }) => {
 					const supabase = await createServerClient();
 					// Check if the user has permission to manage subscriptions for this reference
 					if (

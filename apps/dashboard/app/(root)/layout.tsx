@@ -4,6 +4,7 @@ import { SidebarProvider } from "@optima/ui/components/sidebar";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { CompanySidebar } from "@/components/sidebars/company/company-sidebar";
 import { DashboardInset } from "@/components/sidebars/dashboard-inset";
 import { AppSidebar } from "@/components/sidebars/main/app-sidebar";
 import { AbilityContext, createAbility } from "@/lib/auth/abilities";
@@ -33,7 +34,7 @@ export default function PlatformLayout({
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2, ease: "easeInOut" }}
 					>
-						<AppSidebar />
+						{isCompany ? <CompanySidebar /> : <AppSidebar />}
 					</motion.div>
 				</AnimatePresence>
 				<DashboardInset>{children}</DashboardInset>

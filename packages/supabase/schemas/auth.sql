@@ -131,3 +131,17 @@ create table "subscription" (
     "cancelAtPeriodEnd" boolean,
     "seats" integer
 );
+
+
+create type domain_verification_status_enum as enum ('pending', 'verified', 'failed');
+
+create table domain_verification (
+    id uuid primary key default gen_random_uuid(),
+    organization_id uuid not null references organization(id) on delete cascade,
+    domain text not null,
+    verification_token text not null,
+    verification_status domain_verification_status_enum not null default 'pending',
+    verification_date timestamp with time zone,
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
+);

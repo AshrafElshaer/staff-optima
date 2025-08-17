@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { countries } from "@optima/location";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
+import { createDomainVerification } from "@optima/supabase/mutations/domain-verification.mutations";
 import { updateMembership } from "@optima/supabase/mutations/membership.mutations";
 import { createRole } from "@optima/supabase/mutations/roles.mutations";
 import { organizationInsertSchema } from "@optima/supabase/validations/organization.validations";
@@ -25,6 +26,7 @@ import { toast } from "sonner";
 import { useCountdown } from "usehooks-ts";
 import type { z } from "zod";
 import { authClient } from "@/lib/auth/auth.client";
+
 export function OrganizationOnboarding() {
 	const [counter, { startCountdown }] = useCountdown({
 		countStart: 3,
@@ -162,6 +164,12 @@ function OrganizationForm() {
 		if (subscriptionError) {
 			console.log({ subscriptionError });
 		}
+
+		await createDomainVerification(supabase, {
+			organization_id: organization.id,
+			domain: organization.slug,
+			verification_token: crypto.randomUUID(),
+		});
 
 		router.push(`/onboarding/congrats`);
 	}
