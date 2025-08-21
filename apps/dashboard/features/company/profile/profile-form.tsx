@@ -87,6 +87,7 @@ export function CompanyProfileForm({
 		isUpdating,
 		isUpdated,
 		isErrorUpdating,
+		updateError,
 	} = useCompany();
 	const formSubmitRef = useRef<HTMLButtonElement | null>(null);
 
@@ -172,7 +173,25 @@ export function CompanyProfileForm({
 		const payload = getDirtyFields<OrganizationFormValues>(form, values);
 		console.log(payload);
 
-		// updateOrganizationMutation(payload);
+		updateOrganizationMutation(payload, {
+			onSuccess: (result) => {
+				setTimeout(() => {
+					form.reset(
+						result
+							? (Object.fromEntries(
+									Object.entries(result).map(([key, value]) => [
+										key,
+										value === null ? undefined : value,
+									]),
+								) as OrganizationFormValues)
+							: undefined,
+						{
+							keepDirty: false,
+						},
+					);
+				}, 3000);
+			},
+		});
 	}
 
 	async function uploadLogo(file: File) {
@@ -224,21 +243,18 @@ export function CompanyProfileForm({
 		setResetKey((prev) => prev + 1);
 	};
 
-	const ToastContent = useCallback(
-		({ toastId }: { toastId: string | number }) => {
-			return (
-				<OnChangeToast
-					state={"idle"}
-					onReset={handleReset}
-					onSave={() => {
-						formSubmitRef.current?.click();
-					}}
-					errorMessage={""}
-				/>
-			);
-		},
-		[],
-	);
+	const ToastContent = useCallback(() => {
+		return (
+			<OnChangeToast
+				state={updateStatus}
+				onReset={handleReset}
+				onSave={() => {
+					formSubmitRef.current?.click();
+				}}
+				errorMessage={updateError?.message}
+			/>
+		);
+	}, [updateStatus, updateError, handleReset]);
 
 	useActionToast({
 		show: form.formState.isDirty,

@@ -13,6 +13,7 @@ export function useCompany() {
 		isPending: isUpdating,
 		isSuccess: isUpdated,
 		isError: isErrorUpdating,
+		error: updateError,
 	} = useMutation({
 		mutationFn: (data: OrganizationUpdate) =>
 			updateOrganization(supabase, data),
@@ -28,5 +29,6 @@ export function useCompany() {
 		isUpdating,
 		isUpdated,
 		isErrorUpdating,
+		updateError,
 	};
 }
