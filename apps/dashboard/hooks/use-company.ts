@@ -14,11 +14,15 @@ export function useCompany() {
 		isSuccess: isUpdated,
 		isError: isErrorUpdating,
 		error: updateError,
+		reset: resetUpdate,
 	} = useMutation({
 		mutationFn: (data: OrganizationUpdate) =>
 			updateOrganization(supabase, data),
 		onSuccess: () => {
 			refetch();
+			setTimeout(() => {
+				resetUpdate();
+			}, 3000);
 		},
 	});
 
