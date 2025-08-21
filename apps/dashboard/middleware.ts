@@ -40,7 +40,14 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(new URL(`/onboarding`, request.url));
 	}
 
-	return NextResponse.next();
+	return NextResponse.next({
+		headers: {
+			"x-organization-id": session?.session?.activeOrganizationId ?? "",
+			"x-role": session?.session?.role ?? "",
+			"x-permissions": session?.session?.permissions ?? "",
+			"x-user-id": session?.session?.userId ?? "",
+		},
+	});
 }
 
 export const config = {

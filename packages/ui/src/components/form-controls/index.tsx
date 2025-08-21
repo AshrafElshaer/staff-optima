@@ -1,6 +1,7 @@
 import { buttonVariants } from "@optima/ui/components/button";
 import {
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -30,8 +31,9 @@ import { type FieldValues, type Path, useFormContext } from "react-hook-form";
 
 type BaseFormProps<T extends FieldValues> = {
 	name: Path<T>;
-	label: string;
+	label?: string;
 	isOptional?: boolean;
+	helperText?: string;
 };
 
 type FormInputProps<T extends FieldValues> = BaseFormProps<T> &
@@ -47,6 +49,7 @@ export function FormInput<T extends FieldValues>({
 	name,
 	label,
 	isOptional,
+	helperText,
 	...props
 }: FormInputProps<T>) {
 	const formContext = useFormContext<T>();
@@ -56,16 +59,17 @@ export function FormInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="space-y-2 w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
 								( Optional )
 							</span>
 						)}
+						{helperText && <FormDescription>{helperText}</FormDescription>}
 					</FormLabel>
 					<FormControl>
-						<Input placeholder="John Doe" {...field} {...props} />
+						<Input id={name} placeholder="John Doe" {...field} {...props} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>
@@ -90,7 +94,7 @@ export function FormPhoneInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="space-y-2 w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
@@ -101,6 +105,7 @@ export function FormPhoneInput<T extends FieldValues>({
 					<FormControl className="w-full">
 						<PhoneInput
 							className="w-full"
+							id={name}
 							// @ts-expect-error
 							value={
 								typeof field.value === "string"
@@ -136,7 +141,7 @@ export function FormAddOnInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
@@ -146,6 +151,7 @@ export function FormAddOnInput<T extends FieldValues>({
 					</FormLabel>
 					<FormControl>
 						<InputWithAddOn
+							id={name}
 							addOn={addOn}
 							addOnDirection={addOnDirection}
 							wrapperClassName={wrapperClassName}
@@ -175,7 +181,7 @@ export function FormSelect<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
@@ -225,7 +231,7 @@ export function FormCountrySelector<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
@@ -261,7 +267,7 @@ export function FormTimezoneSelector<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel>
+					<FormLabel htmlFor={name}>
 						{label}
 						{isOptional && (
 							<span className="text-muted-foreground text-sm">
