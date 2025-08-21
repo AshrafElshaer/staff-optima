@@ -4,9 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // import { useActionToast } from "@/hooks/use-action-toast";
 // import { createBrowserClient } from "@/lib/supabase/browser";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
+import { updateOrganization } from "@optima/supabase/mutations/organization.mutations";
 // import Editor from "@optima/editor";
-import type { Organization } from "@optima/supabase/types";
-import { organizationSchema } from "@optima/supabase/validations/organization.validations";
+import type { Organization, TablesUpdate } from "@optima/supabase/types";
+import {
+	organizationSchema,
+	organizationUpdateSchema,
+} from "@optima/supabase/validations/organization.validations";
 import {
 	Avatar,
 	AvatarFallback,
@@ -36,6 +40,7 @@ import { Label } from "@optima/ui/components/label";
 // import { uploadCompanyLogo } from "@/lib/supabase/storage";
 import { CountrySelector } from "@optima/ui/components/selectors/country-selector";
 import { Separator } from "@optima/ui/components/separator";
+import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 // import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
@@ -44,12 +49,17 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
+import { OnChangeToast } from "@/components/toasts/on-change-toast";
+import { useActionToast } from "@/hooks/use-actions-toast";
+import { useCompany } from "@/hooks/use-company";
+import { authClient } from "@/lib/auth/auth.client";
+import { getDirtyFields } from "@/lib/form/get-dirty-fields";
 import { queryClient } from "@/lib/react-query/query-client";
 
 // import { updateOrganizationAction } from "../company.actions";
 // import { DomainVerification } from "./domain-verification";
 
-type OrganizationFormValues = z.infer<typeof organizationSchema>;
+type OrganizationFormValues = z.infer<typeof organizationUpdateSchema>;
 
 const DROP_ZONE_OPTIONS: DropzoneOptions = {
 	accept: {
@@ -71,6 +81,13 @@ export function CompanyProfileForm({
 }) {
 	const [resetKey, setResetKey] = useState(0);
 	const supabase = useSupabase();
+	const {
+		updateOrganizationMutation,
+		updateStatus,
+		isUpdating,
+		isUpdated,
+		isErrorUpdating,
+	} = useCompany();
 	const formSubmitRef = useRef<HTMLButtonElement | null>(null);
 
 	const router = useRouter();
@@ -147,22 +164,15 @@ export function CompanyProfileForm({
 	}, [company]);
 
 	const form = useForm<OrganizationFormValues>({
-		resolver: zodResolver(organizationSchema),
+		resolver: zodResolver(organizationUpdateSchema),
 		defaultValues,
 	});
 
 	function onSubmit(values: OrganizationFormValues) {
-		const dirtyFields = Object.keys(form.formState.dirtyFields).map((key) => {
-			return {
-				[key]: values[key as keyof typeof values],
-			};
-		});
-		const payload = {
-			id: values.id,
-			...Object.assign({}, ...dirtyFields),
-		};
+		const payload = getDirtyFields<OrganizationFormValues>(form, values);
+		console.log(payload);
 
-		// updateOrganization(payload);
+		// updateOrganizationMutation(payload);
 	}
 
 	async function uploadLogo(file: File) {
@@ -214,26 +224,26 @@ export function CompanyProfileForm({
 		setResetKey((prev) => prev + 1);
 	};
 
-	// const ToastContent = useCallback(
-	// 	({ toastId }: { toastId: string | number }) => {
-	// 		return (
-	// 			<OnChangeToast
-	// 				state={status}
-	// 				onReset={handleReset}
-	// 				onSave={() => {
-	// 					formSubmitRef.current?.click();
-	// 				}}
-	// 				errorMessage={result?.serverError}
-	// 			/>
-	// 		);
-	// 	},
-	// 	[status, result?.serverError],
-	// );
+	const ToastContent = useCallback(
+		({ toastId }: { toastId: string | number }) => {
+			return (
+				<OnChangeToast
+					state={"idle"}
+					onReset={handleReset}
+					onSave={() => {
+						formSubmitRef.current?.click();
+					}}
+					errorMessage={""}
+				/>
+			);
+		},
+		[],
+	);
 
-	// useActionToast({
-	// 	show: form.formState.isDirty,
-	// 	ToastContent,
-	// });
+	useActionToast({
+		show: form.formState.isDirty,
+		ToastContent,
+	});
 
 	return (
 		<Form {...form}>

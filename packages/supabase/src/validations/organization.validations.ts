@@ -1,9 +1,9 @@
 import { z } from "zod/v4";
 
 export const organizationSchema = z.object({
-	address1: z.string().nullable().optional(),
-	address2: z.string().nullable().optional(),
-	city: z.string().nullable().optional(),
+	address1: z.string().nullable(),
+	address2: z.string().nullable(),
+	city: z.string().nullable(),
 	country: z.string().min(1, { message: "Country is required" }),
 	createdAt: z.string().optional(),
 	domain: z
@@ -18,18 +18,18 @@ export const organizationSchema = z.object({
 			},
 			{ message: "Please enter a valid domain (e.g., example.com)" },
 		),
-	employeeCount: z.string().nullable().optional(),
+	employeeCount: z.string().nullable(),
 	id: z.string(),
 	industry: z.string().min(1, { message: "Industry is required" }),
-	isDomainVerified: z.boolean().nullable().optional(),
-	logo: z.string().nullable().optional(),
-	metadata: z.string().nullable().optional(),
+	isDomainVerified: z.boolean().nullable(),
+	logo: z.string().nullable(),
+	metadata: z.string().nullable(),
 	name: z.string().min(1, { message: "Name is required" }),
-	profile: z.string().nullable().optional(),
+	profile: z.string().nullable(),
 	slug: z.string().min(1, { message: "Slug is required" }),
-	state: z.string().nullable().optional(),
+	state: z.string().nullable(),
 	timezone: z.string().min(1, { message: "Timezone is required" }),
-	zipCode: z.string().nullable().optional(),
+	zipCode: z.string().nullable(),
 });
 
 export const organizationInsertSchema = organizationSchema.omit({

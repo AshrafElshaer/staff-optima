@@ -14,6 +14,7 @@ export type SupabaseInstance = SupabaseClient<Database>;
 // // Tables
 export type User = Tables<"user">;
 export type Organization = Tables<"organization">;
+export type OrganizationUpdate = TablesUpdate<"organization">;
 // export type WorkspaceMember = Tables<"member">;
 // export type Project = Tables<"projects">;
 // export type ProjectMember = Tables<"project_members">;
