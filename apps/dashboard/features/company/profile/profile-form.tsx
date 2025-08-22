@@ -41,6 +41,7 @@ import { Label } from "@optima/ui/components/label";
 // import { uploadCompanyLogo } from "@/lib/supabase/storage";
 import { CountrySelector } from "@optima/ui/components/selectors/country-selector";
 import { Separator } from "@optima/ui/components/separator";
+import { cn } from "@optima/ui/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 // import { useAction } from "next-safe-action/hooks";
@@ -172,8 +173,6 @@ export function CompanyProfileForm({
 
 	function onSubmit(values: OrganizationFormValues) {
 		const payload = getDirtyFields<OrganizationFormValues>(form, values);
-		console.log(payload);
-
 		updateOrganizationMutation(payload, {
 			onSuccess: (result) => {
 				setTimeout(() => {
@@ -202,9 +201,16 @@ export function CompanyProfileForm({
 					supabase,
 					form.getValues("id") ?? "",
 					file,
+					{
+						upsert: true,
+					},
 				);
 				form.setValue("logo", publicUrl, {
-					shouldDirty: true,
+					shouldDirty: false,
+				});
+				await updateOrganization(supabase, {
+					id: form.getValues("id") ?? "",
+					logo: publicUrl,
 				});
 			},
 			{
@@ -258,6 +264,8 @@ export function CompanyProfileForm({
 		ToastContent,
 	});
 
+	const logoUrl = `${form.watch("logo")}?${Date.now()}`;
+
 	return (
 		<Form {...form}>
 			<form
@@ -291,12 +299,15 @@ export function CompanyProfileForm({
 							},
 						}}
 					>
-						<Avatar className="size-28 rounded-md">
+						<Avatar className="rounded-md size-28">
 							<AvatarImage
-								src={company?.logo ?? undefined}
-								className="size-28 rounded-md"
+								src={logoUrl}
+								className={cn("rounded-md size-28", {
+									hidden: !form.watch("logo"),
+								})}
+								alt={company?.name ?? ""}
 							/>
-							<AvatarFallback className="text-7xl rounded-md">
+							<AvatarFallback className="text-7xl rounded-md size-28">
 								{`${company?.name[0]}${company?.name[1]}`}
 							</AvatarFallback>
 						</Avatar>

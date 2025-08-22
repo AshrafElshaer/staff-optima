@@ -1,8 +1,8 @@
 "use client";
 
-import { useAbility } from "@/hooks/use-ability";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAbility } from "@/hooks/use-ability";
 
 export default function CompanyLayout({
 	children,
@@ -21,11 +21,11 @@ export default function CompanyLayout({
 		ability.can("delete", "team") ||
 		ability.can("assign_members", "team");
 
-	if (!isAllowed) {
-		toast.error("Unauthorized access to this page");
-		router.push("/");
-		return null;
-	}
+	// if (!isAllowed) {
+	// 	toast.error("Unauthorized access to this page");
+	// 	router.push("/");
+	// 	return null;
+	// }
 
 	return <>{children}</>;
 }
