@@ -20,6 +20,8 @@ export function useCompany() {
 			updateOrganization(supabase, data),
 		onSuccess: () => {
 			refetch();
+		},
+		onSettled: () => {
 			setTimeout(() => {
 				resetUpdate();
 			}, 3000);

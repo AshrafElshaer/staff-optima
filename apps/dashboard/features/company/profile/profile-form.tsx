@@ -7,6 +7,7 @@ import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import { updateOrganization } from "@optima/supabase/mutations/organization.mutations";
 // import Editor from "@optima/editor";
 import type { Organization, TablesUpdate } from "@optima/supabase/types";
+import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
 import {
 	organizationSchema,
 	organizationUpdateSchema,
@@ -195,27 +196,23 @@ export function CompanyProfileForm({
 	}
 
 	async function uploadLogo(file: File) {
-		// toast.promise(
-		// 	async () => {
-		// 		const { publicUrl } = await uploadCompanyLogo({
-		// 			supabase,
-		// 			companyId: form.getValues("id") ?? "",
-		// 			file,
-		// 		});
-		// 		form.setValue("logo", publicUrl, {
-		// 			shouldDirty: false,
-		// 		});
-		// 		return await updateOrganizationAsync({
-		// 			id: company?.id ?? "",
-		// 			logo: publicUrl,
-		// 		});
-		// 	},
-		// 	{
-		// 		loading: "Uploading logo...",
-		// 		success: "Logo uploaded successfully",
-		// 		error: ({ error }) => error,
-		// 	},
-		// );
+		toast.promise(
+			async () => {
+				const publicUrl = await uploadOrganizationLogo(
+					supabase,
+					form.getValues("id") ?? "",
+					file,
+				);
+				form.setValue("logo", publicUrl, {
+					shouldDirty: true,
+				});
+			},
+			{
+				loading: "Uploading logo...",
+				success: "Logo uploaded successfully",
+				error: ({ error }) => error,
+			},
+		);
 	}
 
 	const handleReset = () => {
@@ -279,23 +276,26 @@ export function CompanyProfileForm({
 						</p>
 					</div>
 					<FileDropZone
-					// options={{
-					// 	...DROP_ZONE_OPTIONS,
-					// 	onDrop: async (acceptedFiles) => {
-					// 		const file = acceptedFiles[0];
-					// 		if (file) {
-					// 			await uploadLogo(file);
-					// 		}
-					// 	},
-					// 	onDropRejected: (rejectedFiles) => {
-					// 		for (const file of rejectedFiles) {
-					// 			toast.error(file.errors[0]?.message);
-					// 		}
-					// 	},
-					// }}
+						config={{
+							...DROP_ZONE_OPTIONS,
+							onDrop: async (acceptedFiles) => {
+								const file = acceptedFiles[0];
+								if (file) {
+									await uploadLogo(file);
+								}
+							},
+							onDropRejected: (rejectedFiles) => {
+								for (const file of rejectedFiles) {
+									toast.error(file.errors[0]?.message);
+								}
+							},
+						}}
 					>
 						<Avatar className="size-28 rounded-md">
-							<AvatarImage src={company?.logo ?? undefined} />
+							<AvatarImage
+								src={company?.logo ?? undefined}
+								className="size-28 rounded-md"
+							/>
 							<AvatarFallback className="text-7xl rounded-md">
 								{`${company?.name[0]}${company?.name[1]}`}
 							</AvatarFallback>

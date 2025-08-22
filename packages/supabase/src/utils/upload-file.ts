@@ -39,3 +39,12 @@ export async function uploadUserAvatar(
 ) {
 	return await uploadFile(supabase, "avatars", path, file, options);
 }
+
+export async function uploadOrganizationLogo(
+	supabase: SupabaseInstance,
+	path: string,
+	file: File,
+	options?: FileOptions,
+) {
+	return await uploadFile(supabase, "avatars", path, file, options);
+}

@@ -144,14 +144,16 @@ export function OnChangeToast({
 							key={state}
 							className={cn(
 								" leading-5 font-normal whitespace-nowrap text-sm",
-								state === "hasErrored" ? "text-destructive" : "text-white",
+								getHookSaveState(state) === "error"
+									? "text-destructive"
+									: "text-white",
 							)}
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 0 }}
 						>
-							{state === "hasErrored" && errorMessage
+							{getHookSaveState(state) === "error" && errorMessage
 								? errorMessage
 								: currentState.text}
 						</motion.span>
