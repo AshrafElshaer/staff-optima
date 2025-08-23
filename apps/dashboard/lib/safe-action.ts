@@ -1,0 +1,116 @@
+// import { getUser } from "@optima/supabase/queries";
+
+// import { setupAnalytics } from "@optima/analytics/server";
+import { ratelimit } from "@optima/kv/ratelimit";
+import { createServerClient } from "@optima/supabase/clients/server";
+import { headers } from "next/headers";
+// import { logger } from "@optima/logger";
+// import * as Sentry from "@sentry/nextjs";
+import {
+	createSafeActionClient,
+	DEFAULT_SERVER_ERROR_MESSAGE,
+} from "next-safe-action";
+import { z } from "zod";
+import { auth } from "@/lib/auth/auth.server";
+import { resend } from "@/lib/resend";
+import { ServiceFactory } from "../../../packages/supabase/src/services/service.factory";
+
+const handleServerError = (e: Error) => {
+	console.error("Action error:", e.message);
+
+	if (e instanceof Error) {
+		return e.message;
+	}
+
+	return DEFAULT_SERVER_ERROR_MESSAGE;
+};
+
+export const actionClient = createSafeActionClient({
+	handleServerError,
+});
+
+export const actionClientWithMeta = createSafeActionClient({
+	handleServerError,
+	defineMetadataSchema() {
+		return z.object({
+			name: z.string(),
+			track: z
+				.object({
+					event: z.string(),
+					channel: z.string(),
+				})
+				.optional(),
+		});
+	},
+});
+
+export const authActionClient = actionClientWithMeta
+	.use(async ({ next, clientInput, metadata }) => {
+		const result = await next({
+			ctx: {
+				resend,
+			},
+		});
+
+		// if (process.env.NODE_ENV === "development") {
+		//   logger.info(`Input -> ${JSON.stringify(clientInput)}`);
+		//   logger.info(`Result -> ${JSON.stringify(result.data)}`);
+		//   logger.info(`Metadata -> ${JSON.stringify(metadata)}`);
+
+		//   return result;
+		// }
+
+		return result;
+	})
+	.use(async ({ next, metadata }) => {
+		const ip = (await headers()).get("x-forwarded-for");
+
+		const { success, remaining } = await ratelimit.limit(
+			`${ip}-${metadata.name}`,
+		);
+
+		if (!success) {
+			throw new Error("Too many requests");
+		}
+
+		return next({
+			ctx: {
+				ratelimit: {
+					remaining,
+				},
+			},
+		});
+	})
+	.use(async ({ next, metadata }) => {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session) {
+			throw new Error("Unauthorized");
+		}
+
+		const supabase = await createServerClient();
+		const services = ServiceFactory.getInstance(supabase);
+
+		// if (metadata) {
+		// 	const analytics = await setupAnalytics({
+		// 		userId: user.id,
+		// 	});
+		// 	if (metadata.track) {
+		// 		analytics.track(metadata.track);
+		// 	}
+		// }
+
+		return next({
+			ctx: {
+				session,
+				services,
+				supabase,
+			},
+		});
+
+		// return Sentry.withServerActionInstrumentation(metadata.name, async () => {
+
+		// });
+	});

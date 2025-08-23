@@ -43,6 +43,7 @@ import { useCompany } from "@/hooks/use-company";
 import { useServices } from "@/hooks/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 import { getDirtyFields } from "@/lib/form/get-dirty-fields";
+import { DomainVerification } from "./domain-verification";
 
 type OrganizationFormValues = z.infer<typeof organizationUpdateSchema>;
 
@@ -310,7 +311,7 @@ export function CompanyProfileForm({
 						<FormInput<OrganizationFormValues> name="domain" id="domain" />
 					</div>
 				</section>
-				{/* <DomainVerification companyId={form.getValues("id") ?? ""} /> */}
+				<DomainVerification companyId={form.getValues("id") ?? ""} />
 				domain verification
 				<Separator />
 				<section className="flex flex-col w-full gap-4">

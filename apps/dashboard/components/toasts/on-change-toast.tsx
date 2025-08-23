@@ -117,78 +117,50 @@ export function OnChangeToast({
 	};
 
 	return (
-		<motion.div
-			layout
-			className="inline-flex h-10 items-center justify-center gap-4 px-0.5 py-0 bg-[#131316] rounded-full overflow-hidden shadow-[0px_32px_64px_-16px_#0000004c,0px_16px_32px_-8px_#0000004c,0px_8px_16px_-4px_#0000003d,0px_4px_8px_-2px_#0000003d,0px_-8px_16px_-1px_#00000029,0px_2px_4px_-1px_#0000003d,0px_0px_0px_1px_#000000,inset_0px_0px_0px_1px_#ffffff14,inset_0px_1px_0px_#ffffff33] mx-auto w-full"
-		>
-			<div className="flex items-center justify-between w-full p-0">
-				<motion.div
-					layoutId="toast-content"
-					className="inline-flex items-center justify-between gap-2 pl-1.5 pr-3 py-0"
-					layout
-					transition={{ duration: 0.25, ease: "easeInOut" }}
-				>
-					<AnimatePresence mode="wait">
-						<motion.div
-							key={state}
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.25 }}
-						>
-							{currentState.icon}
-						</motion.div>
-					</AnimatePresence>
+		<div className="inline-flex h-10 items-center justify-center gap-4 px-0.5 py-0 bg-[#131316] rounded-full overflow-hidden shadow-[0px_32px_64px_-16px_#0000004c,0px_16px_32px_-8px_#0000004c,0px_8px_16px_-4px_#0000003d,0px_4px_8px_-2px_#0000003d,0px_-8px_16px_-1px_#00000029,0px_2px_4px_-1px_#0000003d,0px_0px_0px_1px_#000000,inset_0px_0px_0px_1px_#ffffff14,inset_0px_1px_0px_#ffffff33] mx-auto w-full">
+			<div className="flex items-center justify-between w-full min-w-[300px] p-0">
+				<div className="inline-flex items-center justify-between gap-2 pl-1.5 pr-3 py-0">
+					<div>{currentState.icon}</div>
 					<AnimatePresence mode="wait">
 						<motion.span
 							key={state}
 							className={cn(
-								" leading-5 font-normal whitespace-nowrap text-sm",
+								"leading-5 font-normal whitespace-nowrap text-sm w-full",
 								getHookSaveState(state) === "error"
 									? "text-destructive"
 									: "text-white",
 							)}
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0 }}
+							initial={{ y: 15, opacity: 0 }}
+							animate={{ y: 0, opacity: 1 }}
+							exit={{ y: -15, opacity: 0 }}
+							transition={{
+								duration: 0.5,
+								type: "spring",
+							}}
 						>
 							{getHookSaveState(state) === "error" && errorMessage
 								? errorMessage
 								: currentState.text}
 						</motion.span>
 					</AnimatePresence>
-				</motion.div>
+				</div>
 
-				<AnimatePresence>
-					{state === "idle" && (
-						<motion.div
-							layoutId="toast-buttons"
-							className="inline-flex items-center gap-2 pl-0 pr-px py-0"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1, width: "auto" }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.25, ease: "easeInOut" }}
+				{state === "idle" && (
+					<div className="inline-flex items-center gap-2 pl-0 pr-px py-0">
+						<Button
+							variant="ghost"
+							className="text-white hover:bg-white/10 hover:text-white rounded-full"
+							size="sm"
+							onClick={onReset}
 						>
-							<Button
-								variant="ghost"
-								className=" text-white hover:bg-white/10 hover:text-white rounded-full transition-colors duration-200"
-								size="sm"
-								onClick={onReset}
-							>
-								Reset
-							</Button>
-							<Button
-								className=" rounded-full transition-colors duration-200"
-								size="sm"
-								onClick={handleSave}
-							>
-								Save
-							</Button>
-						</motion.div>
-					)}
-				</AnimatePresence>
+							Reset
+						</Button>
+						<Button className="rounded-full" size="sm" onClick={handleSave}>
+							Save
+						</Button>
+					</div>
+				)}
 			</div>
-		</motion.div>
+		</div>
 	);
 }

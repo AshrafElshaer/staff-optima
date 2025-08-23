@@ -42,3 +42,20 @@ export const organizationInsertSchema = organizationSchema.omit({
 export const organizationUpdateSchema = organizationSchema.partial().required({
 	id: true,
 });
+
+export const domainVerificationSchema = z.object({
+	created_at: z.string().nullable(),
+	domain: z.string().min(1, { message: "Domain is required" }),
+	id: z.string(),
+	organization_id: z.string(),
+	updated_at: z.string().nullable(),
+	verification_date: z.string().nullable(),
+	verification_status: z.enum(["pending", "verified", "failed"]),
+	verification_token: z.string(),
+});
+
+export const domainVerificationUpdateSchema = domainVerificationSchema
+	.partial()
+	.required({
+		organization_id: true,
+	});
