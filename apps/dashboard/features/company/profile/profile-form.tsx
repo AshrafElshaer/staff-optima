@@ -171,8 +171,19 @@ export function CompanyProfileForm({
 		defaultValues,
 	});
 
-	function onSubmit(values: OrganizationFormValues) {
+	async function onSubmit(values: OrganizationFormValues) {
 		const payload = getDirtyFields<OrganizationFormValues>(form, values);
+		if (payload?.domain) {
+			const { data } = await authClient.organization.checkSlug({
+				slug: payload.domain,
+			});
+			if (!data?.status) {
+				toast.warning("Domain is already in use");
+				return;
+			}
+			toast.success("Domain is available");
+			return;
+		}
 		updateOrganizationMutation(payload, {
 			onSuccess: (result) => {
 				setTimeout(() => {
@@ -264,13 +275,16 @@ export function CompanyProfileForm({
 		ToastContent,
 	});
 
-	const logoUrl = `${form.watch("logo")}?${Date.now()}`;
+	const logoUrl = useMemo(
+		() => `${form.watch("logo")}?${Date.now()}`,
+		[form.watch("logo")],
+	);
 
 	return (
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8 w-full max-w-3xl mx-auto px-4"
+				className="space-y-8 w-full max-w-3xl mx-auto px-4 py-8"
 			>
 				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
 					<div className="space-y-2 w-full">

@@ -42,8 +42,7 @@ export function DashboardInset({ children }: { children: React.ReactNode }) {
 
 				<UserDropdown />
 			</header>
-			<div className="flex flex-1 flex-col p-4">{children}</div>
-			{/* <SetupMenu /> */}
+			<div className="flex flex-1 flex-col">{children}</div>
 		</SidebarInset>
 	);
 }

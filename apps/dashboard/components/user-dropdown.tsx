@@ -27,6 +27,7 @@ import { Skeleton } from "@optima/ui/components/skeleton";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useTransition } from "react";
+import { HiOutlineColorSwatch } from "react-icons/hi";
 import { authSearchParamsSerializer } from "@/features/auth/auth.searchParams";
 import { authClient } from "@/lib/auth/auth.client";
 import { HugeIcon } from "./huge-icon";
@@ -83,17 +84,7 @@ export function UserDropdown() {
 				<DropdownMenuSeparator />
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger>
-						<HugeIcon
-							size={16}
-							icon={
-								theme === "dark"
-									? Moon02Icon
-									: theme === "light"
-										? Sun01Icon
-										: AiComputerIcon
-							}
-							className="mr-2"
-						/>
+						<HiOutlineColorSwatch size={16} className="mr-2" />
 						Theme
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent>
