@@ -190,7 +190,7 @@ export function CompanyProfileForm({
 				errorMessage={updateError?.message}
 			/>
 		);
-	}, [updateStatus, updateError, handleReset]);
+	}, [updateStatus, updateError]);
 
 	useActionToast({
 		show: form.formState.isDirty,

@@ -2,9 +2,9 @@
 
 // import { setupAnalytics } from "@optima/analytics/server";
 import { ratelimit } from "@optima/kv/ratelimit";
+import logger from "@optima/logger";
 import { createServerClient } from "@optima/supabase/clients/server";
 import { headers } from "next/headers";
-import { logger } from "./logger";
 // import * as Sentry from "@sentry/nextjs";
 import {
 	createSafeActionClient,
@@ -52,10 +52,16 @@ export const authActionClient = actionClientWithMeta
 			},
 		});
 
-		// if (process.env.NODE_ENV === "development") {
-		  logger.info(`Input -> ${JSON.stringify(clientInput)}`);
-		  logger.info(`Result -> ${JSON.stringify(result.data)}`);
-		  logger.info(`Metadata -> ${JSON.stringify(metadata)}`);
+		// Update the logging section to handle potential errors
+		try {
+			if (process.env.NODE_ENV === "development") {
+				logger.info(`Input -> ${JSON.stringify(clientInput)}`);
+				logger.info(`Result -> ${JSON.stringify(result.data)}`);
+				logger.info(`Metadata -> ${JSON.stringify(metadata.name)}`);
+			}
+		} catch (error) {
+			console.warn("Logger error:", error);
+		}
 
 		//   return result;
 		// }

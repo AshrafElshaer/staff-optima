@@ -1,5 +1,6 @@
 import type { OrganizationUpdate } from "@optima/supabase/types";
 import { useMutation } from "@tanstack/react-query";
+import { invalidateDomainVerification } from "@/features/company/profile/domain-verification";
 import { authClient } from "@/lib/auth/auth.client";
 import { useServices } from "./use-services";
 
@@ -19,7 +20,10 @@ export function useCompany() {
 	} = useMutation({
 		mutationFn: (data: OrganizationUpdate & { id: string }) =>
 			organizationService.updateOrganization(data),
-		onSuccess: () => {
+		onSuccess: (result) => {
+			if (!result.isDomainVerified) {
+				invalidateDomainVerification(result.id);
+			}
 			refetch();
 		},
 		onSettled: () => {
