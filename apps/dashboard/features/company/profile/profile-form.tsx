@@ -1,17 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { OnChangeToast } from "@/components/toasts/on-change-toast";
-// import { useActionToast } from "@/hooks/use-action-toast";
-// import { createBrowserClient } from "@/lib/supabase/browser";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
-import { updateOrganization } from "@optima/supabase/mutations/organization.mutations";
-// import Editor from "@optima/editor";
-import type { Organization, TablesUpdate } from "@optima/supabase/types";
+import type { OrganizationRow } from "@optima/supabase/types";
 import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
-import {
-	organizationSchema,
-	organizationUpdateSchema,
-} from "@optima/supabase/validations/organization.validations";
+import { organizationUpdateSchema } from "@optima/supabase/validations/organization.validations";
 import {
 	Avatar,
 	AvatarFallback,
@@ -28,7 +20,6 @@ import {
 	FormDescription,
 	FormField,
 	FormItem,
-	FormLabel,
 	FormMessage,
 } from "@optima/ui/components/form";
 import {
@@ -36,17 +27,11 @@ import {
 	FormInput,
 	FormTimezoneSelector,
 } from "@optima/ui/components/form-controls";
-import { Input } from "@optima/ui/components/inputs";
 import { Label } from "@optima/ui/components/label";
-// import { uploadCompanyLogo } from "@/lib/supabase/storage";
-import { CountrySelector } from "@optima/ui/components/selectors/country-selector";
 import { Separator } from "@optima/ui/components/separator";
 import { cn } from "@optima/ui/lib/utils";
-import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-// import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,12 +39,9 @@ import type { z } from "zod";
 import { OnChangeToast } from "@/components/toasts/on-change-toast";
 import { useActionToast } from "@/hooks/use-actions-toast";
 import { useCompany } from "@/hooks/use-company";
+import { useServices } from "@/hooks/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 import { getDirtyFields } from "@/lib/form/get-dirty-fields";
-import { queryClient } from "@/lib/react-query/query-client";
-
-// import { updateOrganizationAction } from "../company.actions";
-// import { DomainVerification } from "./domain-verification";
 
 type OrganizationFormValues = z.infer<typeof organizationUpdateSchema>;
 
@@ -79,82 +61,15 @@ const DROP_ZONE_OPTIONS: DropzoneOptions = {
 export function CompanyProfileForm({
 	company,
 }: {
-	company: Organization | undefined;
+	company: OrganizationRow | undefined;
 }) {
 	const [resetKey, setResetKey] = useState(0);
 	const supabase = useSupabase();
-	const {
-		updateOrganizationMutation,
-		updateStatus,
-		isUpdating,
-		isUpdated,
-		isErrorUpdating,
-		updateError,
-	} = useCompany();
+	const services = useServices();
+	const organizationService = services.getOrganizationService();
+	const { updateOrganizationMutation, updateStatus, updateError } =
+		useCompany();
 	const formSubmitRef = useRef<HTMLButtonElement | null>(null);
-
-	const router = useRouter();
-
-	// const {
-	// 	execute: updateOrganization,
-	// 	executeAsync: updateOrganizationAsync,
-	// 	status,
-	// 	result,
-	// 	reset: resetAction,
-	// 	isExecuting,
-	// } = useAction(updateOrganizationAction, {
-	// 	onError: () => {
-	// 		queryClient.invalidateQueries({
-	// 			queryKey: ["domain-verification"],
-	// 		});
-	// 		queryClient.invalidateQueries({
-	// 			queryKey: ["company"],
-	// 		});
-	// 		setTimeout(() => {
-	// 			resetAction();
-	// 		}, 3000);
-	// 	},
-	// 	onSuccess: ({ data, input }) => {
-	// 		queryClient.invalidateQueries({
-	// 			queryKey: ["company"],
-	// 		});
-	// 		queryClient.invalidateQueries({
-	// 			queryKey: ["domain-verification"],
-	// 		});
-	// 		if (input.domain) {
-	// 			toast.warning(
-	// 				"Domain verification is required. Please re-verify your domain.",
-	// 			);
-	// 		}
-	// 		setTimeout(() => {
-	// 			form.reset(
-	// 				data
-	// 					? {
-	// 							...data,
-	// 							profile: data.profile ?? undefined,
-	// 							logo: data.logo ?? null,
-	// 							admin_id: data.admin_id ?? "",
-	// 							address_1: data.address_1 ?? null,
-	// 							address_2: data.address_2 ?? null,
-	// 							city: data.city ?? null,
-	// 							created_at: data.created_at ?? "",
-	// 							updated_at: data.updated_at ?? "",
-	// 							name: data.name ?? "",
-	// 							domain: data.domain ?? "",
-	// 							industry: data.industry ?? "",
-	// 							country: data.country ?? "",
-	// 							timezone: data.timezone ?? "",
-	// 						}
-	// 					: undefined,
-	// 				{
-	// 					keepDirty: false,
-	// 				},
-	// 			);
-	// 			setResetKey((prev) => prev + 1);
-	// 			resetAction();
-	// 		}, 3000);
-	// 	},
-	// });
 
 	const defaultValues = useMemo(() => {
 		if (!company) return undefined;
@@ -173,6 +88,11 @@ export function CompanyProfileForm({
 
 	async function onSubmit(values: OrganizationFormValues) {
 		const payload = getDirtyFields<OrganizationFormValues>(form, values);
+		if (!payload.id) {
+			toast.error("Organization ID is required");
+			return;
+		}
+
 		if (payload?.domain) {
 			const { data } = await authClient.organization.checkSlug({
 				slug: payload.domain,
@@ -181,8 +101,9 @@ export function CompanyProfileForm({
 				toast.warning("Domain is already in use");
 				return;
 			}
-			toast.info("Domain has changed. Please re-verify your domain.");
+			toast.warning("Domain has changed. Please re-verify your domain.");
 		}
+
 		updateOrganizationMutation(payload, {
 			onSuccess: (result) => {
 				setTimeout(() => {
@@ -218,7 +139,7 @@ export function CompanyProfileForm({
 				form.setValue("logo", publicUrl, {
 					shouldDirty: false,
 				});
-				await updateOrganization(supabase, {
+				await organizationService.updateOrganization({
 					id: form.getValues("id") ?? "",
 					logo: publicUrl,
 				});
@@ -450,15 +371,15 @@ export function CompanyProfileForm({
 								<FormControl>
 									<div className="w-full border rounded-md min-h-96 p-4 grid">
 										{/* <Editor
-											content={field.value ?? ""}
-											onChange={(content) => {
-												form.setValue("profile", content, {
-													shouldDirty: true,
-													shouldTouch: true,
-												});
-											}}
-											key={resetKey}
-										/> */}
+                      content={field.value ?? ""}
+                      onChange={(content) => {
+                        form.setValue("profile", content, {
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        });
+                      }}
+                      key={resetKey}
+                    /> */}
 										editor
 									</div>
 								</FormControl>

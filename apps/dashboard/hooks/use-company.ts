@@ -1,12 +1,13 @@
-import { useSupabase } from "@optima/supabase/clients/use-supabase";
-import { updateOrganization } from "@optima/supabase/mutations/organization.mutations";
-import type { Organization, OrganizationUpdate } from "@optima/supabase/types";
+import type { OrganizationUpdate } from "@optima/supabase/types";
 import { useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth.client";
+import { useServices } from "./use-services";
 
 export function useCompany() {
-	const supabase = useSupabase();
+	const services = useServices();
+	const organizationService = services.getOrganizationService();
 	const { data: company, refetch } = authClient.useActiveOrganization();
+
 	const {
 		mutate: updateOrganizationMutation,
 		status: updateStatus,
@@ -16,8 +17,8 @@ export function useCompany() {
 		error: updateError,
 		reset: resetUpdate,
 	} = useMutation({
-		mutationFn: (data: OrganizationUpdate) =>
-			updateOrganization(supabase, data),
+		mutationFn: (data: OrganizationUpdate & { id: string }) =>
+			organizationService.updateOrganization(data),
 		onSuccess: () => {
 			refetch();
 		},

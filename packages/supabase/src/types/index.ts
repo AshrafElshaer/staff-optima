@@ -12,9 +12,26 @@ export type { Database, Tables, TablesInsert, TablesUpdate, Enums };
 export type SupabaseInstance = SupabaseClient<Database>;
 
 // // Tables
-export type User = Tables<"user">;
-export type Organization = Tables<"organization">;
+
+export type UserRow = Tables<"user">;
+export type UserUpdate = TablesUpdate<"user">;
+export type UserInsert = TablesInsert<"user">;
+
+export type OrganizationRow = Tables<"organization">;
 export type OrganizationUpdate = TablesUpdate<"organization">;
+
+export type DomainVerificationRow = Tables<"domain_verification">;
+export type DomainVerificationUpdate = TablesUpdate<"domain_verification">;
+export type DomainVerificationInsert = TablesInsert<"domain_verification">;
+
+export type MembershipRow = Tables<"member">;
+export type MembershipUpdate = TablesUpdate<"member">;
+export type MembershipInsert = TablesInsert<"member">;
+
+export type RoleRow = Tables<"role">;
+export type RoleUpdate = TablesUpdate<"role">;
+export type RoleInsert = TablesInsert<"role">;
+
 // export type WorkspaceMember = Tables<"member">;
 // export type Project = Tables<"projects">;
 // export type ProjectMember = Tables<"project_members">;
