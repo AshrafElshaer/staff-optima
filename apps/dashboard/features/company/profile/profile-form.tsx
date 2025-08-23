@@ -181,8 +181,7 @@ export function CompanyProfileForm({
 				toast.warning("Domain is already in use");
 				return;
 			}
-			toast.success("Domain is available");
-			return;
+			toast.info("Domain has changed. Please re-verify your domain.");
 		}
 		updateOrganizationMutation(payload, {
 			onSuccess: (result) => {
