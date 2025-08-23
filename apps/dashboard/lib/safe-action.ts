@@ -4,7 +4,7 @@
 import { ratelimit } from "@optima/kv/ratelimit";
 import { createServerClient } from "@optima/supabase/clients/server";
 import { headers } from "next/headers";
-// import { logger } from "@optima/logger";
+import { logger } from "./logger";
 // import * as Sentry from "@sentry/nextjs";
 import {
 	createSafeActionClient,
@@ -53,9 +53,9 @@ export const authActionClient = actionClientWithMeta
 		});
 
 		// if (process.env.NODE_ENV === "development") {
-		//   logger.info(`Input -> ${JSON.stringify(clientInput)}`);
-		//   logger.info(`Result -> ${JSON.stringify(result.data)}`);
-		//   logger.info(`Metadata -> ${JSON.stringify(metadata)}`);
+		  logger.info(`Input -> ${JSON.stringify(clientInput)}`);
+		  logger.info(`Result -> ${JSON.stringify(result.data)}`);
+		  logger.info(`Metadata -> ${JSON.stringify(metadata)}`);
 
 		//   return result;
 		// }
@@ -63,23 +63,39 @@ export const authActionClient = actionClientWithMeta
 		return result;
 	})
 	.use(async ({ next, metadata }) => {
-		const ip = (await headers()).get("x-forwarded-for");
+		try {
+			const ip = (await headers()).get("x-forwarded-for") || "unknown";
 
-		const { success, remaining } = await ratelimit.limit(
-			`${ip}-${metadata.name}`,
-		);
+			// Wrap rate limiting in try-catch
+			try {
+				const { success, remaining } = await ratelimit.limit(
+					`${ip}-${metadata.name}`,
+				);
 
-		if (!success) {
-			throw new Error("Too many requests");
+				if (!success) {
+					throw new Error("Too many requests");
+				}
+
+				return next({
+					ctx: {
+						ratelimit: {
+							remaining,
+						},
+					},
+				});
+			} catch {
+				return next({
+					ctx: {
+						ratelimit: {
+							remaining: 1,
+						},
+					},
+				});
+			}
+		} catch (error) {
+			console.error("Middleware error:", error);
+			throw error;
 		}
-
-		return next({
-			ctx: {
-				ratelimit: {
-					remaining,
-				},
-			},
-		});
 	})
 	.use(async ({ next, metadata }) => {
 		const session = await auth.api.getSession({
@@ -101,7 +117,6 @@ export const authActionClient = actionClientWithMeta
 		// 		analytics.track(metadata.track);
 		// 	}
 		// }
-
 		return next({
 			ctx: {
 				session,

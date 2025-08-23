@@ -29,6 +29,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/react-query/query-client";
 
+function invalidateDomainVerification(companyId: string) {
+	queryClient.invalidateQueries({
+		queryKey: [queryKeysFactory.domainVerification.byOrganizationId(companyId)],
+	});
+}
+
 export function DomainVerification({ companyId }: { companyId: string }) {
 	const router = useRouter();
 	const domainVerificationService =
@@ -41,14 +47,11 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 		onSuccess: () => {
 			toast.success("Domain verified successfully");
 			router.refresh();
-			queryClient.invalidateQueries({
-				queryKey: [
-					queryKeysFactory.domainVerification.byOrganizationId(companyId),
-				],
-			});
+			invalidateDomainVerification(companyId);
 		},
 		onError: ({ error }) => {
 			toast.error(error.serverError);
+			invalidateDomainVerification(companyId);
 		},
 	});
 

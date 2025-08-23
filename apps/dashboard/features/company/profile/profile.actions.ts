@@ -11,6 +11,7 @@ export const verifyDomainAction = authActionClient
 		name: "verify-domain",
 	})
 	.action(async ({ ctx, parsedInput }) => {
+		console.log("verifyDomainAction");
 		const { services } = ctx;
 		const { domainVerification } = parsedInput;
 		const domainVerificationService = services.getDomainVerificationService();
