@@ -24,6 +24,7 @@ import {
 } from "@optima/ui/components/dropdown-menu";
 import { Icons } from "@optima/ui/components/icons";
 import { Skeleton } from "@optima/ui/components/skeleton";
+import { CheckIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useTransition } from "react";
@@ -91,14 +92,23 @@ export function UserDropdown() {
 						<DropdownMenuItem onClick={() => setTheme("light")}>
 							<HugeIcon icon={Sun01Icon} />
 							Light
+							{theme === "light" && (
+								<CheckIcon className="ml-auto h-4 w-4 text-current" />
+							)}
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => setTheme("dark")}>
 							<HugeIcon icon={Moon02Icon} />
 							Dark
+							{theme === "dark" && (
+								<CheckIcon className="ml-auto h-4 w-4 text-current" />
+							)}
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => setTheme("system")}>
 							<HugeIcon icon={AiComputerIcon} />
 							System
+							{theme === "system" && (
+								<CheckIcon className="ml-auto h-4 w-4 text-current" />
+							)}
 						</DropdownMenuItem>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub>
