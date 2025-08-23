@@ -99,9 +99,11 @@ function OrganizationForm() {
 			timezone: "",
 			employeeCount: "",
 			slug: "",
+			isDomainVerified: false,
 		},
 	});
 	const website = form.watch("domain");
+	console.log("errors", form.formState.errors);
 
 	useEffect(() => {
 		if (website) {

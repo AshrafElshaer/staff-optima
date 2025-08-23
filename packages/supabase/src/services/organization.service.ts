@@ -36,14 +36,18 @@ export class OrganizationService extends BaseService<"organization"> {
 
 		// Handle domain verification if domain is being updated
 		if (organization.domain) {
-			await this.handleDomainVerification(organization.id, organization.domain);
+			await this.recreateDomainVerification(
+				organization.id,
+				organization.domain,
+			);
 			organization.slug = organization.domain;
+			organization.isDomainVerified = false;
 		}
 
 		return this.update(organization.id, organization);
 	}
 
-	private async handleDomainVerification(
+	private async recreateDomainVerification(
 		organizationId: string,
 		domain: string,
 	): Promise<void> {

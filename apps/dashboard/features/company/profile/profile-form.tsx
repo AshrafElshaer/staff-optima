@@ -25,6 +25,7 @@ import {
 import {
 	FormCountrySelector,
 	FormInput,
+	FormSelect,
 	FormTimezoneSelector,
 } from "@optima/ui/components/form-controls";
 import { Label } from "@optima/ui/components/label";
@@ -272,6 +273,27 @@ export function CompanyProfileForm({
 					</div>
 					<div className="w-full md:w-1/2">
 						<FormInput<OrganizationFormValues> id="industry" name="industry" />
+					</div>
+				</section>
+				<Separator />
+				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
+					<div className="space-y-2 w-full md:w-1/2">
+						<Label className="font-semibold text-base" htmlFor="employeeCount">
+							Company Size
+						</Label>
+						<FormDescription>Company's employee count</FormDescription>
+					</div>
+					<div className="w-full md:w-1/2">
+						<FormSelect<OrganizationFormValues>
+							name="employeeCount"
+							options={[
+								{ label: "1-10", value: "1-10" },
+								{ label: "11-50", value: "11-50" },
+								{ label: "51-200", value: "51-200" },
+								{ label: "201-500", value: "201-500" },
+								{ label: "+ 500", value: "+ 500" },
+							]}
+						/>
 					</div>
 				</section>
 				<Separator />

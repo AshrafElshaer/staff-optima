@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: because we need to use any to avoid type errors */
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import type { SupabaseInstance } from "../types";
 import type {

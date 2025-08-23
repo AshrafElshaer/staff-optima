@@ -50,9 +50,7 @@ export function UserDropdown() {
 				fetchOptions: {
 					onSuccess: () => {
 						router.push(
-							`/auth?${authSearchParamsSerializer({
-								redirectUrl: pathname,
-							})}`,
+							`/auth${authSearchParamsSerializer({ redirectUrl: pathname })}`,
 						);
 					},
 				},

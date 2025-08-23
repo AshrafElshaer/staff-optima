@@ -233,7 +233,11 @@ function UserForm({ countryCode }: { countryCode: string }) {
 					</div>
 				</div>
 				<FormInput<UserFormValues> name="name" label="Full Name" />
-				<FormInput<UserFormValues> name="jobTitle" label="Job Title" />
+				<FormInput<UserFormValues>
+					name="jobTitle"
+					label="Job Title"
+					placeholder="e.g. Software Engineer"
+				/>
 				<FormPhoneInput<UserFormValues>
 					name="phoneNumber"
 					label="Phone Number"
