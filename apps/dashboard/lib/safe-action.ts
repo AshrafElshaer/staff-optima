@@ -53,15 +53,15 @@ export const authActionClient = actionClientWithMeta
 		});
 
 		// Update the logging section to handle potential errors
-		try {
-			if (process.env.NODE_ENV === "development") {
-				logger.info(`Input -> ${JSON.stringify(clientInput)}`);
-				logger.info(`Result -> ${JSON.stringify(result.data)}`);
-				logger.info(`Metadata -> ${JSON.stringify(metadata.name)}`);
-			}
-		} catch (error) {
-			console.warn("Logger error:", error);
-		}
+		// try {
+		// 	if (process.env.NODE_ENV === "development") {
+		// 		logger.info(`Input -> ${JSON.stringify(clientInput)}`);
+		// 		logger.info(`Result -> ${JSON.stringify(result.data)}`);
+		// 		logger.info(`Metadata -> ${JSON.stringify(metadata.name)}`);
+		// 	}
+		// } catch (error) {
+		// 	console.warn("Logger error:", error);
+		// }
 
 		//   return result;
 		// }

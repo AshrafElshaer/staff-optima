@@ -1,8 +1,5 @@
 "use client";
 import { MailSend02Icon, SentIcon } from "@hugeicons/core-free-icons";
-// import { CopyToClipboard } from "@/components/copy-to-clipboard";
-import { useSupabase } from "@optima/supabase/clients/use-supabase";
-// import { getDomainVerificationByOrganizationId } from "@optima/supabase/queries";
 import { Badge } from "@optima/ui/components/badge";
 import { Button } from "@optima/ui/components/button";
 import {
@@ -12,14 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@optima/ui/components/card";
-import { Input } from "@optima/ui/components/inputs";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@optima/ui/components/popover";
 import { Separator } from "@optima/ui/components/separator";
-import { cn } from "@optima/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { AnimatePresence, motion } from "motion/react";
@@ -162,7 +157,9 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 					>
 						{isExecuting ? "Verifying..." : "Verify"}
 					</Button>
-					<ForwardDnsEmail companyId={companyId} />
+					{domainVerification && (
+						<ForwardDnsEmail domainVerification={domainVerification} />
+					)}
 				</CardTitle>
 				<CardDescription>
 					<p>
@@ -223,33 +220,32 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 }
 
 import { zodResolver } from "@hookform/resolvers/zod";
-// import {
-// 	getDomainVerificationByCompanyId,
-// 	// getDomainVerificationByToken,
-// } from "@optima/supabase/queries";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormMessage,
-} from "@optima/ui/components/form";
+import type { DomainVerificationRow } from "@optima/supabase/types";
+import { Form } from "@optima/ui/components/form";
+import { FormInput } from "@optima/ui/components/form-controls";
 import { Icons } from "@optima/ui/components/icons";
 import { Skeleton } from "@optima/ui/components/skeleton";
-import { Check, CheckCircleIcon, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CopyToClipboard } from "@/components/copy-to-clipboard";
 import { HugeIcon } from "@/components/huge-icon";
 import { useServices } from "@/hooks/use-services";
 import { queryKeysFactory } from "@/lib/react-query/query-keys-factory";
-import { verifyDomainAction } from "./profile.actions";
+import {
+	sendDomainVerificationEmailAction,
+	verifyDomainAction,
+} from "./profile.actions";
 
 const formSchema = z.object({
 	email: z.string().email(),
 });
 
-export function ForwardDnsEmail({ companyId }: { companyId: string }) {
+export function ForwardDnsEmail({
+	domainVerification,
+}: {
+	domainVerification: DomainVerificationRow;
+}) {
 	const [open, setOpen] = useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -257,29 +253,29 @@ export function ForwardDnsEmail({ companyId }: { companyId: string }) {
 			email: "",
 		},
 	});
-	// const {
-	// 	execute: sendDomainVerificationEmail,
-	// 	isExecuting,
-	// 	status,
-	// 	reset,
-	// } = useAction(sendDomainVerificationEmailAction, {
-	// 	onSuccess: () => {
-	// 		form.reset();
-	// 		setTimeout(() => {
-	// 			setOpen(false);
-	// 			reset();
-	// 		}, 1000);
-	// 	},
-	// 	onError: ({ error }) => {
-	// 		toast.error(error.serverError);
-	// 	},
-	// });
+	const {
+		execute: sendDomainVerificationEmail,
+		isExecuting,
+		status,
+		reset,
+	} = useAction(sendDomainVerificationEmailAction, {
+		onSuccess: () => {
+			form.reset();
+			setTimeout(() => {
+				setOpen(false);
+				reset();
+			}, 1000);
+		},
+		onError: ({ error }) => {
+			toast.error(error.serverError);
+		},
+	});
 
 	const onSubmit = (data: z.infer<typeof formSchema>) => {
-		// sendDomainVerificationEmail({
-		// 	company_id: companyId,
-		// 	sendTo: data.email,
-		// });
+		sendDomainVerificationEmail({
+			domainVerification: domainVerification,
+			sendTo: data.email,
+		});
 	};
 
 	return (
@@ -296,25 +292,19 @@ export function ForwardDnsEmail({ companyId }: { companyId: string }) {
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="flex items-start gap-2"
+						className="flex items-end gap-2"
 					>
-						<FormField
-							control={form.control}
+						<FormInput
 							name="email"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="Email" {...field} inputMode="email" />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							placeholder="example@example.com"
+							inputMode="email"
 						/>
+
 						<Button
 							variant="secondary"
 							size="icon"
 							type="submit"
-							// disabled={isExecuting}
+							disabled={isExecuting}
 						>
 							<AnimatePresence mode="wait">
 								{status === "executing" ? (

@@ -1,7 +1,6 @@
 import type {
 	DomainVerificationRow,
 	DomainVerificationUpdate,
-	OrganizationRow,
 	SupabaseInstance,
 } from "../types";
 import { BaseService } from "./base.service";

@@ -1,5 +1,6 @@
 "use server";
 import { resolveTxt } from "node:dns/promises";
+import { DnsVerificationEmail } from "@optima/email";
 import { domainVerificationSchema } from "@optima/supabase/validations/organization.validations";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
@@ -11,7 +12,6 @@ export const verifyDomainAction = authActionClient
 		name: "verify-domain",
 	})
 	.action(async ({ ctx, parsedInput }) => {
-		console.log("verifyDomainAction");
 		const { services } = ctx;
 		const { domainVerification } = parsedInput;
 		const domainVerificationService = services.getDomainVerificationService();
@@ -63,4 +63,35 @@ export const verifyDomainAction = authActionClient
 
 		revalidatePath("/company");
 		return updatedDomainVerification;
+	});
+
+export const sendDomainVerificationEmailAction = authActionClient
+	.inputSchema(
+		z.object({
+			domainVerification: domainVerificationSchema,
+			sendTo: z.email(),
+		}),
+	)
+	.metadata({
+		name: "send-domain-verification-email",
+	})
+	.action(async ({ ctx, parsedInput }) => {
+		const { session, resend } = ctx;
+		const { domainVerification, sendTo } = parsedInput;
+
+		const { error } = await resend.emails.send({
+			from: "Staff Optima <support@www.staffoptima.co>",
+			to: sendTo,
+			subject: "Domain Verification",
+			react: DnsVerificationEmail({
+				records: [domainVerification],
+				organizationDomain: domainVerification.domain,
+				sentBy: `${session.user.name} <${session.user.email}>`,
+			}),
+		});
+
+		if (error) {
+			console.error(error);
+			throw new Error("Failed to send domain verification email");
+		}
 	});
