@@ -78,8 +78,7 @@ type OrganizationFormValues = z.infer<typeof organizationInsertSchema>;
 
 function OrganizationForm() {
 	const roleService = useServices().getRoleService();
-	const domainVerificationService =
-		useServices().getDomainVerificationService();
+	const domainService = useServices().getDomainService();
 	const membershipService = useServices().getMembershipService();
 	const router = useRouter();
 	const { data: session } = authClient.useSession();
@@ -167,7 +166,7 @@ function OrganizationForm() {
 			console.log({ subscriptionError });
 		}
 
-		await domainVerificationService.createDomainVerification({
+		await domainService.createVerification({
 			id: organization.id,
 			slug: organization.slug,
 		});

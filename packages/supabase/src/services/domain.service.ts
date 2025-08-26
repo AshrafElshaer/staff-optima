@@ -5,7 +5,7 @@ import type {
 } from "../types";
 import { BaseService } from "./base.service";
 
-export class DomainVerificationService extends BaseService<"domain_verification"> {
+export class DomainService extends BaseService<"domain_verification"> {
 	constructor(supabase: SupabaseInstance) {
 		super(supabase, "domain_verification");
 	}
@@ -14,7 +14,7 @@ export class DomainVerificationService extends BaseService<"domain_verification"
 		return this.findById(id);
 	}
 
-	async createDomainVerification(organization: {
+	async createVerification(organization: {
 		id: string;
 		slug: string;
 	}): Promise<DomainVerificationRow> {
@@ -25,7 +25,7 @@ export class DomainVerificationService extends BaseService<"domain_verification"
 		});
 	}
 
-	async updateDomainVerification(
+	async updateVerification(
 		domainVerification: DomainVerificationUpdate & {
 			organization_id: string;
 		},
@@ -37,7 +37,7 @@ export class DomainVerificationService extends BaseService<"domain_verification"
 		);
 	}
 
-	async deleteDomainVerification(id: string): Promise<DomainVerificationRow> {
+	async deleteVerification(id: string): Promise<DomainVerificationRow> {
 		return this.delete(id);
 	}
 

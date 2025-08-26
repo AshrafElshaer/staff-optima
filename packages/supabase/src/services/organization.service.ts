@@ -5,14 +5,21 @@ import type {
 	Tables,
 } from "../types";
 import { BaseService } from "./base.service";
+import type { DomainService } from "./domain.service";
 import type { RoleService } from "./role.service";
 
 export class OrganizationService extends BaseService<"organization"> {
 	private readonly roleService: RoleService;
+	private readonly domainService: DomainService;
 
-	constructor(supabase: SupabaseInstance, roleService: RoleService) {
+	constructor(
+		supabase: SupabaseInstance,
+		roleService: RoleService,
+		domainService: DomainService,
+	) {
 		super(supabase, "organization");
 		this.roleService = roleService;
+		this.domainService = domainService;
 	}
 
 	async getById(id: string): Promise<OrganizationRow> {
@@ -36,10 +43,7 @@ export class OrganizationService extends BaseService<"organization"> {
 
 		// Handle domain verification if domain is being updated
 		if (organization.domain) {
-			await this.recreateDomainVerification(
-				organization.id,
-				organization.domain,
-			);
+			await this.recreateDomainVerification(organization.id);
 			organization.slug = organization.domain;
 			organization.isDomainVerified = false;
 		}
@@ -49,21 +53,16 @@ export class OrganizationService extends BaseService<"organization"> {
 
 	private async recreateDomainVerification(
 		organizationId: string,
-		domain: string,
 	): Promise<void> {
-		const { error: organizationError } = await this.supabase
-			.from("domain_verification")
-			.update({
-				verification_date: null,
+		const domainVerification =
+			await this.domainService.updateVerification({
+				organization_id: organizationId,
 				verification_status: "pending",
 				verification_token: crypto.randomUUID(),
 				updated_at: new Date().toISOString(),
-			})
-			.eq("domain", domain)
-			.eq("organization_id", organizationId);
-
-		if (organizationError) {
-			throw organizationError;
+			});
+		if (!domainVerification) {
+			throw new Error("Failed to recreate domain verification");
 		}
 	}
 }

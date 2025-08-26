@@ -22,10 +22,13 @@ export abstract class BaseService<T extends TableName> {
 		this.tableName = tableName;
 	}
 
-	protected async findOne(query: Record<string, unknown>): Promise<Row<T>> {
+	protected async findOne(
+		query: Record<string, unknown>,
+		select?: string,
+	): Promise<Row<T>> {
 		const result = (await this.supabase
 			.from(this.tableName)
-			.select()
+			.select(select)
 			.match(query)
 			.single()) as PostgrestSingleResponse<Row<T>>;
 
@@ -36,8 +39,11 @@ export abstract class BaseService<T extends TableName> {
 		return result.data;
 	}
 
-	protected async findById(id: string): Promise<Row<T>> {
-		return this.findOne({ id });
+	protected async findById(
+		id: string,
+		select?: string,
+	): Promise<Row<T>> {
+		return this.findOne({ id }, select);
 	}
 
 	protected async updateBy(

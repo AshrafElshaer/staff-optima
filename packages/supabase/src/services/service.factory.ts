@@ -1,5 +1,5 @@
 import type { SupabaseInstance } from "../types";
-import { DomainVerificationService } from "./domain-verification.service";
+import { DomainService } from "./domain.service";
 import { MembershipService } from "./membership.service";
 import { OrganizationService } from "./organization.service";
 import { RoleService } from "./role.service";
@@ -14,7 +14,7 @@ export class ServiceFactory {
 		| RoleService
 		| UserService
 		| MembershipService
-		| DomainVerificationService
+		| DomainService
 	>;
 
 	private constructor(supabase: SupabaseInstance) {
@@ -33,7 +33,11 @@ export class ServiceFactory {
 		const key = "organization";
 		let service = this.services.get(key) as OrganizationService;
 		if (!service) {
-			service = new OrganizationService(this.supabase, this.getRoleService());
+			service = new OrganizationService(
+				this.supabase,
+				this.getRoleService(),
+				this.getDomainService(),
+			);
 			this.services.set(key, service);
 		}
 		return service;
@@ -69,11 +73,11 @@ export class ServiceFactory {
 		return service;
 	}
 
-	getDomainVerificationService(): DomainVerificationService {
-		const key = "domain_verification";
-		let service = this.services.get(key) as DomainVerificationService;
+	getDomainService(): DomainService {
+		const key = "domain";
+		let service = this.services.get(key) as DomainService;
 		if (!service) {
-			service = new DomainVerificationService(this.supabase);
+			service = new DomainService(this.supabase);
 			this.services.set(key, service);
 		}
 		return service;
