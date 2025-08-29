@@ -14,7 +14,7 @@ export const verifyDomainAction = authActionClient
 	.action(async ({ ctx, parsedInput }) => {
 		const { services } = ctx;
 		const { domainVerification } = parsedInput;
-		const domainVerificationService = services.getDomainVerificationService();
+		const domainService = services.getDomainService();
 		const organizationService = services.getOrganizationService();
 
 		let records: string[][] | null = null;
@@ -23,7 +23,7 @@ export const verifyDomainAction = authActionClient
 				`staffoptima_verification.${domainVerification.domain}`,
 			);
 		} catch {
-			await domainVerificationService.updateDomainVerification({
+			await domainService.updateVerification({
 				organization_id: domainVerification.organization_id,
 				verification_status: "failed",
 			});
@@ -37,7 +37,7 @@ export const verifyDomainAction = authActionClient
 			.includes(domainVerification.verification_token ?? "");
 
 		if (!isValid) {
-			await domainVerificationService.updateDomainVerification({
+			await domainService.updateVerification({
 				organization_id: domainVerification.organization_id,
 				verification_status: "failed",
 			});
@@ -50,7 +50,7 @@ export const verifyDomainAction = authActionClient
 		}
 
 		const updatedDomainVerification =
-			await domainVerificationService.updateDomainVerification({
+			await domainService.updateVerification({
 				organization_id: domainVerification.organization_id,
 				verification_status: "verified",
 				verification_date: new Date().toISOString(),

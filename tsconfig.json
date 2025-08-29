@@ -1,9 +1,11 @@
 {
 	"extends": "@optima/typescript-config/base.json",
 	"compilerOptions": {
+    "jsx": "react",
 		"strictNullChecks": true,
 		"paths": {
-			"@optima/ui/*": ["./packages/ui/src/*"]
+			"@optima/ui/*": ["./packages/ui/src/*"],
+
 		}
 	}
 }

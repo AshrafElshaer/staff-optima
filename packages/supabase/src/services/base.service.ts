@@ -39,10 +39,7 @@ export abstract class BaseService<T extends TableName> {
 		return result.data;
 	}
 
-	protected async findById(
-		id: string,
-		select?: string,
-	): Promise<Row<T>> {
+	protected async findById(id: string, select?: string): Promise<Row<T>> {
 		return this.findOne({ id }, select);
 	}
 

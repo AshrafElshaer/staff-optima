@@ -392,18 +392,12 @@ export function CompanyProfileForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormControl>
-									<div className="w-full border rounded-md min-h-96 p-4 grid">
-										{/* <Editor
-                      content={field.value ?? ""}
-                      onChange={(content) => {
-                        form.setValue("profile", content, {
-                          shouldDirty: true,
-                          shouldTouch: true,
-                        });
-                      }}
-                      key={resetKey}
-                    /> */}
+									<div className="w-full border rounded-md min-h-96 grid overflow-hidden">
 										editor
+										{/* <SimpleEditor
+											content={field.value ?? ""}
+											onChange={field.onChange}
+										/> */}
 									</div>
 								</FormControl>
 								<FormMessage />

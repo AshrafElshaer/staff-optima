@@ -4,7 +4,8 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./*"],
-			"@optima/ui/*": ["../../packages/ui/src/*"]
+			"@optima/ui/*": ["../../packages/ui/src/*"],
+			"@optima/editor/*": ["../../packages/editor/*"]
 		},
 		"plugins": [
 			{
@@ -19,5 +20,8 @@
 		"next.config.ts",
 		".next/types/**/*.ts"
 	],
+	"module": "ESNext",
+	"moduleResolution": "bundler",
+
 	"exclude": ["node_modules"]
 }

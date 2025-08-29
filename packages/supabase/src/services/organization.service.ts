@@ -54,13 +54,12 @@ export class OrganizationService extends BaseService<"organization"> {
 	private async recreateDomainVerification(
 		organizationId: string,
 	): Promise<void> {
-		const domainVerification =
-			await this.domainService.updateVerification({
-				organization_id: organizationId,
-				verification_status: "pending",
-				verification_token: crypto.randomUUID(),
-				updated_at: new Date().toISOString(),
-			});
+		const domainVerification = await this.domainService.updateVerification({
+			organization_id: organizationId,
+			verification_status: "pending",
+			verification_token: crypto.randomUUID(),
+			updated_at: new Date().toISOString(),
+		});
 		if (!domainVerification) {
 			throw new Error("Failed to recreate domain verification");
 		}

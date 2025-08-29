@@ -32,11 +32,11 @@ export function invalidateDomainVerification(companyId: string) {
 
 export function DomainVerification({ companyId }: { companyId: string }) {
 	const router = useRouter();
-	const domainVerificationService =
-		useServices().getDomainVerificationService();
+	const services = useServices();
+	const domainService = services.getDomainService();
 	const { data: domainVerification, isLoading } = useQuery({
 		queryKey: [queryKeysFactory.domainVerification.byOrganizationId(companyId)],
-		queryFn: () => domainVerificationService.getByOrganizationId(companyId),
+		queryFn: () => domainService.getByOrganizationId(companyId),
 	});
 	const { execute: verifyDomain, isExecuting } = useAction(verifyDomainAction, {
 		onSuccess: () => {
