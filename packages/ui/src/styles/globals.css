@@ -205,3 +205,152 @@
 		cursor: pointer;
 	}
 }
+
+.ProseMirror {
+	outline: none;
+}
+
+.ProseMirror .is-empty::before {
+	content: attr(data-placeholder);
+	float: left;
+	color: var(--color-muted-foreground);
+	pointer-events: none;
+	height: auto;
+	position: absolute;
+}
+.ProseMirror .is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	float: left;
+	color: var(--color-muted-foreground);
+	pointer-events: none;
+	height: auto;
+	position: absolute;
+}
+
+ul[data-type="taskList"] li > label {
+	margin-right: 0.2rem;
+	user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+	ul[data-type="taskList"] li > label {
+		margin-right: 0.5rem;
+	}
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: hsl(var(--background));
+	margin: 0;
+	cursor: pointer;
+	width: 1.2em;
+	height: 1.2em;
+	position: relative;
+	top: 5px;
+	border: 2px solid hsl(var(--border));
+	margin-right: 0.3rem;
+	display: grid;
+	place-content: center;
+
+	&:hover {
+		background-color: hsl(var(--accent));
+	}
+
+	&:active {
+		background-color: hsl(var(--accent));
+	}
+
+	&::before {
+		content: "";
+		width: 0.65em;
+		height: 0.65em;
+		transform: scale(0);
+		transition: 120ms transform ease-in-out;
+		box-shadow: inset 1em 1em;
+		transform-origin: center;
+		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+	}
+
+	&:checked::before {
+		transform: scale(1);
+	}
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div > p {
+	color: var(--muted-foreground);
+	text-decoration: line-through;
+	text-decoration-thickness: 2px;
+}
+
+/* Tippy.js theme for slash command */
+.tippy-box[data-theme~="light"] {
+	background-color: var(--color-popover);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	box-shadow:
+		0 10px 15px -3px rgb(0 0 0 / 0.1),
+		0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.tippy-box[data-theme~="light"] .tippy-content {
+	padding: 0;
+}
+
+.slash-command-container {
+	z-index: 50;
+}
+
+/* Heading styles */
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+	line-height: 1.1;
+	text-wrap: pretty;
+}
+
+.ProseMirror h1,
+.ProseMirror h2 {
+	margin-bottom: 1.5rem;
+}
+
+.ProseMirror h1 {
+	font-size: 1.4rem;
+}
+
+.ProseMirror h2 {
+	font-size: 1.2rem;
+}
+
+.ProseMirror h3 {
+	font-size: 1.1rem;
+}
+
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+	font-size: 1rem;
+}
+
+.ProseMirror blockquote {
+	@apply border-l-2 border-foreground pl-4;
+}
+
+.ProseMirror ul[data-type="bulletList"] {
+	@apply list-disc list-inside space-y-1;
+}
+
+.ProseMirror ol[data-type="orderedList"] {
+	@apply list-decimal list-inside space-y-1;
+}
+
+.ProseMirror li {
+	@apply space-y-1;
+}
+
+.ProseMirror p {
+	@apply mb-4;
+}

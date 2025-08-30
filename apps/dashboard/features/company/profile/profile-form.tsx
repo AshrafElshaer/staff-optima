@@ -1,5 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Editor } from "@optima/editor/src/index";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import type { OrganizationRow } from "@optima/supabase/types";
 import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
@@ -393,11 +394,7 @@ export function CompanyProfileForm({
 							<FormItem>
 								<FormControl>
 									<div className="w-full border rounded-md min-h-96 grid overflow-hidden">
-										editor
-										{/* <SimpleEditor
-											content={field.value ?? ""}
-											onChange={field.onChange}
-										/> */}
+										<Editor />
 									</div>
 								</FormControl>
 								<FormMessage />

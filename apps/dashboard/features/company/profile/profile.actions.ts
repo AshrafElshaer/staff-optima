@@ -49,12 +49,11 @@ export const verifyDomainAction = authActionClient
 			throw new Error("Invalid verification token");
 		}
 
-		const updatedDomainVerification =
-			await domainService.updateVerification({
-				organization_id: domainVerification.organization_id,
-				verification_status: "verified",
-				verification_date: new Date().toISOString(),
-			});
+		const updatedDomainVerification = await domainService.updateVerification({
+			organization_id: domainVerification.organization_id,
+			verification_status: "verified",
+			verification_date: new Date().toISOString(),
+		});
 
 		await organizationService.updateOrganization({
 			id: domainVerification.organization_id,
