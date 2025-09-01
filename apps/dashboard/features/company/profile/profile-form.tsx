@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Editor } from "@optima/editor/src/index";
+import { Editor, useSlashCommand } from "@optima/editor/src/index";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import type { OrganizationRow } from "@optima/supabase/types";
 import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
@@ -10,6 +10,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@optima/ui/components/avatar";
+
 import { buttonVariants } from "@optima/ui/components/button";
 import {
 	type DropzoneOptions,
