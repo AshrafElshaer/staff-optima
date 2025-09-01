@@ -218,6 +218,10 @@
 	height: auto;
 	position: absolute;
 }
+.ProseMirror ul .is-empty::before,
+.ProseMirror ol .is-empty::before {
+	margin-left: 1.5rem;
+}
 .ProseMirror .is-editor-empty:first-child::before {
 	content: attr(data-placeholder);
 	float: left;
@@ -227,58 +231,82 @@
 	position: absolute;
 }
 
-ul[data-type="taskList"] li > label {
+.ProseMirror ul[data-type="taskList"] li > label {
 	margin-right: 0.2rem;
 	user-select: none;
 }
+.ProseMirror ul[data-type="taskList"] {
+	list-style: none !important;
+}
 
 @media screen and (max-width: 768px) {
-	ul[data-type="taskList"] li > label {
+	.ProseMirror ul[data-type="taskList"] li > label {
 		margin-right: 0.5rem;
 	}
 }
 
-ul[data-type="taskList"] li > label input[type="checkbox"] {
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
 	-webkit-appearance: none;
 	appearance: none;
-	background-color: hsl(var(--background));
-	margin: 0;
+	background-color: var(--color-accent);
+	border: 2px solid var(--color-border);
+	border-radius: 4px;
 	cursor: pointer;
-	width: 1.2em;
+	display: grid;
 	height: 1.2em;
+	margin: 0;
+	margin-right: 0.3rem;
+	place-content: center;
 	position: relative;
 	top: 5px;
-	border: 2px solid hsl(var(--border));
-	margin-right: 0.3rem;
-	display: grid;
-	place-content: center;
-
-	&:hover {
-		background-color: hsl(var(--accent));
-	}
-
-	&:active {
-		background-color: hsl(var(--accent));
-	}
-
-	&::before {
-		content: "";
-		width: 0.65em;
-		height: 0.65em;
-		transform: scale(0);
-		transition: 120ms transform ease-in-out;
-		box-shadow: inset 1em 1em;
-		transform-origin: center;
-		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-	}
-
-	&:checked::before {
-		transform: scale(1);
-	}
+	transition: background-color 150ms ease;
+	width: 1.2em;
 }
 
-ul[data-type="taskList"] li[data-checked="true"] > div > p {
-	color: var(--muted-foreground);
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]:hover {
+	background-color: var(--color-accent);
+}
+
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]:active {
+	background-color: var(--color-primary);
+}
+
+.ProseMirror
+	ul[data-type="taskList"]
+	li
+	> label
+	input[type="checkbox"]:checked {
+	background-color: var(--color-primary);
+}
+
+.ProseMirror
+	ul[data-type="taskList"]
+	li
+	> label
+	input[type="checkbox"]::before {
+	content: "";
+	width: 0.65em;
+	height: 0.65em;
+	transform: scale(0);
+	transition: 120ms transform ease-in-out;
+	box-shadow: inset 1em 1em white;
+	transform-origin: center;
+	clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.ProseMirror
+	ul[data-type="taskList"]
+	li
+	> label
+	input[type="checkbox"]:checked::before {
+	transform: scale(1);
+}
+.ProseMirror a {
+	color: var(--color-primary);
+}
+
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div > p {
+	color: var(--color-muted-foreground);
 	text-decoration: line-through;
 	text-decoration-thickness: 2px;
 }
@@ -299,6 +327,16 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 
 .slash-command-container {
 	z-index: 50;
+}
+
+.ProseMirror ul .is-empty::before,
+.ProseMirror ol .is-empty::before,
+.ProseMirror li .is-empty::before {
+	display: none;
+}
+
+.ProseMirror .not-prose::before {
+	display: none;
 }
 
 /* Heading styles */
@@ -339,16 +377,22 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 	@apply border-l-2 border-foreground pl-4;
 }
 
-.ProseMirror ul[data-type="bulletList"] {
-	@apply list-disc list-inside space-y-1;
-}
+@layer base {
+	.ProseMirror ul.not-prose {
+		list-style: disc !important;
+		padding-left: 1.5rem;
+	}
 
-.ProseMirror ol[data-type="orderedList"] {
-	@apply list-decimal list-inside space-y-1;
-}
+	.ProseMirror ol.not-prose {
+		list-style: decimal !important;
+		padding-left: 1.5rem;
+	}
 
-.ProseMirror li {
-	@apply space-y-1;
+	.ProseMirror li.not-prose {
+		display: list-item !important;
+		margin-left: 1rem;
+		@apply space-y-1;
+	}
 }
 
 .ProseMirror p {

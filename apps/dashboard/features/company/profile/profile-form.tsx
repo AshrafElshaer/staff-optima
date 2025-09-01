@@ -390,7 +390,7 @@ export function CompanyProfileForm({
 					<FormField
 						control={form.control}
 						name="profile"
-						render={({ field }) => (
+						render={({ field: _field }) => (
 							<FormItem>
 								<FormControl>
 									<div className="w-full border rounded-md min-h-96 grid overflow-hidden">

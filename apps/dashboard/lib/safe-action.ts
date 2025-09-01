@@ -2,7 +2,6 @@
 
 // import { setupAnalytics } from "@optima/analytics/server";
 import { ratelimit } from "@optima/kv/ratelimit";
-import logger from "@optima/logger";
 import { createServerClient } from "@optima/supabase/clients/server";
 import { headers } from "next/headers";
 // import * as Sentry from "@sentry/nextjs";
@@ -45,7 +44,7 @@ export const actionClientWithMeta = createSafeActionClient({
 });
 
 export const authActionClient = actionClientWithMeta
-	.use(async ({ next, clientInput, metadata }) => {
+	.use(async ({ next, clientInput: _clientInput, metadata: _metadata }) => {
 		const result = await next({
 			ctx: {
 				resend,
@@ -103,7 +102,7 @@ export const authActionClient = actionClientWithMeta
 			throw error;
 		}
 	})
-	.use(async ({ next, metadata }) => {
+	.use(async ({ next, metadata: _metadata }) => {
 		const session = await auth.api.getSession({
 			headers: await headers(),
 		});

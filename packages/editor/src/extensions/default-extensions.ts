@@ -99,22 +99,17 @@ const horizontalRule = HorizontalRule.configure({
 const starterKit = StarterKit.configure({
 	bulletList: {
 		HTMLAttributes: {
-			class: cn("list-disc list-outside leading-3 -mt-2"),
+			class: cn("!list-disc not-prose list-outside leading-3 -mt-2"),
 		},
 	},
 	orderedList: {
 		HTMLAttributes: {
-			class: cn("list-decimal list-outside leading-3 -mt-2"),
+			class: cn("!list-decimal not-prose list-outside leading-3 -mt-2"),
 		},
 	},
 	listItem: {
 		HTMLAttributes: {
-			class: cn("leading-normal -mb-2"),
-		},
-	},
-	blockquote: {
-		HTMLAttributes: {
-			class: cn("border-l-4 border-primary"),
+			class: cn("leading-normal not-prose -mb-2"),
 		},
 	},
 	codeBlock: {

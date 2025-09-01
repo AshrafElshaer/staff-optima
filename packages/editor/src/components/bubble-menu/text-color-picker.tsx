@@ -42,15 +42,6 @@ export function TextColorPicker({
 	editor,
 	onOpenChange,
 }: TextColorPickerProps) {
-	// Make active colors reactive to editor state changes
-	const activeColors = useMemo(
-		() => ({
-			textColor: editor.getAttributes("textStyle").color,
-			backgroundColor: editor.getAttributes("background").color,
-		}),
-		[editor.state.selection],
-	);
-
 	const [activeColorsState, setActiveColorsState] = useState<{
 		textColor: string;
 		backgroundColor: string;

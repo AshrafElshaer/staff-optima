@@ -412,7 +412,7 @@ export const auth = betterAuth({
 			async sendVerificationOTP({ email, otp, type }) {
 				const res = await resend.emails.send(
 					{
-						from: "Staff Optima <security@www.staffoptima.co>",
+						from: "Staff Optima <security@staffoptima.co>",
 						to: [email],
 						subject: "OTP Code for Staff Optima",
 						react: OtpEmail({

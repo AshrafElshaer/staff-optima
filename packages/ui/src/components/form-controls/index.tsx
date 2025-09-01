@@ -141,14 +141,16 @@ export function FormAddOnInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-					</FormLabel>
+					{label && (
+						<FormLabel htmlFor={name}>
+							{label}
+							{isOptional && (
+								<span className="text-muted-foreground text-sm">
+									( Optional )
+								</span>
+							)}
+						</FormLabel>
+					)}
 					<FormControl>
 						<InputWithAddOn
 							id={name}

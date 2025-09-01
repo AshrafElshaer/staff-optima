@@ -8,20 +8,12 @@ import {
 	useFloating,
 	useInteractions,
 } from "@floating-ui/react";
-import { Button } from "@optima/ui/components/button";
 import { Separator } from "@optima/ui/components/separator";
 import { Toggle } from "@optima/ui/components/toggle";
-import { type Editor, useCurrentEditor } from "@tiptap/react";
-import {
-	Bold,
-	Code,
-	Italic,
-	Link,
-	Strikethrough,
-	Underline,
-} from "lucide-react";
+import type { Editor } from "@tiptap/react";
+import { Bold, Code, Italic, Strikethrough, Underline } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LinkBubbleMenu } from "./link-bubble-menu";
+import { LinkPopover } from "./link-popover";
 import { NodeSelector } from "./node-selector";
 import { TextColorPicker } from "./text-color-picker";
 
@@ -30,53 +22,42 @@ interface FloatingBubbleMenuProps {
 }
 
 export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
-	const { selection } = editor.state;
 	const [isOpen, setIsOpen] = useState(false);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const virtualElement = useRef<{
-		getBoundingClientRect: () => DOMRect;
-	} | null>(null);
-
-	// Store the current selection when dropdown opens
 	const [storedSelection, setStoredSelection] = useState<
 		typeof editor.state.selection | null
 	>(null);
 
-	// Set up floating UI
+	const virtualElement = useRef<{
+		getBoundingClientRect: () => DOMRect;
+	} | null>(null);
+
+	// Floating UI setup
 	const { refs, floatingStyles, context } = useFloating({
 		open: isOpen,
 		onOpenChange: setIsOpen,
-		middleware: [
-			offset(8),
-			flip({
-				fallbackPlacements: [
-					"top",
-					"bottom",
-					"top-start",
-					"top-end",
-					"bottom-start",
-					"bottom-end",
-				],
-			}),
-			shift({ padding: 16 }),
-		],
+		middleware: [offset(8), flip(), shift({ padding: 8 })],
 		whileElementsMounted: autoUpdate,
 	});
 
 	const dismiss = useDismiss(context, {
-		enabled: !isDropdownOpen && selection.from !== selection.to, // Don't dismiss when dropdown is open or no selection
+		enabled: !isDropdownOpen,
 	});
-
 	const { getFloatingProps } = useInteractions([dismiss]);
 
-	// Update virtual element position based on selection
+	/** Update menu position based on selection */
 	const updatePosition = useCallback(() => {
 		if (!editor) return;
-
 		const { selection } = editor.state;
-		const { ranges } = selection;
-		const from = Math.min(...ranges.map((range) => range.$from.pos));
-		const to = Math.max(...ranges.map((range) => range.$to.pos));
+		const { ranges, empty } = selection;
+
+		if (empty) {
+			setIsOpen(false);
+			return;
+		}
+
+		const from = Math.min(...ranges.map((r) => r.$from.pos));
+		const to = Math.max(...ranges.map((r) => r.$to.pos));
 
 		if (from === to) {
 			setIsOpen(false);
@@ -86,7 +67,6 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 		const start = editor.view.coordsAtPos(from);
 		const end = editor.view.coordsAtPos(to);
 
-		// Create a virtual element representing the selection
 		virtualElement.current = {
 			getBoundingClientRect: () =>
 				({
@@ -101,44 +81,29 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 					toJSON: () => ({}),
 				}) as DOMRect,
 		};
-
 		refs.setReference(virtualElement.current);
 	}, [editor, refs]);
 
-	// Check if bubble menu should be visible
+	/** Should the menu show at all? */
 	const shouldShow = useCallback(() => {
 		if (!editor) return false;
-
 		const { selection } = editor.state;
-		const { empty } = selection;
 
-		// Always show if dropdown is open, even if selection changes
-		if (isDropdownOpen) {
-			return true;
-		}
-
-		// Don't show if selection is empty
-		if (empty) return false;
-
-		// Don't show if we're in a code block
+		if (isDropdownOpen) return true;
+		if (selection.empty) return false;
 		if (editor.isActive("codeBlock")) return false;
-
-		// Don't show for certain node types
-		const isInvalidNodeType =
-			editor.isActive("image") || editor.isActive("video");
-		if (isInvalidNodeType) return false;
+		if (editor.isActive("image") || editor.isActive("video")) return false;
 
 		return true;
 	}, [editor, isDropdownOpen]);
 
-	// Update position and visibility on selection change
+	/** Sync with editor events */
 	useEffect(() => {
 		if (!editor) return;
 
 		const handleSelectionUpdate = () => {
-			const show = shouldShow();
-
-			if (show) {
+			const visible = shouldShow();
+			if (visible) {
 				updatePosition();
 				setIsOpen(true);
 			} else {
@@ -146,28 +111,20 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 			}
 		};
 
-		// Initial check
-		handleSelectionUpdate();
-
-		// Listen to editor updates
 		editor.on("selectionUpdate", handleSelectionUpdate);
 		editor.on("transaction", handleSelectionUpdate);
 
-		// Handle editor blur to immediately clear selection and close menu
 		const handleBlur = () => {
-			// Only clear selection if no dropdown is open
 			if (!isDropdownOpen) {
-				// Clear the selection immediately when editor loses focus
 				setTimeout(() => {
-					if (!editor.isFocused) {
-						editor.commands.blur();
-						setIsOpen(false);
-					}
-				}, 0);
+					if (!editor.isFocused) setIsOpen(false);
+				}, 100);
 			}
 		};
-
 		editor.on("blur", handleBlur);
+
+		// Initial check
+		handleSelectionUpdate();
 
 		return () => {
 			editor.off("selectionUpdate", handleSelectionUpdate);
@@ -176,33 +133,23 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 		};
 	}, [editor, shouldShow, updatePosition, isDropdownOpen]);
 
-	// Handle dropdown state changes
+	/** Dropdown open/close behavior */
 	const handleDropdownOpenChange = useCallback(
 		(open: boolean) => {
 			if (open) {
-				// Store current selection when dropdown opens
 				setStoredSelection(editor.state.selection);
-				// Prevent the editor from losing focus
+			} else if (storedSelection) {
 				setTimeout(() => {
-					if (refs.floating.current) {
-						refs.floating.current.focus();
-					}
+					editor.commands.setTextSelection(storedSelection);
+					editor.commands.focus();
 				}, 0);
-			} else {
-				// Restore selection when dropdown closes
-				if (storedSelection) {
-					setTimeout(() => {
-						editor.commands.setTextSelection(storedSelection);
-						editor.commands.focus();
-					}, 0);
-				}
 			}
 			setIsDropdownOpen(open);
 		},
-		[editor, storedSelection, refs.floating],
+		[editor, storedSelection],
 	);
 
-	// Memoize formatting state for performance
+	/** Formatting state */
 	const formattingState = useMemo(
 		() => ({
 			bold: editor.isActive("bold"),
@@ -210,19 +157,15 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 			underline: editor.isActive("underline"),
 			strike: editor.isActive("strike"),
 			code: editor.isActive("code"),
-			link: editor.isActive("link"),
 		}),
 		[editor.state.selection],
 	);
 
-	// Handle keyboard shortcuts
+	/** Keyboard handlers */
 	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent) => {
-			if (!editor) return;
-
-			// Prevent bubbling for certain keys
-			if (event.key === "Escape") {
-				event.preventDefault();
+		(e: React.KeyboardEvent) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
 				setIsOpen(false);
 				editor.commands.focus();
 			}
@@ -230,46 +173,31 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 		[editor],
 	);
 
-	// Memoized toggle handlers
-	const toggleBold = useCallback(() => {
-		editor.chain().focus().toggleBold().run();
-	}, [editor]);
-
-	const toggleItalic = useCallback(() => {
-		editor.chain().focus().toggleItalic().run();
-	}, [editor]);
-
-	const toggleUnderline = useCallback(() => {
-		editor.chain().focus().toggleUnderline().run();
-	}, [editor]);
-
-	const toggleStrike = useCallback(() => {
-		editor.chain().focus().toggleStrike().run();
-	}, [editor]);
-
-	const toggleCode = useCallback(() => {
-		editor.chain().focus().toggleCode().run();
-	}, [editor]);
-
-	const handleLinkClick = useCallback(() => {
-		const url = window.prompt("Enter URL:");
-		if (url) {
-			editor.chain().focus().setLink({ href: url }).run();
-		}
-	}, [editor]);
-
-	if (!editor || !isOpen) {
-		return (
-			<>
-				{/* Separate Link Bubble Menu for editing existing links */}
-				<LinkBubbleMenu editor={editor} />
-			</>
-		);
-	}
+	// Formatting commands
+	const toggleBold = useCallback(
+		() => editor.chain().focus().toggleBold().run(),
+		[editor],
+	);
+	const toggleItalic = useCallback(
+		() => editor.chain().focus().toggleItalic().run(),
+		[editor],
+	);
+	const toggleUnderline = useCallback(
+		() => editor.chain().focus().toggleUnderline().run(),
+		[editor],
+	);
+	const toggleStrike = useCallback(
+		() => editor.chain().focus().toggleStrike().run(),
+		[editor],
+	);
+	const toggleCode = useCallback(
+		() => editor.chain().focus().toggleCode().run(),
+		[editor],
+	);
 
 	return (
-		<>
-			<FloatingPortal>
+		<FloatingPortal>
+			{isOpen && (
 				<div
 					ref={refs.setFloating}
 					style={floatingStyles}
@@ -278,19 +206,13 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 				>
 					<div
 						className="flex items-center gap-1 rounded-lg border bg-muted p-1 shadow-lg overflow-x-auto"
-						style={{
-							maxWidth: "calc(100vw - 32px)",
-						}}
+						style={{ maxWidth: "calc(100vw - 32px)" }}
 						onKeyDown={handleKeyDown}
 						role="toolbar"
 						aria-label="Text formatting options"
-						onMouseDown={(e) => {
-							// Prevent default for all interactions to maintain selection
-							e.preventDefault();
-							e.stopPropagation();
-						}}
+						onMouseDown={(e) => e.preventDefault()}
 					>
-						{/* Node Type Selector */}
+						{/* Node type */}
 						<NodeSelector
 							editor={editor}
 							onOpenChange={handleDropdownOpenChange}
@@ -298,55 +220,45 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 
 						<Separator orientation="vertical" className="h-6" />
 
-						{/* Basic Formatting */}
+						{/* Text styles */}
 						<fieldset className="flex items-center" aria-label="Text style">
 							<Toggle
 								size="sm"
 								pressed={formattingState.bold}
 								onPressedChange={toggleBold}
 								aria-label="Bold (Ctrl+B)"
-								title="Bold (Ctrl+B)"
-								onMouseDown={(e) => e.stopPropagation()}
 							>
 								<Bold className="size-4" />
 							</Toggle>
-
 							<Toggle
 								size="sm"
 								pressed={formattingState.italic}
 								onPressedChange={toggleItalic}
 								aria-label="Italic (Ctrl+I)"
-								title="Italic (Ctrl+I)"
 							>
 								<Italic className="size-4" />
 							</Toggle>
-
 							<Toggle
 								size="sm"
 								pressed={formattingState.underline}
 								onPressedChange={toggleUnderline}
 								aria-label="Underline (Ctrl+U)"
-								title="Underline (Ctrl+U)"
 							>
 								<Underline className="size-4" />
 							</Toggle>
-
 							<Toggle
 								size="sm"
 								pressed={formattingState.strike}
 								onPressedChange={toggleStrike}
 								aria-label="Strikethrough"
-								title="Strikethrough"
 							>
 								<Strikethrough className="size-4" />
 							</Toggle>
-
 							<Toggle
 								size="sm"
 								pressed={formattingState.code}
 								onPressedChange={toggleCode}
 								aria-label="Inline code"
-								title="Inline code"
 							>
 								<Code className="size-4" />
 							</Toggle>
@@ -354,7 +266,6 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 
 						<Separator orientation="vertical" className="h-6" />
 
-						{/* Text Color */}
 						<TextColorPicker
 							editor={editor}
 							onOpenChange={handleDropdownOpenChange}
@@ -362,23 +273,13 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 
 						<Separator orientation="vertical" className="h-6" />
 
-						{/* Link */}
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={handleLinkClick}
-							className={formattingState.link ? "bg-accent" : ""}
-							aria-label="Add or edit link"
-							title="Add or edit link"
-						>
-							<Link className="size-4" />
-						</Button>
+						<LinkPopover
+							editor={editor}
+							onOpenChange={handleDropdownOpenChange}
+						/>
 					</div>
 				</div>
-			</FloatingPortal>
-
-			{/* Separate Link Bubble Menu for editing existing links */}
-			<LinkBubbleMenu editor={editor} />
-		</>
+			)}
+		</FloatingPortal>
 	);
 }

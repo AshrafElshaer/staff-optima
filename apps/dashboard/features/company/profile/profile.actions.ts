@@ -79,7 +79,7 @@ export const sendDomainVerificationEmailAction = authActionClient
 		const { domainVerification, sendTo } = parsedInput;
 
 		const { error } = await resend.emails.send({
-			from: "Staff Optima <support@www.staffoptima.co>",
+			from: "Staff Optima <support@staffoptima.co>",
 			to: sendTo,
 			subject: "Domain Verification",
 			react: DnsVerificationEmail({
