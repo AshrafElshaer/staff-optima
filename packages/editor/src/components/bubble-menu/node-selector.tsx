@@ -20,7 +20,7 @@ import {
 	Quote,
 	Text,
 } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface NodeSelectorProps {
 	editor: Editor;
@@ -36,6 +36,28 @@ interface NodeOption {
 }
 
 export function NodeSelector({ editor, onOpenChange }: NodeSelectorProps) {
+	// Add state to track editor updates
+	const [editorState, setEditorState] = useState(0);
+
+	// Listen to editor state changes
+	useEffect(() => {
+		if (!editor) return;
+
+		const handleUpdate = () => {
+			setEditorState((prev) => prev + 1);
+		};
+
+		editor.on("selectionUpdate", handleUpdate);
+		editor.on("transaction", handleUpdate);
+
+		return () => {
+			if (!editor.isDestroyed) {
+				editor.off("selectionUpdate", handleUpdate);
+				editor.off("transaction", handleUpdate);
+			}
+		};
+	}, [editor]);
+
 	const options: NodeOption[] = useMemo(
 		() => [
 			{
@@ -104,7 +126,7 @@ export function NodeSelector({ editor, onOpenChange }: NodeSelectorProps) {
 
 	const activeItem = useMemo(
 		() => options.find((option) => option.isActive()) ?? options[0],
-		[options, editor],
+		[options, editorState], // Now depends on editorState which updates when editor state changes
 	);
 
 	const handleItemSelect = useCallback((option: NodeOption) => {

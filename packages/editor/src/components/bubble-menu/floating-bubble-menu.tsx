@@ -1,285 +1,311 @@
-import {
-	autoUpdate,
-	FloatingPortal,
-	flip,
-	offset,
-	shift,
-	useDismiss,
-	useFloating,
-	useInteractions,
-} from "@floating-ui/react";
+"use client";
+
 import { Separator } from "@optima/ui/components/separator";
 import { Toggle } from "@optima/ui/components/toggle";
 import type { Editor } from "@tiptap/react";
-import { Bold, Code, Italic, Strikethrough, Underline } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useComposedRef } from "@udecode/cn";
+import {
+	Bold,
+	Code,
+	Italic,
+	PaintBucket,
+	Palette,
+	Strikethrough,
+	Underline,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { useFloatingToolbar } from "../../hooks/use-floating-toolbar";
+import { useFloatingToolbarState } from "../../hooks/use-floating-toolbar-state";
+import { Toolbar, ToolbarButton } from "../toolbar";
 import { LinkPopover } from "./link-popover";
 import { NodeSelector } from "./node-selector";
-import { TextColorPicker } from "./text-color-picker";
+import { FontColorToolbarButton } from "./text-color-picker";
 
 interface FloatingBubbleMenuProps {
 	editor: Editor;
 }
 
 export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 	const [storedSelection, setStoredSelection] = useState<
 		typeof editor.state.selection | null
 	>(null);
 
-	const virtualElement = useRef<{
-		getBoundingClientRect: () => DOMRect;
-	} | null>(null);
-
-	// Floating UI setup
-	const { refs, floatingStyles, context } = useFloating({
-		open: isOpen,
-		onOpenChange: setIsOpen,
-		middleware: [offset(8), flip(), shift({ padding: 8 })],
-		whileElementsMounted: autoUpdate,
-	});
-
-	const dismiss = useDismiss(context, {
-		enabled: !isDropdownOpen,
-	});
-	const { getFloatingProps } = useInteractions([dismiss]);
-
-	/** Update menu position based on selection */
-	const updatePosition = useCallback(() => {
-		if (!editor) return;
-		const { selection } = editor.state;
-		const { ranges, empty } = selection;
-
-		if (empty) {
-			setIsOpen(false);
-			return;
+	/** Safe editor state check */
+	const isEditorValid = useCallback(() => {
+		try {
+			return !!(
+				editor &&
+				!editor.isDestroyed &&
+				editor.state &&
+				editor.view &&
+				editor.view.dom
+			);
+		} catch (error) {
+			console.warn("Error checking editor validity:", error);
+			return false;
 		}
+	}, [editor]);
 
-		const from = Math.min(...ranges.map((r) => r.$from.pos));
-		const to = Math.max(...ranges.map((r) => r.$to.pos));
-
-		if (from === to) {
-			setIsOpen(false);
-			return;
-		}
-
-		const start = editor.view.coordsAtPos(from);
-		const end = editor.view.coordsAtPos(to);
-
-		virtualElement.current = {
-			getBoundingClientRect: () =>
-				({
-					x: start.left,
-					y: start.top,
-					width: end.right - start.left,
-					height: end.bottom - start.top,
-					top: start.top,
-					right: end.right,
-					bottom: end.bottom,
-					left: start.left,
-					toJSON: () => ({}),
-				}) as DOMRect,
-		};
-		refs.setReference(virtualElement.current);
-	}, [editor, refs]);
-
-	/** Should the menu show at all? */
-	const shouldShow = useCallback(() => {
-		if (!editor) return false;
-		const { selection } = editor.state;
-
-		if (isDropdownOpen) return true;
-		if (selection.empty) return false;
-		if (editor.isActive("codeBlock")) return false;
-		if (editor.isActive("image") || editor.isActive("video")) return false;
-
-		return true;
-	}, [editor, isDropdownOpen]);
-
-	/** Sync with editor events */
-	useEffect(() => {
-		if (!editor) return;
-
-		const handleSelectionUpdate = () => {
-			const visible = shouldShow();
-			if (visible) {
-				updatePosition();
-				setIsOpen(true);
-			} else {
-				setIsOpen(false);
-			}
-		};
-
-		editor.on("selectionUpdate", handleSelectionUpdate);
-		editor.on("transaction", handleSelectionUpdate);
-
-		const handleBlur = () => {
-			if (!isDropdownOpen) {
-				setTimeout(() => {
-					if (!editor.isFocused) setIsOpen(false);
-				}, 100);
-			}
-		};
-		editor.on("blur", handleBlur);
-
-		// Initial check
-		handleSelectionUpdate();
-
-		return () => {
-			editor.off("selectionUpdate", handleSelectionUpdate);
-			editor.off("transaction", handleSelectionUpdate);
-			editor.off("blur", handleBlur);
-		};
-	}, [editor, shouldShow, updatePosition, isDropdownOpen]);
-
-	/** Dropdown open/close behavior */
-	const handleDropdownOpenChange = useCallback(
+	/** Popover open/close behavior with error handling */
+	const handlePopoverOpenChange = useCallback(
 		(open: boolean) => {
-			if (open) {
-				setStoredSelection(editor.state.selection);
-			} else if (storedSelection) {
-				setTimeout(() => {
-					editor.commands.setTextSelection(storedSelection);
-					editor.commands.focus();
-				}, 0);
+			try {
+				if (open && isEditorValid()) {
+					// Store current selection when opening popover
+					setStoredSelection(editor.state.selection);
+				} else if (!open && storedSelection && isEditorValid()) {
+					// Restore selection when closing popover
+					setTimeout(() => {
+						try {
+							if (isEditorValid() && storedSelection) {
+								editor.commands.setTextSelection(storedSelection);
+								editor.commands.focus();
+								// Clear stored selection after restoring
+								setStoredSelection(null);
+							}
+						} catch (error) {
+							console.warn("Error restoring selection:", error);
+						}
+					}, 10); // Shorter delay for better UX
+				}
+				setIsPopoverOpen(open);
+			} catch (error) {
+				console.warn("Error handling popover state change:", error);
+				setIsPopoverOpen(false);
 			}
-			setIsDropdownOpen(open);
 		},
-		[editor, storedSelection],
+		[editor, storedSelection, isEditorValid],
 	);
 
-	/** Formatting state */
-	const formattingState = useMemo(
-		() => ({
-			bold: editor.isActive("bold"),
-			italic: editor.isActive("italic"),
-			underline: editor.isActive("underline"),
-			strike: editor.isActive("strike"),
-			code: editor.isActive("code"),
-		}),
-		[editor.state.selection],
+	// Custom floating toolbar state
+	const floatingToolbarState = useFloatingToolbarState({
+		editor,
+		hideToolbar: isPopoverOpen,
+		placement: "top",
+		offset: 12,
+		padding: 12,
+	});
+
+	const {
+		hidden,
+		props: rootProps,
+		refs,
+		floatingStyles,
+	} = useFloatingToolbar({
+		state: floatingToolbarState,
+		onOpenChange: (open) => {
+			// Handle floating toolbar open/close
+			if (!open && !isPopoverOpen) {
+				// Only fully close if no popovers are open
+				setStoredSelection(null);
+			}
+		},
+	});
+
+	const ref = useComposedRef<HTMLDivElement>(refs.setFloating);
+
+	/** Formatting state with error handling */
+	const formattingState = useMemo(() => {
+		if (!isEditorValid()) {
+			return {
+				bold: false,
+				italic: false,
+				underline: false,
+				strike: false,
+				code: false,
+			};
+		}
+
+		try {
+			return {
+				bold: editor.isActive("bold"),
+				italic: editor.isActive("italic"),
+				underline: editor.isActive("underline"),
+				strike: editor.isActive("strike"),
+				code: editor.isActive("code"),
+			};
+		} catch (error) {
+			console.warn("Error getting formatting state:", error);
+			return {
+				bold: false,
+				italic: false,
+				underline: false,
+				strike: false,
+				code: false,
+			};
+		}
+	}, [editor.state.selection, isEditorValid]);
+
+	/** Safe formatting commands */
+	const createSafeToggleCommand = useCallback(
+		(command: string) => () => {
+			if (!isEditorValid()) return;
+
+			try {
+				switch (command) {
+					case "bold":
+						editor.chain().focus().toggleBold().run();
+						break;
+					case "italic":
+						editor.chain().focus().toggleItalic().run();
+						break;
+					case "underline":
+						editor.chain().focus().toggleUnderline().run();
+						break;
+					case "strike":
+						editor.chain().focus().toggleStrike().run();
+						break;
+					case "code":
+						editor.chain().focus().toggleCode().run();
+						break;
+					default:
+						console.warn(`Unknown formatting command: ${command}`);
+				}
+			} catch (error) {
+				console.warn(`Error executing ${command} command:`, error);
+			}
+		},
+		[editor, isEditorValid],
 	);
+
+	const toggleBold = createSafeToggleCommand("bold");
+	const toggleItalic = createSafeToggleCommand("italic");
+	const toggleUnderline = createSafeToggleCommand("underline");
+	const toggleStrike = createSafeToggleCommand("strike");
+	const toggleCode = createSafeToggleCommand("code");
 
 	/** Keyboard handlers */
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (e.key === "Escape") {
-				e.preventDefault();
-				setIsOpen(false);
-				editor.commands.focus();
+			try {
+				if (e.key === "Escape") {
+					e.preventDefault();
+					if (isEditorValid()) {
+						editor.commands.focus();
+					}
+				}
+			} catch (error) {
+				console.warn("Error handling keyboard event:", error);
 			}
 		},
-		[editor],
+		[editor, isEditorValid],
 	);
 
-	// Formatting commands
-	const toggleBold = useCallback(
-		() => editor.chain().focus().toggleBold().run(),
-		[editor],
-	);
-	const toggleItalic = useCallback(
-		() => editor.chain().focus().toggleItalic().run(),
-		[editor],
-	);
-	const toggleUnderline = useCallback(
-		() => editor.chain().focus().toggleUnderline().run(),
-		[editor],
-	);
-	const toggleStrike = useCallback(
-		() => editor.chain().focus().toggleStrike().run(),
-		[editor],
-	);
-	const toggleCode = useCallback(
-		() => editor.chain().focus().toggleCode().run(),
-		[editor],
-	);
+	// Don't render if hidden or editor is invalid
+	if (hidden || !isEditorValid()) {
+		return null;
+	}
 
 	return (
-		<FloatingPortal>
-			{isOpen && (
-				<div
-					ref={refs.setFloating}
-					style={floatingStyles}
-					className="z-[9999]"
-					{...getFloatingProps()}
-				>
-					<div
-						className="flex items-center gap-1 rounded-lg border bg-muted p-1 shadow-lg overflow-x-auto"
-						style={{ maxWidth: "calc(100vw - 32px)" }}
-						onKeyDown={handleKeyDown}
-						role="toolbar"
-						aria-label="Text formatting options"
-						onMouseDown={(e) => e.preventDefault()}
-					>
-						{/* Node type */}
-						<NodeSelector
-							editor={editor}
-							onOpenChange={handleDropdownOpenChange}
-						/>
-
-						<Separator orientation="vertical" className="h-6" />
-
-						{/* Text styles */}
-						<fieldset className="flex items-center" aria-label="Text style">
-							<Toggle
-								size="sm"
-								pressed={formattingState.bold}
-								onPressedChange={toggleBold}
-								aria-label="Bold (Ctrl+B)"
-							>
-								<Bold className="size-4" />
-							</Toggle>
-							<Toggle
-								size="sm"
-								pressed={formattingState.italic}
-								onPressedChange={toggleItalic}
-								aria-label="Italic (Ctrl+I)"
-							>
-								<Italic className="size-4" />
-							</Toggle>
-							<Toggle
-								size="sm"
-								pressed={formattingState.underline}
-								onPressedChange={toggleUnderline}
-								aria-label="Underline (Ctrl+U)"
-							>
-								<Underline className="size-4" />
-							</Toggle>
-							<Toggle
-								size="sm"
-								pressed={formattingState.strike}
-								onPressedChange={toggleStrike}
-								aria-label="Strikethrough"
-							>
-								<Strikethrough className="size-4" />
-							</Toggle>
-							<Toggle
-								size="sm"
-								pressed={formattingState.code}
-								onPressedChange={toggleCode}
-								aria-label="Inline code"
-							>
-								<Code className="size-4" />
-							</Toggle>
-						</fieldset>
-
-						<Separator orientation="vertical" className="h-6" />
-
-						<TextColorPicker
-							editor={editor}
-							onOpenChange={handleDropdownOpenChange}
-						/>
-
-						<Separator orientation="vertical" className="h-6" />
-
-						<LinkPopover
-							editor={editor}
-							onOpenChange={handleDropdownOpenChange}
-						/>
-					</div>
+		<Toolbar
+			{...rootProps}
+			ref={ref}
+			style={floatingStyles}
+			className="flex items-center gap-1 rounded-lg border bg-muted p-1 shadow-lg"
+		>
+			<div
+				className="flex items-center gap-1 rounded-lg overflow-x-auto scrollbar-hide"
+				style={{ maxWidth: "calc(100vw - 40px)" }}
+				onKeyDown={handleKeyDown}
+				role="toolbar"
+				aria-label="Text formatting options"
+				onMouseDown={(e) => e.preventDefault()}
+			>
+				{/* Node type */}
+				<div className="flex-shrink-0">
+					<NodeSelector
+						editor={editor}
+						onOpenChange={handlePopoverOpenChange}
+					/>
 				</div>
-			)}
-		</FloatingPortal>
+
+				<Separator orientation="vertical" className="h-6 flex-shrink-0" />
+
+				{/* Text styles */}
+				<fieldset
+					className="flex items-center flex-shrink-0"
+					aria-label="Text style"
+				>
+					<ToolbarButton
+						size="sm"
+						pressed={formattingState.bold}
+						onClick={toggleBold}
+						aria-label="Bold (Ctrl+B)"
+						tooltip="Bold"
+						disabled={!isEditorValid()}
+					>
+						<Bold className="size-4" />
+					</ToolbarButton>
+					<ToolbarButton
+						size="sm"
+						pressed={formattingState.italic}
+						onClick={toggleItalic}
+						tooltip="Italic"
+						aria-label="Italic (Ctrl+I)"
+						disabled={!isEditorValid()}
+					>
+						<Italic className="size-4" />
+					</ToolbarButton>
+					<ToolbarButton
+						size="sm"
+						pressed={formattingState.underline}
+						onClick={toggleUnderline}
+						tooltip="Underline"
+						aria-label="Underline (Ctrl+U)"
+						disabled={!isEditorValid()}
+					>
+						<Underline className="size-4" />
+					</ToolbarButton>
+					<ToolbarButton
+						size="sm"
+						pressed={formattingState.strike}
+						onClick={toggleStrike}
+						tooltip="Strikethrough"
+						aria-label="Strikethrough"
+						disabled={!isEditorValid()}
+					>
+						<Strikethrough className="size-4" />
+					</ToolbarButton>
+					<ToolbarButton
+						size="sm"
+						pressed={formattingState.code}
+						onClick={toggleCode}
+						aria-label="Inline code"
+						tooltip="Inline code"
+						disabled={!isEditorValid()}
+					>
+						<Code className="size-4" />
+					</ToolbarButton>
+				</fieldset>
+
+				<Separator orientation="vertical" className="h-6 flex-shrink-0" />
+
+				<div className="flex items-center gap-1 flex-shrink-0">
+					<FontColorToolbarButton
+						editor={editor}
+						nodeType="color"
+						tooltip="Text Color"
+						onOpenChange={handlePopoverOpenChange}
+					>
+						<Palette className="size-4" />
+					</FontColorToolbarButton>
+					<FontColorToolbarButton
+						editor={editor}
+						nodeType="backgroundColor"
+						tooltip="Background Color"
+						onOpenChange={handlePopoverOpenChange}
+					>
+						<PaintBucket className="size-4" />
+					</FontColorToolbarButton>
+				</div>
+
+				<Separator orientation="vertical" className="h-6 flex-shrink-0" />
+
+				<div className="flex-shrink-0">
+					<LinkPopover editor={editor} onOpenChange={handlePopoverOpenChange} />
+				</div>
+			</div>
+		</Toolbar>
 	);
 }

@@ -1,160 +1,808 @@
-import { Button } from "@optima/ui/components/button";
+"use client";
+
+import { buttonVariants } from "@optima/ui/components/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuLabel,
-	DropdownMenuTrigger,
-} from "@optima/ui/components/dropdown-menu";
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@optima/ui/components/popover";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@optima/ui/components/tooltip";
+import { cn } from "@optima/ui/lib/utils";
 import type { Editor } from "@tiptap/react";
-import { Palette } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import debounce from "lodash/debounce.js";
+import { EraserIcon } from "lucide-react";
+import React from "react";
 
-interface TextColorPickerProps {
-	editor: Editor;
-	onOpenChange?: (open: boolean) => void;
-}
+import { ToolbarButton, ToolbarMenuGroup } from "../toolbar";
 
-const colors = [
-	{ name: "Default", value: "", class: "text-foreground" },
-	{ name: "Gray", value: "#6B7280", class: "text-gray-500" },
-	{ name: "Red", value: "#EF4444", class: "text-red-500" },
-	{ name: "Orange", value: "#F97316", class: "text-orange-500" },
-	{ name: "Yellow", value: "#EAB308", class: "text-yellow-500" },
-	{ name: "Green", value: "#22C55E", class: "text-green-500" },
-	{ name: "Blue", value: "#3B82F6", class: "text-blue-500" },
-	{ name: "Purple", value: "#A855F7", class: "text-purple-500" },
-	{ name: "Pink", value: "#EC4899", class: "text-pink-500" },
-];
-
-const backgroundColors = [
-	{ name: "Default", value: "", class: "bg-transparent" },
-	{ name: "Gray", value: "#6B7280", class: "bg-gray-500" },
-	{ name: "Red", value: "#EF4444", class: "bg-red-500" },
-	{ name: "Orange", value: "#F97316", class: "bg-orange-500" },
-	{ name: "Yellow", value: "#EAB308", class: "bg-yellow-500" },
-	{ name: "Green", value: "#22C55E", class: "bg-green-500" },
-	{ name: "Blue", value: "#3B82F6", class: "bg-blue-500" },
-	{ name: "Purple", value: "#A855F7", class: "bg-purple-500" },
-	{ name: "Pink", value: "#EC4899", class: "bg-pink-500" },
-];
-
-export function TextColorPicker({
+export function FontColorToolbarButton({
+	children,
+	nodeType,
+	tooltip,
 	editor,
 	onOpenChange,
-}: TextColorPickerProps) {
-	const [activeColorsState, setActiveColorsState] = useState<{
-		textColor: string;
-		backgroundColor: string;
-	}>({
-		textColor: editor.getAttributes("textStyle").color,
-		backgroundColor: editor.getAttributes("background").color,
-	});
-	const setTextColor = useCallback(
-		(color: string) => {
-			if (color === "") {
-				setActiveColorsState((prev) => ({ ...prev, textColor: "" }));
+	...popoverProps
+}: {
+	nodeType: string;
+	tooltip?: string;
+	editor: Editor;
+	onOpenChange?: (open: boolean) => void;
+} & React.ComponentProps<typeof Popover>) {
+	const selectionDefined = React.useMemo(
+		() => !!editor?.state?.selection && !editor.state.selection.empty,
+		[editor?.state?.selection],
+	);
+
+	const color = React.useMemo(() => {
+		if (!editor || !nodeType) return "";
+
+		try {
+			const attributes = editor.getAttributes("textStyle");
+			return nodeType === "color"
+				? attributes.color || ""
+				: attributes.backgroundColor || "";
+		} catch (error) {
+			console.warn("Error getting color attributes:", error);
+			return "";
+		}
+	}, [editor, nodeType]);
+
+	const [selectedColor, setSelectedColor] = React.useState<string>("");
+	const [open, setOpen] = React.useState(false);
+
+	const onToggle = React.useCallback(
+		(value: boolean) => {
+			setOpen(value);
+			// Notify parent (floating bubble menu) about dropdown state change
+			onOpenChange?.(value);
+		},
+		[open, setOpen, onOpenChange],
+	);
+
+	const updateColor = React.useCallback(
+		(value: string) => {
+			if (!editor || !editor.state.selection) return;
+
+			try {
+				setSelectedColor(value);
+
+				if (nodeType === "color") {
+					if (value) {
+						editor.chain().focus().setColor(value).run();
+					} else {
+						editor.chain().focus().unsetColor().run();
+					}
+				} else if (nodeType === "backgroundColor") {
+					if (value) {
+						editor.chain().focus().setHighlight({ color: value }).run();
+					} else {
+						editor.chain().focus().unsetHighlight().run();
+					}
+				}
+			} catch (error) {
+				console.warn("Error updating color:", error);
+			}
+		},
+		[editor, nodeType],
+	);
+
+	const updateColorAndClose = React.useCallback(
+		(value: string) => {
+			updateColor(value);
+			onToggle(false);
+		},
+		[onToggle, updateColor],
+	);
+
+	const clearColor = React.useCallback(() => {
+		if (!editor || !editor.state.selection) return;
+
+		try {
+			if (nodeType === "color") {
 				editor.chain().focus().unsetColor().run();
-			} else {
-				setActiveColorsState((prev) => ({ ...prev, textColor: color }));
-				editor.chain().focus().setColor(color).run();
+			} else if (nodeType === "backgroundColor") {
+				editor.chain().focus().unsetHighlight().run();
 			}
-		},
-		[editor],
-	);
 
-	const setBackgroundColor = useCallback(
-		(color: string) => {
-			if (color === "") {
-				setActiveColorsState((prev) => ({ ...prev, backgroundColor: "" }));
-				editor.chain().focus().unsetBackgroundColor().run();
-			} else {
-				setActiveColorsState((prev) => ({ ...prev, backgroundColor: color }));
-				editor.chain().focus().setBackgroundColor(color).run();
-			}
-		},
-		[editor],
-	);
+			setSelectedColor("");
+			onToggle(false);
+		} catch (error) {
+			console.warn("Error clearing color:", error);
+		}
+	}, [editor, nodeType, onToggle]);
 
-	if (!editor) {
+	React.useEffect(() => {
+		if (selectionDefined && color !== selectedColor) {
+			setSelectedColor(color);
+		}
+	}, [color, selectionDefined, selectedColor]);
+
+	if (!editor || editor.isDestroyed) {
 		return null;
 	}
 
 	return (
-		<DropdownMenu onOpenChange={onOpenChange}>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					aria-label="Text color"
-					title="Text color"
-				>
-					<Palette className="size-4" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				className="w-48"
-				side="bottom"
-				sideOffset={8}
-				align="end"
-				avoidCollisions={true}
+		<Popover open={open} onOpenChange={onToggle} {...popoverProps}>
+			<PopoverTrigger asChild>
+				<ToolbarButton pressed={open} tooltip={tooltip}>
+					{children}
+				</ToolbarButton>
+			</PopoverTrigger>
+
+			<PopoverContent
+				align="start"
 				onCloseAutoFocus={(e) => e.preventDefault()}
-				style={{ zIndex: 9999 }}
+				onInteractOutside={(e) => {
+					// Prevent closing when clicking inside the color picker
+					const target = e.target as Element;
+					if (target.closest("[data-radix-popover-content]")) {
+						e.preventDefault();
+					}
+				}}
+				onMouseDown={(e) => e.stopPropagation()}
+				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="p-2 space-y-2">
-					<DropdownMenuLabel className="px-0 text-muted-foreground flex items-center justify-between">
-						Text Color{" "}
-						<div
-							className="size-3 rounded-sm"
-							style={{ backgroundColor: activeColorsState.textColor }}
-						/>
-					</DropdownMenuLabel>
-
-					<div className="flex flex-wrap gap-2">
-						{colors.map((color) => (
-							<button
-								key={color.name}
-								type="button"
-								onClick={() => setTextColor(color.value)}
-								className="flex size-6 rounded items-center justify-center border hover:bg-accent"
-								style={{
-									backgroundColor: color.value || "currentColor",
-									opacity: 0.8,
-									borderColor: color.value || "currentColor",
-									borderWidth: 1,
-								}}
-								title={color.name}
-								aria-label={`Set text color to ${color.name}`}
-							/>
-						))}
-					</div>
-
-					<DropdownMenuLabel className="px-0 text-muted-foreground flex items-center justify-between">
-						Background Color{" "}
-						<div
-							className="size-3 rounded-sm"
-							style={{ backgroundColor: activeColorsState.backgroundColor }}
-						/>
-					</DropdownMenuLabel>
-					<div className="flex flex-wrap gap-2">
-						{backgroundColors.map((color) => (
-							<button
-								key={color.name}
-								type="button"
-								onClick={() => setBackgroundColor(color.value)}
-								className="flex size-6 rounded items-center justify-center border hover:bg-accent"
-								style={{
-									backgroundColor: color.value,
-									opacity: 0.8,
-									borderColor: color.value,
-									borderWidth: 1,
-								}}
-								title={color.name}
-								aria-label={`Set background color to ${color.name}`}
-							/>
-						))}
-					</div>
-				</div>
-			</DropdownMenuContent>
-		</DropdownMenu>
+				<ColorPicker
+					color={selectedColor || color}
+					clearColor={clearColor}
+					colors={DEFAULT_COLORS}
+					customColors={DEFAULT_CUSTOM_COLORS}
+					updateColor={updateColorAndClose}
+					updateCustomColor={updateColor}
+				/>
+			</PopoverContent>
+		</Popover>
 	);
 }
+
+function PureColorPicker({
+	className,
+	clearColor,
+	color,
+	colors,
+	customColors,
+	updateColor,
+	updateCustomColor,
+	...props
+}: React.ComponentProps<"div"> & {
+	colors: TColor[];
+	customColors: TColor[];
+	clearColor: () => void;
+	updateColor: (color: string) => void;
+	updateCustomColor: (color: string) => void;
+	color?: string;
+}) {
+	return (
+		<div className={cn("flex flex-col", className)} {...props}>
+			<ToolbarMenuGroup label="Custom Colors">
+				<ColorCustom
+					clearColor={clearColor}
+					color={color}
+					className="px-2"
+					colors={colors}
+					customColors={customColors}
+					updateColor={updateColor}
+					updateCustomColor={updateCustomColor}
+				/>
+			</ToolbarMenuGroup>
+			<ToolbarMenuGroup label="Default Colors">
+				<ColorItems
+					color={color}
+					className="px-2"
+					colors={colors}
+					updateColor={updateColor}
+				/>
+			</ToolbarMenuGroup>
+		</div>
+	);
+}
+
+const ColorPicker = React.memo(
+	PureColorPicker,
+	(prev, next) =>
+		prev.color === next.color &&
+		prev.colors === next.colors &&
+		prev.customColors === next.customColors,
+);
+
+function ColorCustom({
+	className,
+	color,
+	colors,
+	customColors,
+	updateColor,
+	updateCustomColor,
+	clearColor,
+	...props
+}: {
+	colors: TColor[];
+	customColors: TColor[];
+	updateColor: (color: string) => void;
+	updateCustomColor: (color: string) => void;
+	color?: string;
+	clearColor: () => void;
+} & React.ComponentPropsWithoutRef<"div">) {
+	const [customColor, setCustomColor] = React.useState<string>();
+	const [value, setValue] = React.useState<string>(color || "#000000");
+
+	React.useEffect(() => {
+		if (
+			!color ||
+			customColors.some((c) => c.value === color) ||
+			colors.some((c) => c.value === color)
+		) {
+			return;
+		}
+
+		setCustomColor(color);
+	}, [color, colors, customColors]);
+
+	const computedColors = React.useMemo(
+		() =>
+			customColor
+				? [
+						...customColors,
+						{
+							isBrightColor: false,
+							name: "",
+							value: customColor,
+						},
+					]
+				: customColors,
+		[customColor, customColors],
+	);
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const updateCustomColorDebounced = React.useCallback(
+		debounce(updateCustomColor, 100),
+		[updateCustomColor],
+	);
+
+	return (
+		<div className={cn("relative flex flex-col gap-4", className)} {...props}>
+			<ColorItems
+				color={color}
+				colors={computedColors}
+				updateColor={updateColor}
+			>
+				<ToolbarButton
+					className="ml-auto rounded-full"
+					tooltip="Clear"
+					onClick={clearColor}
+				>
+					<span className="rounded-full">
+						<EraserIcon className="size-4" />
+					</span>
+				</ToolbarButton>
+			</ColorItems>
+		</div>
+	);
+}
+
+type TColor = {
+	isBrightColor: boolean;
+	name: string;
+	value: string;
+};
+
+function ColorItem({
+	className,
+	isBrightColor,
+	isSelected,
+	name,
+	updateColor,
+	value,
+	...props
+}: {
+	isBrightColor: boolean;
+	isSelected: boolean;
+	value: string;
+	updateColor: (color: string) => void;
+	name?: string;
+} & React.ComponentProps<"button">) {
+	const content = (
+		<button
+			className={cn(
+				buttonVariants({
+					size: "icon",
+					variant: "outline",
+				}),
+				"my-1 flex size-6 items-center justify-center rounded-full border border-solid border-muted p-0 transition-all hover:scale-125",
+				!isBrightColor && "border-transparent",
+				isSelected && "border-2 border-primary",
+				className,
+			)}
+			style={{ backgroundColor: value }}
+			onClick={(e) => {
+				e.preventDefault();
+				updateColor(value);
+			}}
+			type="button"
+			{...props}
+		/>
+	);
+
+	return name ? (
+		<Tooltip>
+			<TooltipTrigger asChild>{content}</TooltipTrigger>
+			<TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
+		</Tooltip>
+	) : (
+		content
+	);
+}
+
+export function ColorItems({
+	className,
+	color,
+	colors,
+	updateColor,
+	...props
+}: {
+	colors: TColor[];
+	updateColor: (color: string) => void;
+	color?: string;
+} & React.ComponentProps<"div">) {
+	return (
+		<div
+			className={cn("flex flex-wrap gap-1 justify-start", className)}
+			{...props}
+		>
+			<TooltipProvider>
+				{colors.map(({ isBrightColor, name, value }) => (
+					<ColorItem
+						name={name}
+						key={name ?? value}
+						value={value}
+						isBrightColor={isBrightColor}
+						isSelected={color === value}
+						updateColor={updateColor}
+					/>
+				))}
+				{props.children}
+			</TooltipProvider>
+		</div>
+	);
+}
+
+export const DEFAULT_COLORS = [
+	{
+		isBrightColor: false,
+		name: "black",
+		value: "#000000",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 4",
+		value: "#434343",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 3",
+		value: "#666666",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 2",
+		value: "#999999",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 1",
+		value: "#B7B7B7",
+	},
+	{
+		isBrightColor: false,
+		name: "grey",
+		value: "#CCCCCC",
+	},
+	{
+		isBrightColor: false,
+		name: "light grey 1",
+		value: "#D9D9D9",
+	},
+	{
+		isBrightColor: true,
+		name: "light grey 2",
+		value: "#EFEFEF",
+	},
+	{
+		isBrightColor: true,
+		name: "light grey 3",
+		value: "#F3F3F3",
+	},
+	{
+		isBrightColor: true,
+		name: "white",
+		value: "#FFFFFF",
+	},
+	{
+		isBrightColor: false,
+		name: "red berry",
+		value: "#980100",
+	},
+	{
+		isBrightColor: false,
+		name: "red",
+		value: "#FE0000",
+	},
+	{
+		isBrightColor: false,
+		name: "orange",
+		value: "#FE9900",
+	},
+	{
+		isBrightColor: true,
+		name: "yellow",
+		value: "#FEFF00",
+	},
+	{
+		isBrightColor: false,
+		name: "green",
+		value: "#00FF00",
+	},
+	{
+		isBrightColor: false,
+		name: "cyan",
+		value: "#00FFFF",
+	},
+	{
+		isBrightColor: false,
+		name: "cornflower blue",
+		value: "#4B85E8",
+	},
+	{
+		isBrightColor: false,
+		name: "blue",
+		value: "#1300FF",
+	},
+	{
+		isBrightColor: false,
+		name: "purple",
+		value: "#9900FF",
+	},
+	{
+		isBrightColor: false,
+		name: "magenta",
+		value: "#FF00FF",
+	},
+
+	{
+		isBrightColor: false,
+		name: "light red berry 3",
+		value: "#E6B8AF",
+	},
+	{
+		isBrightColor: false,
+		name: "light red 3",
+		value: "#F4CCCC",
+	},
+	{
+		isBrightColor: true,
+		name: "light orange 3",
+		value: "#FCE4CD",
+	},
+	{
+		isBrightColor: true,
+		name: "light yellow 3",
+		value: "#FFF2CC",
+	},
+	{
+		isBrightColor: true,
+		name: "light green 3",
+		value: "#D9EAD3",
+	},
+	{
+		isBrightColor: false,
+		name: "light cyan 3",
+		value: "#D0DFE3",
+	},
+	{
+		isBrightColor: false,
+		name: "light cornflower blue 3",
+		value: "#C9DAF8",
+	},
+	{
+		isBrightColor: true,
+		name: "light blue 3",
+		value: "#CFE1F3",
+	},
+	{
+		isBrightColor: true,
+		name: "light purple 3",
+		value: "#D9D2E9",
+	},
+	{
+		isBrightColor: true,
+		name: "light magenta 3",
+		value: "#EAD1DB",
+	},
+
+	{
+		isBrightColor: false,
+		name: "light red berry 2",
+		value: "#DC7E6B",
+	},
+	{
+		isBrightColor: false,
+		name: "light red 2",
+		value: "#EA9999",
+	},
+	{
+		isBrightColor: false,
+		name: "light orange 2",
+		value: "#F9CB9C",
+	},
+	{
+		isBrightColor: true,
+		name: "light yellow 2",
+		value: "#FFE598",
+	},
+	{
+		isBrightColor: false,
+		name: "light green 2",
+		value: "#B7D6A8",
+	},
+	{
+		isBrightColor: false,
+		name: "light cyan 2",
+		value: "#A1C4C9",
+	},
+	{
+		isBrightColor: false,
+		name: "light cornflower blue 2",
+		value: "#A4C2F4",
+	},
+	{
+		isBrightColor: false,
+		name: "light blue 2",
+		value: "#9FC5E8",
+	},
+	{
+		isBrightColor: false,
+		name: "light purple 2",
+		value: "#B5A7D5",
+	},
+	{
+		isBrightColor: false,
+		name: "light magenta 2",
+		value: "#D5A6BD",
+	},
+
+	{
+		isBrightColor: false,
+		name: "light red berry 1",
+		value: "#CC4125",
+	},
+	{
+		isBrightColor: false,
+		name: "light red 1",
+		value: "#E06666",
+	},
+	{
+		isBrightColor: false,
+		name: "light orange 1",
+		value: "#F6B26B",
+	},
+	{
+		isBrightColor: false,
+		name: "light yellow 1",
+		value: "#FFD966",
+	},
+	{
+		isBrightColor: false,
+		name: "light green 1",
+		value: "#93C47D",
+	},
+	{
+		isBrightColor: false,
+		name: "light cyan 1",
+		value: "#76A5AE",
+	},
+	{
+		isBrightColor: false,
+		name: "light cornflower blue 1",
+		value: "#6C9EEB",
+	},
+	{
+		isBrightColor: false,
+		name: "light blue 1",
+		value: "#6FA8DC",
+	},
+	{
+		isBrightColor: false,
+		name: "light purple 1",
+		value: "#8D7CC3",
+	},
+	{
+		isBrightColor: false,
+		name: "light magenta 1",
+		value: "#C27BA0",
+	},
+
+	{
+		isBrightColor: false,
+		name: "dark red berry 1",
+		value: "#A61B00",
+	},
+	{
+		isBrightColor: false,
+		name: "dark red 1",
+		value: "#CC0000",
+	},
+	{
+		isBrightColor: false,
+		name: "dark orange 1",
+		value: "#E59138",
+	},
+	{
+		isBrightColor: false,
+		name: "dark yellow 1",
+		value: "#F1C231",
+	},
+	{
+		isBrightColor: false,
+		name: "dark green 1",
+		value: "#6AA74F",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cyan 1",
+		value: "#45818E",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cornflower blue 1",
+		value: "#3B78D8",
+	},
+	{
+		isBrightColor: false,
+		name: "dark blue 1",
+		value: "#3E84C6",
+	},
+	{
+		isBrightColor: false,
+		name: "dark purple 1",
+		value: "#664EA6",
+	},
+	{
+		isBrightColor: false,
+		name: "dark magenta 1",
+		value: "#A64D78",
+	},
+
+	{
+		isBrightColor: false,
+		name: "dark red berry 2",
+		value: "#84200D",
+	},
+	{
+		isBrightColor: false,
+		name: "dark red 2",
+		value: "#990001",
+	},
+	{
+		isBrightColor: false,
+		name: "dark orange 2",
+		value: "#B45F05",
+	},
+	{
+		isBrightColor: false,
+		name: "dark yellow 2",
+		value: "#BF9002",
+	},
+	{
+		isBrightColor: false,
+		name: "dark green 2",
+		value: "#38761D",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cyan 2",
+		value: "#124F5C",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cornflower blue 2",
+		value: "#1155CB",
+	},
+	{
+		isBrightColor: false,
+		name: "dark blue 2",
+		value: "#0C5394",
+	},
+	{
+		isBrightColor: false,
+		name: "dark purple 2",
+		value: "#351C75",
+	},
+	{
+		isBrightColor: false,
+		name: "dark magenta 2",
+		value: "#741B47",
+	},
+
+	{
+		isBrightColor: false,
+		name: "dark red berry 3",
+		value: "#5B0F00",
+	},
+	{
+		isBrightColor: false,
+		name: "dark red 3",
+		value: "#660000",
+	},
+	{
+		isBrightColor: false,
+		name: "dark orange 3",
+		value: "#783F04",
+	},
+	{
+		isBrightColor: false,
+		name: "dark yellow 3",
+		value: "#7E6000",
+	},
+	{
+		isBrightColor: false,
+		name: "dark green 3",
+		value: "#274E12",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cyan 3",
+		value: "#0D343D",
+	},
+	{
+		isBrightColor: false,
+		name: "dark cornflower blue 3",
+		value: "#1B4487",
+	},
+	{
+		isBrightColor: false,
+		name: "dark blue 3",
+		value: "#083763",
+	},
+	{
+		isBrightColor: false,
+		name: "dark purple 3",
+		value: "#1F124D",
+	},
+	{
+		isBrightColor: false,
+		name: "dark magenta 3",
+		value: "#4C1130",
+	},
+];
+
+const DEFAULT_CUSTOM_COLORS = [
+	{
+		isBrightColor: false,
+		name: "dark orange 3",
+		value: "#783F04",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 3",
+		value: "#666666",
+	},
+	{
+		isBrightColor: false,
+		name: "dark grey 2",
+		value: "#999999",
+	},
+	{
+		isBrightColor: false,
+		name: "light cornflower blue 1",
+		value: "#6C9EEB",
+	},
+	{
+		isBrightColor: false,
+		name: "dark magenta 3",
+		value: "#4C1130",
+	},
+];
