@@ -3,9 +3,10 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./*"],
+			"@/*": ["./*", "../../packages/editor/src/*"],
 			"@optima/ui/*": ["../../packages/ui/src/*"],
-			"@optima/editor/*": ["../../packages/editor/*"]
+			"@optima/editor": ["../../packages/editor/src"],
+			"@optima/editor/*": ["../../packages/editor/src/*"]
 		},
 		"plugins": [
 			{
