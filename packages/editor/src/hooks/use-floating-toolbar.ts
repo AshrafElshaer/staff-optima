@@ -61,8 +61,8 @@ export function useFloatingToolbar({
 
 			if (ranges.length === 0) return;
 
-			const from = Math.min(...ranges.map((r: NodeRange) => r.from));
-			const to = Math.max(...ranges.map((r: NodeRange) => r.to));
+			const from = Math.min(...ranges.map((r: any) => r.$from.pos));
+			const to = Math.max(...ranges.map((r: any) => r.$to.pos));
 
 			// Validate positions
 			const docSize = editor.state.doc.content.size;
