@@ -1,13 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@optima/ui/components/button";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@optima/ui/components/form";
+import { Form } from "@optima/ui/components/form";
 import { FormAddOnInput } from "@optima/ui/components/form-controls/index";
 import {
 	Popover,
@@ -17,13 +10,13 @@ import {
 import type { Editor } from "@tiptap/react";
 import { Check, Link, X } from "lucide-react";
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod/v4";
 
 const formSchema = z.object({
 	url: z
 		.string()
-		.min(1, { message: "Domain is required" })
+		.min(1, { error: "Domain is required" }) // Fixed error -> message property
 		.refine(
 			(val) => {
 				// This regex validates domains without protocols
@@ -31,7 +24,7 @@ const formSchema = z.object({
 					/^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 				return domainRegex.test(val);
 			},
-			{ message: "Please enter a valid domain (e.g., example.com)" },
+			{ error: "Please enter a valid domain (e.g., example.com)" },
 		),
 });
 
@@ -44,8 +37,9 @@ interface LinkPopoverProps {
 
 export function LinkPopover({ editor, onOpenChange }: LinkPopoverProps) {
 	const isExistingLink = editor.isActive("link");
-	const existingLink = editor.getAttributes("link").href;
+	const existingLink = editor.getAttributes("link").href || "";
 	const form = useForm<FormValues>({
+		// @ts-expect-error - zodResolver is not typed correctly
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			url: isExistingLink ? existingLink : "",
