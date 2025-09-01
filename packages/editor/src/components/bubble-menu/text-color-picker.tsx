@@ -14,7 +14,7 @@ import {
 } from "@optima/ui/components/tooltip";
 import { cn } from "@optima/ui/lib/utils";
 import type { Editor } from "@tiptap/react";
-import debounce from "lodash/debounce.js";
+import { debounce } from "lodash";
 import { EraserIcon } from "lucide-react";
 import React from "react";
 
