@@ -32,7 +32,7 @@
 		"resend": "^4.7.0",
 		"stripe": "^18.3.0",
 		"uuid": "^11.1.0",
-		"zod": "^4.1.5"
+		"zod": "^4.0.5"
 	},
 	"devDependencies": {
 		"@optima/typescript-config": "workspace:*",
