@@ -1,9 +1,7 @@
 "use client";
 
 import { Separator } from "@optima/ui/components/separator";
-import { Toggle } from "@optima/ui/components/toggle";
 import type { Editor } from "@tiptap/react";
-import { useComposedRef } from "@udecode/cn";
 import {
 	Bold,
 	Code,
@@ -14,8 +12,9 @@ import {
 	Underline,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useFloatingToolbar } from "../../hooks/use-floating-toolbar";
-import { useFloatingToolbarState } from "../../hooks/use-floating-toolbar-state";
+import { useComposedRef } from "@/hooks/use-composed-ref";
+import { useFloatingToolbar } from "@/hooks/use-floating-toolbar";
+import { useFloatingToolbarState } from "@/hooks/use-floating-toolbar-state";
 import { Toolbar, ToolbarButton } from "../toolbar";
 import { LinkPopover } from "./link-popover";
 import { NodeSelector } from "./node-selector";
