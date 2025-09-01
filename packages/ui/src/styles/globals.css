@@ -356,21 +356,21 @@
 }
 
 .ProseMirror h1 {
-	font-size: 1.4rem;
+	font-size: 1.7rem;
 }
 
 .ProseMirror h2 {
-	font-size: 1.2rem;
+	font-size: 1.5rem;
 }
 
 .ProseMirror h3 {
-	font-size: 1.1rem;
+	font-size: 1.3rem;
 }
 
 .ProseMirror h4,
 .ProseMirror h5,
 .ProseMirror h6 {
-	font-size: 1rem;
+	font-size: 1.1rem;
 }
 
 .ProseMirror blockquote {

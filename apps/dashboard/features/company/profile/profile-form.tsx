@@ -390,11 +390,15 @@ export function CompanyProfileForm({
 					<FormField
 						control={form.control}
 						name="profile"
-						render={({ field: _field }) => (
+						render={({ field }) => (
 							<FormItem>
 								<FormControl>
 									<div className="w-full border rounded-md min-h-96 grid overflow-hidden">
-										<Editor />
+										<Editor
+											key={resetKey}
+											content={field.value ?? ""}
+											onChange={(_value) => field.onChange(_value ?? "")}
+										/>
 									</div>
 								</FormControl>
 								<FormMessage />
