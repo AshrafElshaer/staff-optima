@@ -39,7 +39,7 @@ export function LinkPopover({ editor, onOpenChange }: LinkPopoverProps) {
 	const isExistingLink = editor.isActive("link");
 	const existingLink = editor.getAttributes("link").href || "";
 	const form = useForm<FormValues>({
-		// @ts-expect-error - zodResolver is not typed correctly
+		// @ts-ignore - zodResolver is not typed correctly
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			url: isExistingLink ? existingLink : "",
