@@ -12,9 +12,9 @@ import {
 	Underline,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useComposedRef } from "@/hooks/use-composed-ref";
-import { useFloatingToolbar } from "@/hooks/use-floating-toolbar";
-import { useFloatingToolbarState } from "@/hooks/use-floating-toolbar-state";
+import { useComposedRef } from "../../hooks/use-composed-ref";
+import { useFloatingToolbar } from "../../hooks/use-floating-toolbar";
+import { useFloatingToolbarState } from "../../hooks/use-floating-toolbar-state";
 import { Toolbar, ToolbarButton } from "../toolbar";
 import { LinkPopover } from "./link-popover";
 import { NodeSelector } from "./node-selector";
