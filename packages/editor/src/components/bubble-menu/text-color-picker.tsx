@@ -136,6 +136,7 @@ export function FontColorToolbarButton({
 
 			<PopoverContent
 				align="start"
+				sideOffset={8}
 				onCloseAutoFocus={(e) => e.preventDefault()}
 				onInteractOutside={(e) => {
 					// Prevent closing when clicking inside the color picker
