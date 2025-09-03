@@ -147,8 +147,19 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-start gap-2">
-					<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-						<span className="min-w-fit">Domain Verification</span>
+					<Flex
+						direction={{
+							initial: "column",
+							sm: "row",
+						}}
+						align={{
+							sm: "center",
+						}}
+						gap="2"
+					>
+						<Text as="span" className="min-w-fit">
+							Domain Verification
+						</Text>
 						<Badge
 							variant={
 								status === "pending"
@@ -161,7 +172,7 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 						>
 							{status}
 						</Badge>
-					</div>
+					</Flex>
 					<Button
 						size="sm"
 						variant="secondary"
@@ -177,10 +188,7 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 					)}
 				</CardTitle>
 				<CardDescription>
-					<p>
-						Verify your domain to ensure that your company is properly
-						identified.
-					</p>
+					Verify your domain to ensure that your company is properly identified.
 				</CardDescription>
 			</CardHeader>
 			<Separator />
@@ -302,15 +310,13 @@ export function ForwardDnsEmail({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="space-y-2 p-2" align="end">
-				<p className="text-sm text-secondary-foreground">
-					Forward Instructions to
-				</p>
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
 						className="flex items-end gap-2"
 					>
 						<FormInput
+							label="Forward Instructions to"
 							name="email"
 							placeholder="example@example.com"
 							inputMode="email"
