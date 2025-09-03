@@ -108,7 +108,13 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 				<Separator />
 				<CardContent className="space-y-4">
 					<Box overflow="auto" mx="-6" px="6">
-						<DataList className="rounded-md border p-4">
+						<DataList
+							className="rounded-md border p-4"
+							orientation={{
+								initial: "vertical",
+								sm: "horizontal",
+							}}
+						>
 							<DataListItem>
 								<DataListLabel minWidth="120px">Name</DataListLabel>
 								<DataListValue>staffoptima_verification</DataListValue>
@@ -186,7 +192,13 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 					</Text>
 				) : null}
 				<Box overflow="auto" mx="-6" px="6">
-					<DataList className="rounded-md border p-4">
+					<DataList
+						className="rounded-md border p-4"
+						orientation={{
+							initial: "vertical",
+							sm: "horizontal",
+						}}
+					>
 						<DataListItem>
 							<DataListLabel minWidth="120px">Name</DataListLabel>
 							<DataListValue>
