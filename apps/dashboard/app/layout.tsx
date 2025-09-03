@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "@optima/ui/globals.css";
+import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 

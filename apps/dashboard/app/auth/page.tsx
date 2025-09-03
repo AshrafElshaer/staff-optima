@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AuthPage() {
 	return (
-		<div className="flex h-screen w-screen items-center justify-center">
+		<div className="flex h-screen w-screen items-center justify-center bg-background">
 			<Suspense>
 				<AuthComponent />
 			</Suspense>

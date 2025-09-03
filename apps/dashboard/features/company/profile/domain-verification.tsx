@@ -10,6 +10,12 @@ import {
 	CardTitle,
 } from "@optima/ui/components/card";
 import {
+	DataList,
+	DataListItem,
+	DataListLabel,
+	DataListValue,
+} from "@optima/ui/components/data-list";
+import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
@@ -64,11 +70,23 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-start gap-2">
-						<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-							<span className="min-w-fit">Domain Verification</span>
+						<Flex
+							direction={{
+								initial: "column",
+								sm: "row",
+							}}
+							align={{
+								sm: "center",
+							}}
+							gap="2"
+							justify="between"
+						>
+							<Text as="span" className="min-w-fit">
+								Domain Verification
+							</Text>
 
 							<Skeleton className="w-18 h-7" />
-						</div>
+						</Flex>
 						<Button
 							size="sm"
 							variant="outline"
@@ -83,47 +101,38 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 						</Button>
 					</CardTitle>
 					<CardDescription>
-						<p>
-							Verify your domain to ensure that your organization is properly
-							identified.
-						</p>
+						Verify your domain to ensure that your organization is properly
+						identified.
 					</CardDescription>
 				</CardHeader>
 				<Separator />
 				<CardContent className="space-y-4">
-					<div className="overflow-auto -mx-6 px-6">
-						<div className="grid gap-4">
-							<div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 rounded-md border p-4">
-								<div className="text-sm font-medium text-muted-foreground">
-									Name
-								</div>
-								<div className="flex items-center justify-between text-sm">
-									staffoptima_verification
-								</div>
-
-								<div className="text-sm font-medium text-muted-foreground">
-									Type
-								</div>
-								<div className="text-sm">TXT</div>
-
-								<div className="text-sm font-medium text-muted-foreground">
-									Value
-								</div>
-								<div className="flex items-center justify-between text-sm overflow-auto">
-									<Skeleton className="w-2/3 h-6 rounded-md" />
-								</div>
-
-								<div className="text-sm font-medium text-muted-foreground">
-									TTL
-								</div>
-								<div className="text-sm">60</div>
-
-								<div className="text-sm font-medium text-muted-foreground">
-									Priority
-								</div>
-							</div>
-						</div>
-					</div>
+					<Box overflow="auto" mx="-6" px="6">
+						<DataList className="rounded-md border p-4">
+							<DataListItem>
+								<DataListLabel minWidth="120px">Name</DataListLabel>
+								<DataListValue>staffoptima_verification</DataListValue>
+							</DataListItem>
+							<DataListItem>
+								<DataListLabel minWidth="120px">Type</DataListLabel>
+								<DataListValue>TXT</DataListValue>
+							</DataListItem>
+							<DataListItem>
+								<DataListLabel minWidth="120px">Value</DataListLabel>
+								<DataListValue>
+									<Skeleton className="w-96 h-5" />
+								</DataListValue>
+							</DataListItem>
+							<DataListItem>
+								<DataListLabel minWidth="120px">TTL</DataListLabel>
+								<DataListValue>60</DataListValue>
+							</DataListItem>
+							<DataListItem>
+								<DataListLabel minWidth="120px">Priority</DataListLabel>
+								<DataListValue>auto</DataListValue>
+							</DataListItem>
+						</DataList>
+					</Box>
 				</CardContent>
 			</Card>
 		);
@@ -171,49 +180,43 @@ export function DomainVerification({ companyId }: { companyId: string }) {
 			<Separator />
 			<CardContent className="space-y-4">
 				{domainVerification?.verification_date ? (
-					<p className="text-secondary-foreground">
+					<Text as="p" mb="4" className="text-secondary-foreground">
 						Verified at{" "}
 						{moment(domainVerification.verification_date).format("MMM D, YYYY")}
-					</p>
+					</Text>
 				) : null}
-				<div className="overflow-auto -mx-6 px-6">
-					<div className="grid gap-4">
-						<div className="grid grid-cols-[auto_1fr] items-center gap-x-12 gap-y-2 rounded-md border p-4">
-							<div className="text-sm font-medium text-muted-foreground">
-								Name
-							</div>
-							<div className="flex items-center justify-between text-sm">
-								staffoptima_verification
+				<Box overflow="auto" mx="-6" px="6">
+					<DataList className="rounded-md border p-4">
+						<DataListItem>
+							<DataListLabel minWidth="120px">Name</DataListLabel>
+							<DataListValue>
+								staffoptima_verification{" "}
 								<CopyToClipboard text="staffoptima_verification" />
-							</div>
-
-							<div className="text-sm font-medium text-muted-foreground">
-								Type
-							</div>
-							<div className="text-sm">TXT</div>
-
-							<div className="text-sm font-medium text-muted-foreground">
-								Value
-							</div>
-							<div className="flex items-center justify-between text-sm overflow-auto">
+							</DataListValue>
+						</DataListItem>
+						<DataListItem>
+							<DataListLabel minWidth="120px">Type</DataListLabel>
+							<DataListValue>TXT</DataListValue>
+						</DataListItem>
+						<DataListItem>
+							<DataListLabel minWidth="120px">Value</DataListLabel>
+							<DataListValue>
 								{domainVerification?.verification_token}
 								<CopyToClipboard
 									text={domainVerification?.verification_token ?? ""}
 								/>
-							</div>
-
-							<div className="text-sm font-medium text-muted-foreground">
-								TTL
-							</div>
-							<div className="text-sm">60</div>
-
-							<div className="text-sm font-medium text-muted-foreground">
-								Priority
-							</div>
-							<div className="text-sm">auto</div>
-						</div>
-					</div>
-				</div>
+							</DataListValue>
+						</DataListItem>
+						<DataListItem>
+							<DataListLabel minWidth="120px">TTL</DataListLabel>
+							<DataListValue>60</DataListValue>
+						</DataListItem>
+						<DataListItem>
+							<DataListLabel minWidth="120px">Priority</DataListLabel>
+							<DataListValue>auto</DataListValue>
+						</DataListItem>
+					</DataList>
+				</Box>
 			</CardContent>
 		</Card>
 	);
@@ -225,6 +228,7 @@ import { Form } from "@optima/ui/components/form";
 import { FormInput } from "@optima/ui/components/form-controls";
 import { Icons } from "@optima/ui/components/icons";
 import { Skeleton } from "@optima/ui/components/skeleton";
+import { Box, Flex, Text } from "@radix-ui/themes";
 import { Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

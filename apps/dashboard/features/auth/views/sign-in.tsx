@@ -21,6 +21,7 @@ import {
 import { Icons } from "@optima/ui/components/icons";
 import { Input } from "@optima/ui/components/inputs/input";
 import { Separator } from "@optima/ui/components/separator";
+import { Text } from "@radix-ui/themes";
 import { useQueryStates } from "nuqs";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -121,7 +122,7 @@ export function SignIn() {
 			</CardContent>
 			<div className="flex items-center justify-center gap-6">
 				<Separator className="flex-1" />
-				<span className="text-secondary-foreground">Or continue with</span>
+				<Text className="text-secondary-foreground">Or continue with</Text>
 				<Separator className="flex-1" />
 			</div>
 			<CardFooter className="flex flex-col  items-start">
@@ -151,7 +152,7 @@ export function SignIn() {
 				</div>
 
 				<div className="flex items-center flex-wrap  gap-2 mt-6">
-					<p className="text-sm text-secondary-foreground">
+					<Text size="2" className="text-sm text-secondary-foreground">
 						By signing in you agree to our{" "}
 						<Button variant="link" className="p-0" type="button">
 							Terms of Service
@@ -161,7 +162,7 @@ export function SignIn() {
 						<Button variant="link" className="p-0" type="button">
 							Contact Support
 						</Button>
-					</p>
+					</Text>
 				</div>
 			</CardFooter>
 		</Card>

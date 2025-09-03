@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Editor, useSlashCommand } from "@optima/editor/src/index";
+import { Editor } from "@optima/editor/src/index";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import type { OrganizationRow } from "@optima/supabase/types";
 import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
@@ -33,6 +33,7 @@ import {
 import { Label } from "@optima/ui/components/label";
 import { Separator } from "@optima/ui/components/separator";
 import { cn } from "@optima/ui/lib/utils";
+import { Box, Container, Flex, Grid, Text } from "@radix-ui/themes";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -205,212 +206,279 @@ export function CompanyProfileForm({
 	);
 
 	return (
-		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8 w-full max-w-3xl mx-auto px-4 py-8"
-			>
-				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-					<div className="space-y-2 w-full">
-						<Label className="font-semibold text-base">Company Logo</Label>
-						<p className="text-muted-foreground text-sm">
-							Accepts : PNG, JPG, or SVG.
-							<br />
-							Max size : 1MB
-							<br />
-							Recommended dimensions: 200x200 pixels.
-						</p>
-					</div>
-					<FileDropZone
-						config={{
-							...DROP_ZONE_OPTIONS,
-							onDrop: async (acceptedFiles) => {
-								const file = acceptedFiles[0];
-								if (file) {
-									await uploadLogo(file);
-								}
-							},
-							onDropRejected: (rejectedFiles) => {
-								for (const file of rejectedFiles) {
-									toast.error(file.errors[0]?.message);
-								}
-							},
+		<Container size="3">
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="space-y-8 w-full  mx-auto px-4 py-8"
+				>
+					<Flex
+						direction={{
+							initial: "column-reverse",
+							sm: "row",
 						}}
+						justify="between"
+						align={"start"}
+						className="w-full gap-4"
 					>
-						<Avatar className="rounded-md size-28">
-							<AvatarImage
-								src={logoUrl}
-								className={cn("rounded-md size-28", {
-									hidden: !form.watch("logo"),
-								})}
-								alt={company?.name ?? ""}
+						<Box className="space-y-2">
+							<Label className="font-semibold text-base">Company Logo</Label>
+							<Text as="p" size="2" className="text-muted-foreground">
+								Accepts : PNG, JPG, or SVG.
+								<br />
+								Max size : 1MB
+								<br />
+								Recommended dimensions: 200x200 pixels.
+							</Text>
+						</Box>
+						<FileDropZone
+							config={{
+								...DROP_ZONE_OPTIONS,
+								onDrop: async (acceptedFiles) => {
+									const file = acceptedFiles[0];
+									if (file) {
+										await uploadLogo(file);
+									}
+								},
+								onDropRejected: (rejectedFiles) => {
+									for (const file of rejectedFiles) {
+										toast.error(file.errors[0]?.message);
+									}
+								},
+							}}
+						>
+							<Avatar className="rounded-md size-28">
+								<AvatarImage
+									src={logoUrl}
+									className={cn("rounded-md size-28", {
+										hidden: !form.watch("logo"),
+									})}
+									alt={company?.name ?? ""}
+								/>
+								<AvatarFallback className="text-7xl rounded-md size-28">
+									{`${company?.name[0]}${company?.name[1]}`}
+								</AvatarFallback>
+							</Avatar>
+							<div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 grid place-items-center">
+								<Plus className="size-10 text-secondary-foreground" />
+							</div>
+						</FileDropZone>
+					</Flex>
+					<Separator />
+					<Flex
+						direction={{
+							initial: "column",
+							sm: "row",
+						}}
+						justify="between"
+						align="start"
+						className="w-full gap-4"
+					>
+						<Box className="space-y-2 w-full md:w-1/2">
+							<Label className="font-semibold text-base" htmlFor="name">
+								Legal Name
+							</Label>
+							<FormDescription>Company's registered legal name</FormDescription>
+						</Box>
+						<Box className="w-full md:w-1/2">
+							<FormInput<OrganizationFormValues> id="name" name="name" />
+						</Box>
+					</Flex>
+					<Separator />
+					<Flex
+						direction={{
+							initial: "column",
+							sm: "row",
+						}}
+						justify="between"
+						align="start"
+						className="w-full gap-4"
+					>
+						<Box className="space-y-2 w-full md:w-1/2">
+							<Label className="font-semibold text-base" htmlFor="industry">
+								Industry
+							</Label>
+							<FormDescription>Company's industry</FormDescription>
+						</Box>
+						<Box className="w-full md:w-1/2">
+							<FormInput<OrganizationFormValues>
+								id="industry"
+								name="industry"
 							/>
-							<AvatarFallback className="text-7xl rounded-md size-28">
-								{`${company?.name[0]}${company?.name[1]}`}
-							</AvatarFallback>
-						</Avatar>
-						<div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 grid place-items-center">
-							<Plus className="size-10 text-secondary-foreground" />
-						</div>
-					</FileDropZone>
-				</section>
-				<Separator />
-				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-					<div className="space-y-2 w-full md:w-1/2">
-						<Label className="font-semibold text-base" htmlFor="name">
-							Legal Name
-						</Label>
-						<FormDescription>Company's registered legal name</FormDescription>
-					</div>
-					<div className="w-full md:w-1/2">
-						<FormInput<OrganizationFormValues> id="name" name="name" />
-					</div>
-				</section>
-				<Separator />
-				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-					<div className="space-y-2 w-full md:w-1/2">
-						<Label className="font-semibold text-base" htmlFor="industry">
-							Industry
-						</Label>
-						<FormDescription>Company's industry</FormDescription>
-					</div>
-					<div className="w-full md:w-1/2">
-						<FormInput<OrganizationFormValues> id="industry" name="industry" />
-					</div>
-				</section>
-				<Separator />
-				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-					<div className="space-y-2 w-full md:w-1/2">
-						<Label className="font-semibold text-base" htmlFor="employeeCount">
-							Company Size
-						</Label>
-						<FormDescription>Company's employee count</FormDescription>
-					</div>
-					<div className="w-full md:w-1/2">
-						<FormSelect<OrganizationFormValues>
-							name="employeeCount"
-							options={[
-								{ label: "1-10", value: "1-10" },
-								{ label: "11-50", value: "11-50" },
-								{ label: "51-200", value: "51-200" },
-								{ label: "201-500", value: "201-500" },
-								{ label: "+ 500", value: "+ 500" },
-							]}
-						/>
-					</div>
-				</section>
-				<Separator />
-				<section className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-					<div className="space-y-2 w-full md:w-1/2">
-						<Label className="font-semibold text-base" htmlFor="domain">
-							Domain
-						</Label>
-						<FormDescription>
-							Company's official website domain.
-						</FormDescription>
-					</div>
-					<div className="w-full md:w-1/2">
-						<FormInput<OrganizationFormValues> name="domain" id="domain" />
-					</div>
-				</section>
-				<DomainVerification companyId={form.getValues("id") ?? ""} />
-				domain verification
-				<Separator />
-				<section className="flex flex-col w-full gap-4">
-					<div className="space-y-2 w-full">
-						<Label className="font-semibold text-base" htmlFor="address1">
-							Location
-						</Label>
-						<FormDescription>Company's headquarter address</FormDescription>
-					</div>
-					<FormInput<OrganizationFormValues>
-						name="address1"
-						id="address1"
-						placeholder="123 Main St"
-						label="Address 1"
-						isOptional
-					/>
-					<div className="grid gap-8 md:grid-cols-2">
-						<FormInput<OrganizationFormValues>
-							name="address2"
-							id="address2"
-							placeholder="Suite 542"
-							label="Address 2"
-							isOptional
-						/>
-						<FormInput<OrganizationFormValues>
-							name="city"
-							id="city"
-							placeholder="San Francisco"
-							label="City"
-							isOptional
-						/>
-						<FormInput<OrganizationFormValues>
-							name="state"
-							id="state"
-							placeholder="California"
-							label="State"
-							isOptional
-						/>
-						<FormInput<OrganizationFormValues>
-							name="zipCode"
-							id="zipCode"
-							placeholder="12345"
-							label="Zip Code"
-							isOptional
-						/>
-
-						<FormCountrySelector name="country" id="country" label="Country" />
-						<FormTimezoneSelector
-							name="timezone"
-							id="timezone"
-							label="Timezone"
-						/>
-					</div>
-				</section>
-				<Separator />
-				<section className="flex flex-col w-full gap-4">
-					<div className="flex flex-col md:flex-row items-center justify-between gap-4">
-						<div className="space-y-2 w-full">
-							<Label className="font-semibold text-base">Profile</Label>
-							<p className="text-muted-foreground text-sm md:w-3/4">
-								Write a detailed profile showcasing your company's mission,
-								values, services, and achievements.
-							</p>
-						</div>
-						<div className="flex items-center gap-4 w-full md:w-auto">
-							<Link
-								href={`https://jobs.staffoptima.co/${company?.domain}`}
-								className={buttonVariants({ variant: "secondary" })}
-								target="_blank"
+						</Box>
+					</Flex>
+					<Separator />
+					<Flex
+						direction={{
+							initial: "column",
+							sm: "row",
+						}}
+						justify="between"
+						align="start"
+						className="w-full gap-4"
+					>
+						<Box className="space-y-2 w-full md:w-1/2">
+							<Label
+								className="font-semibold text-base"
+								htmlFor="employeeCount"
 							>
-								Preview
-							</Link>
-						</div>
-					</div>
-					<FormField
-						control={form.control}
-						name="profile"
-						render={({ field }) => (
-							<FormItem>
-								<FormControl>
-									<div className="w-full border rounded-md min-h-96 grid overflow-hidden">
-										<Editor
-											key={resetKey}
-											content={field.value ?? ""}
-											onChange={(_value) => field.onChange(_value ?? "")}
-										/>
-									</div>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</section>
-				<button type="submit" ref={formSubmitRef} className="hidden">
-					save
-				</button>
-			</form>
-		</Form>
+								Company Size
+							</Label>
+							<FormDescription>Company's employee count</FormDescription>
+						</Box>
+						<Box className="w-full md:w-1/2">
+							<FormSelect<OrganizationFormValues>
+								name="employeeCount"
+								options={[
+									{ label: "1-10", value: "1-10" },
+									{ label: "11-50", value: "11-50" },
+									{ label: "51-200", value: "51-200" },
+									{ label: "201-500", value: "201-500" },
+									{ label: "+ 500", value: "+ 500" },
+								]}
+							/>
+						</Box>
+					</Flex>
+					<Separator />
+					<Flex
+						direction={{
+							initial: "column",
+							sm: "row",
+						}}
+						justify="between"
+						align="start"
+						className="w-full gap-4"
+					>
+						<Box className="space-y-2 w-full md:w-1/2">
+							<Label className="font-semibold text-base" htmlFor="domain">
+								Domain
+							</Label>
+							<FormDescription>
+								Company's official website domain.
+							</FormDescription>
+						</Box>
+						<Box className="w-full md:w-1/2">
+							<FormInput<OrganizationFormValues> name="domain" id="domain" />
+						</Box>
+					</Flex>
+					<DomainVerification companyId={form.getValues("id") ?? ""} />
+					<Separator />
+					<Flex direction="column" gap="4" width="full">
+						<Box className="space-y-2" width="full">
+							<Label className="font-semibold text-base" htmlFor="address1">
+								Location
+							</Label>
+							<FormDescription>Company's headquarter address</FormDescription>
+						</Box>
+						<FormInput<OrganizationFormValues>
+							name="address1"
+							id="address1"
+							placeholder="123 Main St"
+							label="Address 1"
+							isOptional
+						/>
+						<Grid
+							mt="4"
+							columns={{
+								initial: "1",
+								sm: "2",
+							}}
+							gap="8"
+							width="auto"
+						>
+							<FormInput<OrganizationFormValues>
+								name="address2"
+								id="address2"
+								placeholder="Suite 542"
+								label="Address 2"
+								isOptional
+							/>
+							<FormInput<OrganizationFormValues>
+								name="city"
+								id="city"
+								placeholder="San Francisco"
+								label="City"
+								isOptional
+							/>
+							<FormInput<OrganizationFormValues>
+								name="state"
+								id="state"
+								placeholder="California"
+								label="State"
+								isOptional
+							/>
+							<FormInput<OrganizationFormValues>
+								name="zipCode"
+								id="zipCode"
+								placeholder="12345"
+								label="Zip Code"
+								isOptional
+							/>
+							<FormCountrySelector
+								name="country"
+								id="country"
+								label="Country"
+							/>
+							<FormTimezoneSelector
+								name="timezone"
+								id="timezone"
+								label="Timezone"
+							/>
+						</Grid>
+					</Flex>
+					<Separator />
+					<Flex direction="column" gap="4" width="full">
+						<Flex direction="row" justify="between" align="center" gap="4">
+							<Box className="space-y-2" width="full">
+								<Label className="font-semibold text-base">Profile</Label>
+								<Text
+									as="p"
+									size="2"
+									className="text-muted-foreground md:w-3/4"
+								>
+									Write a detailed profile showcasing your company's mission,
+									values, services, and achievements.
+								</Text>
+							</Box>
+							<Box
+								width={{
+									initial: "full",
+									sm: "auto",
+								}}
+							>
+								<Link
+									href={`https://jobs.staffoptima.co/${company?.domain}`}
+									className={buttonVariants({ variant: "secondary" })}
+									target="_blank"
+								>
+									Preview
+								</Link>
+							</Box>
+						</Flex>
+						<FormField
+							control={form.control}
+							name="profile"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<div className="w-full border rounded-md min-h-96 grid overflow-hidden">
+											<Editor
+												key={resetKey}
+												content={field.value ?? ""}
+												onChange={(_value) => field.onChange(_value ?? "")}
+											/>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</Flex>
+					<button type="submit" ref={formSubmitRef} className="hidden">
+						save
+					</button>
+				</form>
+			</Form>
+		</Container>
 	);
 }

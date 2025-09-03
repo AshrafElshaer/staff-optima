@@ -135,7 +135,7 @@ export function FontColorToolbarButton({
 			</PopoverTrigger>
 
 			<PopoverContent
-				align="start"
+				align="center"
 				sideOffset={8}
 				onCloseAutoFocus={(e) => e.preventDefault()}
 				onInteractOutside={(e) => {

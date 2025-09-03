@@ -16,6 +16,7 @@ import {
 	InputOTPSlot,
 } from "@optima/ui/components/inputs";
 import { cn } from "@optima/ui/lib/utils";
+import { Heading, Strong, Text } from "@radix-ui/themes";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -108,7 +109,7 @@ export function VerifyOtp() {
 					We&apos;ve sent a one time pass code to{" "}
 				</CardDescription>
 				<CardDescription className="text-foreground">
-					<strong>{email}</strong>
+					<Strong>{email}</Strong>
 				</CardDescription>
 				<Button
 					className="text-secondary-foreground"
@@ -125,9 +126,14 @@ export function VerifyOtp() {
 				</Button>
 			</CardHeader>
 			<CardContent className="">
-				<h2 className=" font-semibold text-center mb-6">
+				<Heading
+					as="h2"
+					size="3"
+					className=" font-semibold text-center mb-6"
+					mb="6"
+				>
 					Enter the pass code to sign in
-				</h2>
+				</Heading>
 				<InputOTP
 					// eslint-disable-next-line jsx-a11y/no-autofocus -- This is an OTP input field
 					autoFocus
