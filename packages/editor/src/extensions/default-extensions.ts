@@ -3,6 +3,7 @@ import { Color } from "@tiptap/extension-color";
 import { Highlight } from "@tiptap/extension-highlight";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
+import { TextAlign } from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { BackgroundColor } from "@tiptap/extension-text-style/background-color";
 import { Underline } from "@tiptap/extension-underline";
@@ -179,6 +180,11 @@ const codeBlockLowlight = CodeBlockLowlight.configure({
 // });
 
 // Export extensions with all formatting capabilities
+const textAlign = TextAlign.configure({
+	alignments: ["left", "right", "center", "justify"],
+	defaultAlignment: "left",
+	types: ["heading", "paragraph"],
+});
 export const defaultExtensions = [
 	starterKit,
 	taskList,
@@ -191,4 +197,5 @@ export const defaultExtensions = [
 	underline,
 	codeBlockLowlight,
 	horizontalRule,
+	textAlign,
 ];

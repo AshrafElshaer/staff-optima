@@ -18,6 +18,7 @@ import { useFloatingToolbarState } from "../../hooks/use-floating-toolbar-state"
 import { Toolbar, ToolbarButton } from "../toolbar";
 import { LinkPopover } from "./link-popover";
 import { NodeSelector } from "./node-selector";
+import { TextAlign } from "./text-align";
 import { FontColorToolbarButton } from "./text-color-picker";
 
 interface FloatingBubbleMenuProps {
@@ -300,6 +301,11 @@ export function FloatingBubbleMenu({ editor }: FloatingBubbleMenuProps) {
 				</div>
 
 				<Separator orientation="vertical" className="h-6 flex-shrink-0" />
+
+				{/* Text alignment */}
+				<div className="flex-shrink-0">
+					<TextAlign editor={editor} onOpenChange={handlePopoverOpenChange} />
+				</div>
 
 				<div className="flex-shrink-0">
 					<LinkPopover editor={editor} onOpenChange={handlePopoverOpenChange} />
