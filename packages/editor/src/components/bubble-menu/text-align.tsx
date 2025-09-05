@@ -4,18 +4,11 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "@optima/ui/components/dropdown-menu";
 import { cn } from "@optima/ui/lib/utils";
 import type { Editor } from "@tiptap/react";
-import {
-	AlignCenter,
-	AlignJustify,
-	AlignLeft,
-	AlignRight,
-	ChevronDown,
-} from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ToolbarButton } from "../toolbar";

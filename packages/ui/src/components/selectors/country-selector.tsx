@@ -35,7 +35,7 @@ export function CountrySelector({ setValue, value, triggerClassName }: Props) {
 					variant="secondary"
 					aria-expanded={open}
 					className={cn(
-						"w-full justify-between  px-3 font-normal outline-offset-0  focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20",
+						"w-full justify-between border px-3 font-normal outline-offset-0  focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20",
 						triggerClassName,
 					)}
 				>

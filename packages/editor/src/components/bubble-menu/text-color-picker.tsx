@@ -14,7 +14,6 @@ import {
 } from "@optima/ui/components/tooltip";
 import { cn } from "@optima/ui/lib/utils";
 import type { Editor } from "@tiptap/react";
-import { debounce } from "lodash";
 import { EraserIcon } from "lucide-react";
 import React from "react";
 
@@ -229,7 +228,6 @@ function ColorCustom({
 	clearColor: () => void;
 } & React.ComponentPropsWithoutRef<"div">) {
 	const [customColor, setCustomColor] = React.useState<string>();
-	const [value, setValue] = React.useState<string>(color || "#000000");
 
 	React.useEffect(() => {
 		if (
@@ -256,12 +254,6 @@ function ColorCustom({
 					]
 				: customColors,
 		[customColor, customColors],
-	);
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const updateCustomColorDebounced = React.useCallback(
-		debounce(updateCustomColor, 100),
-		[updateCustomColor],
 	);
 
 	return (

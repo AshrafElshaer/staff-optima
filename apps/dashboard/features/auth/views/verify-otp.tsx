@@ -16,7 +16,7 @@ import {
 	InputOTPSlot,
 } from "@optima/ui/components/inputs";
 import { cn } from "@optima/ui/lib/utils";
-import { Heading, Strong, Text } from "@radix-ui/themes";
+import { Heading, Strong } from "@radix-ui/themes";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";

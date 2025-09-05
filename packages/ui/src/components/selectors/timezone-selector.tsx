@@ -64,7 +64,7 @@ export function TimezoneSelector({
 					variant="outline"
 					aria-expanded={open}
 					className={cn(
-						"w-full justify-between  px-3 font-normal border-input bg-input hover:bg-input/80",
+						"w-full justify-between border px-3 font-normal border-input bg-input hover:bg-input/80",
 						triggerClassName,
 					)}
 				>

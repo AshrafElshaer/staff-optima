@@ -25,6 +25,7 @@ import {
 	FormMessage,
 } from "@optima/ui/components/form";
 import {
+	FormAddOnInput,
 	FormCountrySelector,
 	FormInput,
 	FormSelect,
@@ -358,7 +359,12 @@ export function CompanyProfileForm({
 							</FormDescription>
 						</Box>
 						<Box className="w-full md:w-1/2">
-							<FormInput<OrganizationFormValues> name="domain" id="domain" />
+							<FormAddOnInput<OrganizationFormValues>
+								name="domain"
+								id="domain"
+								addOn="https://"
+								addOnDirection="start"
+							/>
 						</Box>
 					</Flex>
 					<DomainVerification companyId={form.getValues("id") ?? ""} />

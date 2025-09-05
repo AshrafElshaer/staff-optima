@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: false positive */
 import {
 	autoUpdate,
 	flip,
@@ -8,7 +9,6 @@ import {
 	useFloating,
 	useInteractions,
 } from "@floating-ui/react";
-import type { NodeRange, Range } from "@tiptap/core";
 import React, { useCallback, useRef } from "react";
 import type { FloatingToolbarState } from "./use-floating-toolbar-state";
 

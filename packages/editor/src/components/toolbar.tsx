@@ -3,7 +3,6 @@
 import {
 	DropdownMenuLabel,
 	DropdownMenuRadioGroup,
-	DropdownMenuSeparator,
 } from "@optima/ui/components/dropdown-menu";
 
 import { Separator } from "@optima/ui/components/separator";
