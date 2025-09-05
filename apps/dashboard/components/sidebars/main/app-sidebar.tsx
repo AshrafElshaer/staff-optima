@@ -12,10 +12,14 @@ import { Separator } from "@optima/ui/components/separator";
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarGroup,
+	SidebarGroupContent,
 	SidebarHeader,
+	SidebarMenu,
 } from "@optima/ui/components/sidebar";
 import type * as React from "react";
 import { HugeIcon } from "@/components/huge-icon";
+import { CommandMenu } from "@/features/cmdk/command-menu";
 import { Can } from "@/lib/auth/abilities";
 import { NavMain } from "./nav-main";
 import { OrganizationLogo } from "./organization-logo";
@@ -73,6 +77,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<Separator />
 			<SidebarContent>
+				<SidebarGroup className="pb-0">
+					<SidebarGroupContent className=" p-0">
+						<CommandMenu />
+					</SidebarGroupContent>
+				</SidebarGroup>
+
 				<NavMain items={sidebarLinks} label="Workspace" />
 				<Can I="manage" a="organization">
 					<NavMain items={sidebarSettings} label="Settings" />
