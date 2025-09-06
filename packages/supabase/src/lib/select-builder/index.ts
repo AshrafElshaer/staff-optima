@@ -1,7 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 /** biome-ignore-all lint/suspicious/noExplicitAny: default by creator */
 
-import type { Database, Tables } from "../types/database";
+import type { Database, Tables } from "../../types/database";
 
 // --- Basic utility types ---
 

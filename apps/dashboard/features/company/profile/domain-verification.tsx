@@ -254,7 +254,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CopyToClipboard } from "@/components/copy-to-clipboard";
 import { HugeIcon } from "@/components/huge-icon";
-import { useServices } from "@/hooks/use-services";
+import { useServices } from "@optima/supabase/clients/use-services";
 import { queryKeysFactory } from "@/lib/react-query/query-keys-factory";
 import {
 	sendDomainVerificationEmailAction,

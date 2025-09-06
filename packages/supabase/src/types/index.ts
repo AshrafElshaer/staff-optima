@@ -32,6 +32,10 @@ export type RoleRow = Tables<"role">;
 export type RoleUpdate = TablesUpdate<"role">;
 export type RoleInsert = TablesInsert<"role">;
 
+export type Department = Tables<"team">;
+export type DepartmentUpdate = TablesUpdate<"team">;
+export type DepartmentInsert = TablesInsert<"team">;
+
 // export type WorkspaceMember = Tables<"member">;
 // export type Project = Tables<"projects">;
 // export type ProjectMember = Tables<"project_members">;

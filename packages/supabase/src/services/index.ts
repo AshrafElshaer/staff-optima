@@ -1,4 +1,5 @@
 export * from "./base.service";
+export * from "./departments.service";
 export * from "./domain.service";
 export * from "./membership.service";
 export * from "./organization.service";

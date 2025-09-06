@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useCountdown } from "usehooks-ts";
 import type { z } from "zod";
-import { useServices } from "@/hooks/use-services";
+import { useServices } from "@optima/supabase/clients/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 
 export function OrganizationOnboarding() {

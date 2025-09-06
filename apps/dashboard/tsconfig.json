@@ -19,7 +19,8 @@
 		"next-env.d.ts",
 		".next/types/**/*.ts",
 		"next.config.ts",
-		".next/types/**/*.ts"
+		".next/types/**/*.ts",
+		"../../packages/supabase/src/clients/use-services.ts"
 	],
 	"module": "ESNext",
 	"moduleResolution": "bundler",

@@ -44,7 +44,7 @@ import type { z } from "zod";
 import { OnChangeToast } from "@/components/toasts/on-change-toast";
 import { useActionToast } from "@/hooks/use-actions-toast";
 import { useCompany } from "@/hooks/use-company";
-import { useServices } from "@/hooks/use-services";
+import { useServices } from "@optima/supabase/clients/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 import { getDirtyFields } from "@/lib/form/get-dirty-fields";
 import { DomainVerification } from "./domain-verification";

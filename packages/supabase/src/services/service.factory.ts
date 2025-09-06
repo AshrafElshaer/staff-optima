@@ -1,4 +1,5 @@
 import type { SupabaseInstance } from "../types";
+import { DepartmentService } from "./departments.service";
 import { DomainService } from "./domain.service";
 import { MembershipService } from "./membership.service";
 import { OrganizationService } from "./organization.service";
@@ -15,6 +16,7 @@ export class ServiceFactory {
 		| UserService
 		| MembershipService
 		| DomainService
+		| DepartmentService
 	>;
 
 	private constructor(supabase: SupabaseInstance) {
@@ -78,6 +80,16 @@ export class ServiceFactory {
 		let service = this.services.get(key) as DomainService;
 		if (!service) {
 			service = new DomainService(this.supabase);
+			this.services.set(key, service);
+		}
+		return service;
+	}
+
+	getDepartmentService(): DepartmentService {
+		const key = "department";
+		let service = this.services.get(key) as DepartmentService;
+		if (!service) {
+			service = new DepartmentService(this.supabase);
 			this.services.set(key, service);
 		}
 		return service;
