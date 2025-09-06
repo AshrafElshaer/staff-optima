@@ -22,15 +22,15 @@ export abstract class BaseService<T extends TableName> {
 		this.tableName = tableName;
 	}
 
-	protected async findOne(
+	protected async findOne<TReturn = Row<T>>(
 		query: Record<string, unknown>,
 		select?: string,
-	): Promise<Row<T>> {
+	): Promise<TReturn> {
 		const result = (await this.supabase
 			.from(this.tableName)
 			.select(select)
 			.match(query)
-			.single()) as PostgrestSingleResponse<Row<T>>;
+			.single()) as PostgrestSingleResponse<TReturn>;
 
 		if (result.error) {
 			throw result.error;
@@ -39,8 +39,11 @@ export abstract class BaseService<T extends TableName> {
 		return result.data;
 	}
 
-	protected async findById(id: string, select?: string): Promise<Row<T>> {
-		return this.findOne({ id }, select);
+	protected async findById<TReturn = Row<T>>(
+		id: string,
+		select?: string,
+	): Promise<TReturn> {
+		return this.findOne<TReturn>({ id }, select);
 	}
 
 	protected async updateBy(
