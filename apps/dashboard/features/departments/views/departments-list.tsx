@@ -8,7 +8,7 @@ export async function DepartmentsList() {
 	const headersList = await headers();
 	const organizationId = headersList.get("x-organization-id");
 	const departmentService = (await getServerServices()).getDepartmentService();
-	const departments = await departmentService.searchDepartments(
+	const departments = await departmentService.searchDepartmentsByName(
 		organizationId ?? "",
 		filters.name,
 	);

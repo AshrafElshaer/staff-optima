@@ -52,7 +52,7 @@ export abstract class BaseService<T extends TableName> {
 	 * Generic find one method with filters
 	 */
 	async findOne<TReturn = Row<T>>(options: {
-		filters: FilterGroup | FilterCondition[];
+		filters: FilterGroup<T> | FilterCondition<T>[];
 		select?: string;
 	}): Promise<TReturn> {
 		return this.findOneWithConfig<TReturn>({
@@ -65,7 +65,10 @@ export abstract class BaseService<T extends TableName> {
 		id: string,
 		select?: string,
 	): Promise<TReturn> {
-		return this.findOne<TReturn>({ filters: [Filter.eq("id", id)], select });
+		return this.findOne<TReturn>({
+			filters: [Filter.eq<T, string>("id", id)],
+			select,
+		});
 	}
 	protected async findAll<TReturn = Row<T>[]>(
 		query: Record<string, unknown>,
@@ -151,7 +154,10 @@ export abstract class BaseService<T extends TableName> {
 		let query: any = this.createBaseQuery();
 
 		// Always apply select first (required for Supabase queries)
-		query = QueryBuilder.applySelect(query, config.select || "*");
+		query = QueryBuilder.applySelect(
+			query,
+			(config.select || "*") as keyof Tables<T>,
+		);
 
 		// Apply filters
 		if (config.filters) {
@@ -191,7 +197,10 @@ export abstract class BaseService<T extends TableName> {
 		let query: any = this.createBaseQuery();
 
 		// Always apply select first (required for Supabase queries)
-		query = QueryBuilder.applySelect(query, config.select || "*");
+		query = QueryBuilder.applySelect(
+			query,
+			(config.select || "*") as keyof Tables<T>,
+		);
 
 		// Apply filters
 		if (config.filters) {
@@ -221,7 +230,7 @@ export abstract class BaseService<T extends TableName> {
 	 * Count records with filters
 	 */
 	protected async countWithFilters(
-		filters?: FilterGroup | FilterCondition[],
+		filters?: FilterGroup<T> | FilterCondition<T>[],
 	): Promise<number> {
 		let query: any = this.createBaseQuery();
 
@@ -248,7 +257,7 @@ export abstract class BaseService<T extends TableName> {
 	 * Find records with simple filters (backward compatibility)
 	 */
 	protected async findAllWithFilters<TReturn = Row<T>[]>(
-		filters: FilterGroup | FilterCondition[],
+		filters: FilterGroup<T> | FilterCondition<T>[],
 		select?: string,
 	): Promise<TReturn[]> {
 		return this.findWithConfig<TReturn>({
@@ -265,12 +274,12 @@ export abstract class BaseService<T extends TableName> {
 	 * Generic search method with filters, sorting, pagination, and search
 	 */
 	async search<TReturn = Row<T>[]>(options: {
-		filters?: FilterGroup | FilterCondition[];
+		filters?: FilterGroup<T> | FilterCondition<T>[];
 		search?: {
-			columns: string[];
+			columns: (keyof Tables<T>)[];
 			term: string;
 		};
-		sort?: SortConfig[];
+		sort?: SortConfig<T>[];
 		pagination?: PaginationConfig;
 		select?: string;
 	}): Promise<TReturn[]> {
@@ -287,7 +296,7 @@ export abstract class BaseService<T extends TableName> {
 	 * Generic find method with filters only
 	 */
 	async find<TReturn = Row<T>[]>(options: {
-		filters: FilterGroup | FilterCondition[];
+		filters: FilterGroup<T> | FilterCondition<T>[];
 		select?: string;
 	}): Promise<TReturn[]> {
 		return this.findWithConfig<TReturn>({
@@ -299,7 +308,9 @@ export abstract class BaseService<T extends TableName> {
 	/**
 	 * Generic count method with filters
 	 */
-	async count(filters?: FilterGroup | FilterCondition[]): Promise<number> {
+	async count(
+		filters?: FilterGroup<T> | FilterCondition<T>[],
+	): Promise<number> {
 		return this.countWithFilters(filters);
 	}
 
@@ -307,12 +318,12 @@ export abstract class BaseService<T extends TableName> {
 	 * Generic paginated search method
 	 */
 	async searchPaginated<TReturn = Row<T>[]>(options: {
-		filters?: FilterGroup | FilterCondition[];
+		filters?: FilterGroup<T> | FilterCondition<T>[];
 		search?: {
-			columns: string[];
+			columns: (keyof Tables<T>)[];
 			term: string;
 		};
-		sort?: SortConfig[];
+		sort?: SortConfig<T>[];
 		page: number;
 		limit: number;
 		select?: string;
@@ -355,11 +366,13 @@ export abstract class BaseService<T extends TableName> {
 		value: unknown,
 		options?: {
 			select?: string;
-			sort?: SortConfig[];
+			sort?: SortConfig<T>[];
 			limit?: number;
 		},
 	): Promise<TReturn[]> {
-		const filters: FilterCondition[] = [Filter.eq(field as string, value)];
+		const filters: FilterCondition<T>[] = [
+			Filter.eq<T, unknown>(field as keyof Tables<T>, value),
+		];
 
 		return this.findWithConfig<TReturn>({
 			filters,
@@ -376,12 +389,12 @@ export abstract class BaseService<T extends TableName> {
 		fields: Record<keyof Row<T>, unknown>,
 		options?: {
 			select?: string;
-			sort?: SortConfig[];
+			sort?: SortConfig<T>[];
 			limit?: number;
 		},
 	): Promise<TReturn[]> {
-		const filters: FilterCondition[] = Object.entries(fields).map(
-			([key, value]) => Filter.eq(key, value),
+		const filters: FilterCondition<T>[] = Object.entries(fields).map(
+			([key, value]) => Filter.eq<T, unknown>(key as keyof Tables<T>, value),
 		);
 
 		return this.findWithConfig<TReturn>({
@@ -400,11 +413,13 @@ export abstract class BaseService<T extends TableName> {
 		values: unknown[],
 		options?: {
 			select?: string;
-			sort?: SortConfig[];
+			sort?: SortConfig<T>[];
 			limit?: number;
 		},
 	): Promise<TReturn[]> {
-		const filters: FilterCondition[] = [Filter.in(field as string, values)];
+		const filters: FilterCondition<T>[] = [
+			Filter.in<T, unknown>(field as keyof Tables<T>, values),
+		];
 
 		return this.findWithConfig<TReturn>({
 			filters,
@@ -421,16 +436,16 @@ export abstract class BaseService<T extends TableName> {
 		columns: (keyof Row<T>)[],
 		term: string,
 		options?: {
-			filters?: FilterGroup | FilterCondition[];
+			filters?: FilterGroup<T> | FilterCondition<T>[];
 			select?: string;
-			sort?: SortConfig[];
+			sort?: SortConfig<T>[];
 			limit?: number;
 		},
 	): Promise<TReturn[]> {
 		return this.findWithConfig<TReturn>({
 			filters: options?.filters,
 			search: {
-				columns: columns as string[],
+				columns: columns as (keyof Tables<T>)[],
 				term,
 			},
 			select: options?.select || "*",

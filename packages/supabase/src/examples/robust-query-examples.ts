@@ -4,7 +4,7 @@
  * This file demonstrates how to use the new robust, generic query system
  * that eliminates the need to define custom methods in each service.
  */
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
+/** biome-ignore-all lint/suspicious/noExplicitAny: examples need any for demonstration */
 
 import { createServerClient } from "../clients/server";
 import type { FilterCondition, FilterGroup } from "../lib/query-builder";
@@ -33,12 +33,12 @@ export class GenericServiceExamples {
 	/**
 	 * Example 2: Find with multiple filters
 	 */
-	async getActiveDepartments(organizationId: string) {
+	async getRecentDepartments(organizationId: string) {
 		// Uses generic find method - no custom method needed!
 		return this.departmentService.find({
 			filters: [
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "active"),
+				Filter.eq<"team", string>("organizationId", organizationId),
+				Filter.gte<"team", string>("createdAt", "2024-01-01"),
 			],
 		});
 	}
@@ -47,11 +47,17 @@ export class GenericServiceExamples {
 	 * Example 3: Find with complex filters
 	 */
 	async getDepartmentsWithComplexFilters(organizationId: string) {
-		const complexFilters: FilterGroup = Filter.and(
-			Filter.eq("organizationId", organizationId),
-			Filter.or(
-				Filter.and(Filter.eq("status", "active"), Filter.gte("memberCount", 5)),
-				Filter.and(Filter.eq("status", "pending"), Filter.lt("memberCount", 3)),
+		const complexFilters: FilterGroup<"team"> = Filter.and<"team">(
+			Filter.eq<"team", string>("organizationId", organizationId),
+			Filter.or<"team">(
+				Filter.and<"team">(
+					Filter.gte<"team", string>("createdAt", "2024-01-01"),
+					Filter.lte<"team", string>("createdAt", "2024-06-30"),
+				),
+				Filter.and<"team">(
+					Filter.gte<"team", string>("updatedAt", "2024-07-01"),
+					Filter.lte<"team", string>("updatedAt", "2024-12-31"),
+				),
 			),
 		);
 
@@ -66,13 +72,9 @@ export class GenericServiceExamples {
 	 */
 	async searchDepartments(organizationId: string, searchTerm: string) {
 		// Uses generic searchText method - no custom method needed!
-		return this.departmentService.searchText(
-			["name", "description"],
-			searchTerm,
-			{
-				filters: [Filter.eq("organizationId", organizationId)],
-			},
-		);
+		return this.departmentService.searchText(["name"], searchTerm, {
+			filters: [Filter.eq<"team", string>("organizationId", organizationId)],
+		});
 	}
 
 	/**
@@ -82,14 +84,14 @@ export class GenericServiceExamples {
 		// Uses generic search method - no custom method needed!
 		return this.departmentService.search({
 			filters: [
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "active"),
+				Filter.eq<"team", string>("organizationId", organizationId),
+				Filter.gte<"team", string>("createdAt", "2024-01-01"),
 			],
 			search: {
-				columns: ["name", "description"],
+				columns: ["name"],
 				term: searchTerm,
 			},
-			sort: [Sort.asc("name")],
+			sort: [Sort.asc<"team">("name")],
 			pagination: { limit: 20 },
 		});
 	}
@@ -104,44 +106,44 @@ export class GenericServiceExamples {
 	) {
 		// Uses generic searchPaginated method - no custom method needed!
 		return this.departmentService.searchPaginated({
-			filters: [Filter.eq("organizationId", organizationId)],
+			filters: [Filter.eq<"team", string>("organizationId", organizationId)],
 			page,
 			limit,
-			sort: [Sort.desc("createdAt")],
+			sort: [Sort.desc<"team">("createdAt")],
 		});
 	}
 
 	/**
-	 * Example 7: Find by multiple fields
+	 * Example 7: Find by multiple fields (using team table columns)
 	 */
-	async getDepartmentsByFields(organizationId: string, status: string) {
+	async getDepartmentsByFields(organizationId: string, name: string) {
 		// Uses generic findByFields method - no custom method needed!
 		return this.departmentService.findByFields({
 			organizationId,
-			status,
+			name,
 		});
 	}
 
 	/**
-	 * Example 8: Find by IN operator
+	 * Example 8: Find by IN operator (using team table columns)
 	 */
-	async getDepartmentsByStatuses(organizationId: string, statuses: string[]) {
+	async getDepartmentsByIds(organizationId: string, departmentIds: string[]) {
 		// Uses generic findByIn method - no custom method needed!
-		return this.departmentService.findByIn("status", statuses, {
-			filters: [Filter.eq("organizationId", organizationId)],
+		return this.departmentService.findByIn("id", departmentIds, {
+			filters: [Filter.eq<"team", string>("organizationId", organizationId)],
 		});
 	}
 
 	/**
-	 * Example 9: Count with filters
+	 * Example 9: Count with filters (using team table columns)
 	 */
-	async getDepartmentCount(organizationId: string, status?: string) {
-		const filters: FilterCondition[] = [
-			Filter.eq("organizationId", organizationId),
+	async getDepartmentCount(organizationId: string, createdAfter?: string) {
+		const filters: FilterCondition<"team">[] = [
+			Filter.eq<"team", string>("organizationId", organizationId),
 		];
 
-		if (status) {
-			filters.push(Filter.eq("status", status));
+		if (createdAfter) {
+			filters.push(Filter.gte<"team", string>("createdAt", createdAfter));
 		}
 
 		// Uses generic count method - no custom method needed!
@@ -155,8 +157,8 @@ export class GenericServiceExamples {
 		// Uses generic findOne method - no custom method needed!
 		return this.departmentService.findOne({
 			filters: [
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("name", name),
+				Filter.eq<"team", string>("organizationId", organizationId),
+				Filter.eq<"team", string>("name", name),
 			],
 		});
 	}
@@ -169,21 +171,21 @@ export class GenericServiceExamples {
 	 * Dashboard data loading
 	 */
 	async loadDashboardData(organizationId: string) {
-		const [departments, totalCount, activeCount] = await Promise.all([
+		const [departments, totalCount, recentCount] = await Promise.all([
 			// Get recent departments
 			this.departmentService.search({
-				filters: [Filter.eq("organizationId", organizationId)],
-				sort: [Sort.desc("createdAt")],
+				filters: [Filter.eq<"team", string>("organizationId", organizationId)],
+				sort: [Sort.desc<"team">("createdAt")],
 				pagination: { limit: 10 },
 			}),
 			// Get total count
 			this.departmentService.count([
-				Filter.eq("organizationId", organizationId),
+				Filter.eq<"team", string>("organizationId", organizationId),
 			]),
-			// Get active count
+			// Get recent count (created in last 30 days)
 			this.departmentService.count([
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "active"),
+				Filter.eq<"team", string>("organizationId", organizationId),
+				Filter.gte<"team", string>("createdAt", "2024-01-01"),
 			]),
 		]);
 
@@ -191,8 +193,8 @@ export class GenericServiceExamples {
 			departments,
 			stats: {
 				total: totalCount,
-				active: activeCount,
-				inactive: totalCount - activeCount,
+				recent: recentCount,
+				older: totalCount - recentCount,
 			},
 		};
 	}
@@ -204,23 +206,25 @@ export class GenericServiceExamples {
 		organizationId: string,
 		uiFilters: {
 			searchTerm?: string;
-			status?: string;
-			sortBy?: string;
+			createdAfter?: string;
+			sortBy?: "name" | "createdAt" | "updatedAt";
 			sortOrder?: "asc" | "desc";
 			page?: number;
 			limit?: number;
 		},
 	) {
-		const filters: FilterCondition[] = [
-			Filter.eq("organizationId", organizationId),
+		const filters: FilterCondition<"team">[] = [
+			Filter.eq<"team", string>("organizationId", organizationId),
 		];
 
-		if (uiFilters.status) {
-			filters.push(Filter.eq("status", uiFilters.status));
+		if (uiFilters.createdAfter) {
+			filters.push(
+				Filter.gte<"team", string>("createdAt", uiFilters.createdAfter),
+			);
 		}
 
 		const sort = uiFilters.sortBy
-			? [Sort[uiFilters.sortOrder || "asc"](uiFilters.sortBy)]
+			? [Sort[uiFilters.sortOrder || "asc"]<"team">(uiFilters.sortBy)]
 			: undefined;
 
 		if (uiFilters.page && uiFilters.limit) {
@@ -229,7 +233,7 @@ export class GenericServiceExamples {
 				filters,
 				search: uiFilters.searchTerm
 					? {
-							columns: ["name", "description"],
+							columns: ["name"],
 							term: uiFilters.searchTerm,
 						}
 					: undefined,
@@ -243,7 +247,7 @@ export class GenericServiceExamples {
 				filters,
 				search: uiFilters.searchTerm
 					? {
-							columns: ["name", "description"],
+							columns: ["name"],
 							term: uiFilters.searchTerm,
 						}
 					: undefined,
@@ -257,44 +261,34 @@ export class GenericServiceExamples {
 	 * Analytics queries
 	 */
 	async getAnalyticsData(organizationId: string) {
-		const [
-			totalDepartments,
-			activeDepartments,
-			pendingDepartments,
-			recentDepartments,
-		] = await Promise.all([
-			// Total count
-			this.departmentService.count([
-				Filter.eq("organizationId", organizationId),
-			]),
-			// Active count
-			this.departmentService.count([
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "active"),
-			]),
-			// Pending count
-			this.departmentService.count([
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "pending"),
-			]),
-			// Recent departments (last 30 days)
-			this.departmentService.find({
-				filters: [
-					Filter.eq("organizationId", organizationId),
-					Filter.gte(
+		const [totalDepartments, recentDepartments, updatedDepartments] =
+			await Promise.all([
+				// Total count
+				this.departmentService.count([
+					Filter.eq<"team", string>("organizationId", organizationId),
+				]),
+				// Recent departments (last 30 days)
+				this.departmentService.count([
+					Filter.eq<"team", string>("organizationId", organizationId),
+					Filter.gte<"team", string>(
 						"createdAt",
 						new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
 					),
-				],
-				sort: [Sort.desc("createdAt")],
-			}),
-		]);
+				]),
+				// Updated departments (last 30 days)
+				this.departmentService.count([
+					Filter.eq<"team", string>("organizationId", organizationId),
+					Filter.gte<"team", string>(
+						"updatedAt",
+						new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+					),
+				]),
+			]);
 
 		return {
 			total: totalDepartments,
-			active: activeDepartments,
-			pending: pendingDepartments,
-			recent: recentDepartments.length,
+			recent: recentDepartments,
+			updated: updatedDepartments,
 		};
 	}
 }
@@ -309,41 +303,38 @@ export const QueryHelpers = {
 	 */
 	createOrgFilters: (
 		organizationId: string,
-		additionalFilters: FilterCondition[] = [],
-	) => [Filter.eq("organizationId", organizationId), ...additionalFilters],
-
-	/**
-	 * Create status filters
-	 */
-	createStatusFilters: (status: string | string[]) => {
-		if (Array.isArray(status)) {
-			return Filter.in("status", status);
-		}
-		return Filter.eq("status", status);
-	},
-
-	/**
-	 * Create date range filters
-	 */
-	createDateRangeFilters: (startDate: string, endDate: string) => [
-		Filter.gte("createdAt", startDate),
-		Filter.lt("createdAt", endDate),
+		additionalFilters: FilterCondition<"team">[] = [],
+	) => [
+		Filter.eq<"team", string>("organizationId", organizationId),
+		...additionalFilters,
 	],
 
 	/**
-	 * Create search configuration
+	 * Create date range filters (typesafe for team table)
 	 */
-	createSearchConfig: (columns: string[], term: string) => ({
+	createDateRangeFilters: (startDate: string, endDate: string) => [
+		Filter.gte<"team", string>("createdAt", startDate),
+		Filter.lt<"team", string>("createdAt", endDate),
+	],
+
+	/**
+	 * Create search configuration (typesafe for team table)
+	 */
+	createSearchConfig: (
+		columns: ("name" | "createdAt" | "updatedAt" | "organizationId" | "id")[],
+		term: string,
+	) => ({
 		columns,
 		term,
 	}),
 
 	/**
-	 * Create sort configuration
+	 * Create sort configuration (typesafe for team table)
 	 */
-	createSortConfig: (column: string, order: "asc" | "desc" = "asc") => [
-		Sort[order](column),
-	],
+	createSortConfig: (
+		column: "name" | "createdAt" | "updatedAt",
+		order: "asc" | "desc" = "asc",
+	) => [Sort[order]<"team">(column)],
 
 	/**
 	 * Create pagination configuration
@@ -360,9 +351,8 @@ export const QueryHelpers = {
 
 export type DepartmentQueryOptions = {
 	organizationId: string;
-	status?: string | string[];
 	searchTerm?: string;
-	sortBy?: string;
+	sortBy?: "name" | "createdAt" | "updatedAt";
 	sortOrder?: "asc" | "desc";
 	page?: number;
 	limit?: number;
@@ -373,32 +363,31 @@ export type DepartmentQueryOptions = {
 };
 
 export const createDepartmentQuery = (options: DepartmentQueryOptions) => {
-	const filters: FilterCondition[] = [
-		Filter.eq("organizationId", options.organizationId),
+	const filters: FilterCondition<"team">[] = [
+		Filter.eq<"team", string>("organizationId", options.organizationId),
 	];
-
-	// Add status filter
-	if (options.status) {
-		if (Array.isArray(options.status)) {
-			filters.push(Filter.in("status", options.status));
-		} else {
-			filters.push(Filter.eq("status", options.status));
-		}
-	}
 
 	// Add date range filter
 	if (options.dateRange) {
-		filters.push(Filter.gte("createdAt", options.dateRange.start));
-		filters.push(Filter.lt("createdAt", options.dateRange.end));
+		filters.push(
+			Filter.gte<"team", string>("createdAt", options.dateRange.start),
+		);
+		filters.push(Filter.lt<"team", string>("createdAt", options.dateRange.end));
 	}
 
 	const sort = options.sortBy
-		? [Sort[options.sortOrder || "asc"](options.sortBy)]
+		? [Sort[options.sortOrder || "asc"]<"team">(options.sortBy)]
 		: undefined;
 
 	const search = options.searchTerm
 		? {
-				columns: ["name", "description"],
+				columns: ["name"] as (
+					| "name"
+					| "createdAt"
+					| "updatedAt"
+					| "organizationId"
+					| "id"
+				)[],
 				term: options.searchTerm,
 			}
 		: undefined;
@@ -441,7 +430,6 @@ export const usageExamples = {
 		const queryOptions = createDepartmentQuery({
 			organizationId,
 			searchTerm,
-			status,
 		});
 
 		return departmentService.search(queryOptions);
@@ -469,16 +457,18 @@ export const usageExamples = {
 	async getDepartmentAnalytics(organizationId: string) {
 		const departmentService = new DepartmentService(supabase);
 
-		const [total, active, recent] = await Promise.all([
-			departmentService.count([Filter.eq("organizationId", organizationId)]),
+		const [total, recent, updated] = await Promise.all([
 			departmentService.count([
-				Filter.eq("organizationId", organizationId),
-				Filter.eq("status", "active"),
+				Filter.eq<"team", string>("organizationId", organizationId),
+			]),
+			departmentService.count([
+				Filter.eq<"team", string>("organizationId", organizationId),
+				Filter.gte<"team", string>("createdAt", "2024-01-01"),
 			]),
 			departmentService.find({
 				filters: [
-					Filter.eq("organizationId", organizationId),
-					Filter.gte(
+					Filter.eq<"team", string>("organizationId", organizationId),
+					Filter.gte<"team", string>(
 						"createdAt",
 						new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
 					),
@@ -486,6 +476,6 @@ export const usageExamples = {
 			}),
 		]);
 
-		return { total, active, recentCount: recent.length };
+		return { total, recent, updated };
 	},
 };

@@ -21,19 +21,22 @@ export type FilterOperator =
 	| "or"
 	| "and";
 
-export type FilterCondition<T = unknown> = {
-	column: string;
+export type FilterCondition<
+	TTable extends TableName = TableName,
+	TValue = unknown,
+> = {
+	column: keyof Tables<TTable>;
 	operator: FilterOperator;
-	value: T;
+	value: TValue;
 };
 
-export type FilterGroup = {
+export type FilterGroup<TTable extends TableName = TableName> = {
 	operator: "and" | "or";
-	conditions: (FilterCondition | FilterGroup)[];
+	conditions: (FilterCondition<TTable> | FilterGroup<TTable>)[];
 };
 
-export type SortConfig = {
-	column: string;
+export type SortConfig<TTable extends TableName = TableName> = {
+	column: keyof Tables<TTable>;
 	ascending?: boolean;
 };
 
@@ -45,12 +48,12 @@ export type PaginationConfig = {
 };
 
 export type QueryConfig<T extends TableName> = {
-	filters?: FilterGroup | FilterCondition[];
+	filters?: FilterGroup<T> | FilterCondition<T>[];
 	select?: string;
-	sort?: SortConfig[];
+	sort?: SortConfig<T>[];
 	pagination?: PaginationConfig;
 	search?: {
-		columns: string[];
+		columns: (keyof Tables<T>)[];
 		term: string;
 	};
 };
@@ -59,83 +62,151 @@ export type QueryConfig<T extends TableName> = {
  * Helper function to create common filter conditions
  */
 export const Filter = {
-	eq: <T>(column: string, value: T): FilterCondition<T> => ({
+	eq: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "eq",
 		value,
 	}),
 
-	neq: <T>(column: string, value: T): FilterCondition<T> => ({
+	neq: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "neq",
 		value,
 	}),
 
-	gt: <T>(column: string, value: T): FilterCondition<T> => ({
+	gt: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "gt",
 		value,
 	}),
 
-	gte: <T>(column: string, value: T): FilterCondition<T> => ({
+	gte: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "gte",
 		value,
 	}),
 
-	lt: <T>(column: string, value: T): FilterCondition<T> => ({
+	lt: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "lt",
 		value,
 	}),
 
-	lte: <T>(column: string, value: T): FilterCondition<T> => ({
+	lte: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "lte",
 		value,
 	}),
 
-	like: (column: string, value: string): FilterCondition<string> => ({
+	like: <TTable extends TableName>(
+		column: keyof Tables<TTable>,
+		value: string,
+	): FilterCondition<TTable, string> => ({
 		column,
 		operator: "like",
 		value,
 	}),
 
-	ilike: (column: string, value: string): FilterCondition<string> => ({
+	ilike: <TTable extends TableName>(
+		column: keyof Tables<TTable>,
+		value: string,
+	): FilterCondition<TTable, string> => ({
 		column,
 		operator: "ilike",
 		value,
 	}),
 
-	in: <T>(column: string, values: T[]): FilterCondition<T[]> => ({
+	in: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		values: T[],
+	): FilterCondition<TTable, T[]> => ({
 		column,
 		operator: "in",
 		value: values,
 	}),
 
-	is: <T>(column: string, value: T): FilterCondition<T> => ({
+	is: <TTable extends TableName, T>(
+		column: keyof Tables<TTable>,
+		value: T,
+	): FilterCondition<TTable, T> => ({
 		column,
 		operator: "is",
 		value,
 	}),
 
-	and: (...conditions: (FilterCondition | FilterGroup)[]): FilterGroup => ({
+	and: <TTable extends TableName>(
+		...conditions: (FilterCondition<TTable> | FilterGroup<TTable>)[]
+	): FilterGroup<TTable> => ({
 		operator: "and",
 		conditions,
 	}),
 
-	or: (...conditions: (FilterCondition | FilterGroup)[]): FilterGroup => ({
+	or: <TTable extends TableName>(
+		...conditions: (FilterCondition<TTable> | FilterGroup<TTable>)[]
+	): FilterGroup<TTable> => ({
 		operator: "or",
 		conditions,
 	}),
 };
 
 /**
+ * Creates a table-specific filter instance with all filter methods
+ */
+export const createTableFilters = <TTable extends TableName>() => ({
+	eq: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.eq<TTable, T>(column, value),
+	neq: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.neq<TTable, T>(column, value),
+	gt: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.gt<TTable, T>(column, value),
+	gte: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.gte<TTable, T>(column, value),
+	lt: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.lt<TTable, T>(column, value),
+	lte: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.lte<TTable, T>(column, value),
+	like: (column: keyof Tables<TTable>, value: string) =>
+		Filter.like<TTable>(column, value),
+	ilike: (column: keyof Tables<TTable>, value: string) =>
+		Filter.ilike<TTable>(column, value),
+	in: <T>(column: keyof Tables<TTable>, values: T[]) =>
+		Filter.in<TTable, T>(column, values),
+	is: <T>(column: keyof Tables<TTable>, value: T) =>
+		Filter.is<TTable, T>(column, value),
+	and: (...conditions: (FilterCondition<TTable> | FilterGroup<TTable>)[]) =>
+		Filter.and<TTable>(...conditions),
+	or: (...conditions: (FilterCondition<TTable> | FilterGroup<TTable>)[]) =>
+		Filter.or<TTable>(...conditions),
+});
+
+/**
  * Helper function to create sort configurations
  */
 export const Sort = {
-	asc: (column: string): SortConfig => ({ column, ascending: true }),
-	desc: (column: string): SortConfig => ({ column, ascending: false }),
+	asc: <TTable extends TableName>(
+		column: keyof Tables<TTable>,
+	): SortConfig<TTable> => ({ column, ascending: true }),
+	desc: <TTable extends TableName>(
+		column: keyof Tables<TTable>,
+	): SortConfig<TTable> => ({ column, ascending: false }),
 };
 
 /**
@@ -155,7 +226,7 @@ export const QueryBuilder = {
 	 */
 	applyFilters<T extends TableName>(
 		query: any,
-		filters: FilterGroup | FilterCondition[],
+		filters: FilterGroup<T> | FilterCondition<T>[],
 	): any {
 		if (Array.isArray(filters)) {
 			return QueryBuilder.applyFilterArray(query, filters);
@@ -166,7 +237,10 @@ export const QueryBuilder = {
 	/**
 	 * Apply an array of filter conditions
 	 */
-	applyFilterArray(query: any, filters: FilterCondition[]): any {
+	applyFilterArray<T extends TableName>(
+		query: any,
+		filters: FilterCondition<T>[],
+	): any {
 		return filters.reduce((q, condition) => {
 			return QueryBuilder.applyCondition(q, condition);
 		}, query);
@@ -175,7 +249,10 @@ export const QueryBuilder = {
 	/**
 	 * Apply a filter group (recursive)
 	 */
-	applyFilterGroup(query: any, filterGroup: FilterGroup): any {
+	applyFilterGroup<T extends TableName>(
+		query: any,
+		filterGroup: FilterGroup<T>,
+	): any {
 		const { operator, conditions } = filterGroup;
 
 		if (operator === "and") {
@@ -202,7 +279,10 @@ export const QueryBuilder = {
 	/**
 	 * Apply a single filter condition
 	 */
-	applyCondition(query: any, condition: FilterCondition): any {
+	applyCondition<T extends TableName>(
+		query: any,
+		condition: FilterCondition<T>,
+	): any {
 		const { column, operator, value } = condition;
 
 		switch (operator) {
@@ -236,7 +316,10 @@ export const QueryBuilder = {
 	/**
 	 * Apply search across multiple columns
 	 */
-	applySearch(query: any, search: { columns: string[]; term: string }): any {
+	applySearch<T extends TableName>(
+		query: any,
+		search: { columns: (keyof Tables<T>)[]; term: string },
+	): any {
 		const { columns, term } = search;
 
 		if (columns.length === 0) return query;
@@ -254,7 +337,7 @@ export const QueryBuilder = {
 	/**
 	 * Apply sorting
 	 */
-	applySort(query: any, sort: SortConfig[]): any {
+	applySort<T extends TableName>(query: any, sort: SortConfig<T>[]): any {
 		return sort.reduce((q, { column, ascending = true }) => {
 			return q.order(column, { ascending });
 		}, query);
@@ -282,7 +365,7 @@ export const QueryBuilder = {
 	/**
 	 * Apply select fields
 	 */
-	applySelect(query: any, select: string): any {
+	applySelect<T extends TableName>(query: any, select: keyof Tables<T>): any {
 		return query.select(select);
 	},
 };

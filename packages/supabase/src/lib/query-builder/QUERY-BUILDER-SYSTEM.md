@@ -1,14 +1,46 @@
 # Robust Query System
 
-A powerful, generic query system that eliminates the need to define custom methods in each service. All services automatically inherit comprehensive querying capabilities.
+A powerful, generic query system that eliminates the need to define custom methods in each service. All services automatically inherit comprehensive querying capabilities with **full type safety** for column references.
 
 ## 🚀 **Key Benefits**
 
 - **Zero Custom Methods**: No need to define filter methods in each service
-- **Type-Safe**: Full TypeScript support with proper type inference
+- **Type-Safe Columns**: Full TypeScript support with compile-time column validation
+- **Table-Specific Types**: Each service only works with columns that exist in its table
 - **Consistent API**: Same methods work across all services
 - **Highly Flexible**: Supports complex queries, pagination, sorting, and search
 - **Maintainable**: Single source of truth for query logic
+- **No Runtime Errors**: Eliminates potential errors from referencing non-existent columns
+- **Table-Specific Filter Instances**: Create reusable filter instances for any table
+
+## 🎯 **Table-Specific Filter Instances**
+
+Create reusable, type-safe filter instances for any table:
+
+```typescript
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instances
+const teamFilters = createTableFilters<"team">();
+const userFilters = createTableFilters<"user">();
+const departmentFilters = createTableFilters<"department">();
+
+// All methods are type-safe for the specific table
+const filters = [
+  teamFilters.eq("organizationId", "org-123"),
+  teamFilters.gte("createdAt", "2024-01-01"),
+  teamFilters.ilike("name", "%marketing%"),
+];
+
+// Complex filtering with type safety
+const complexFilters = teamFilters.and(
+  teamFilters.eq("organizationId", "org-123"),
+  teamFilters.or(
+    teamFilters.gte("createdAt", "2024-01-01"),
+    teamFilters.lte("updatedAt", "2024-12-31"),
+  ),
+);
+```
 
 ## 📋 **Available Methods**
 
@@ -17,56 +49,56 @@ Every service that extends `BaseService` automatically gets these methods:
 ### **Basic Query Methods**
 
 ```typescript
-// Find by single field
+// Find by single field (typesafe for team table)
 await service.findBy("organizationId", "org-123");
 
-// Find with filters
+// Find with filters (typesafe for team table)
 await service.find({
-  filters: [Filter.eq("status", "active")]
+  filters: [Filter.eq<"team", string>("organizationId", "org-123")]
 });
 
-// Find one record
+// Find one record (typesafe for team table)
 await service.findOne({
-  filters: [Filter.eq("id", "dept-123")]
+  filters: [Filter.eq<"team", string>("id", "dept-123")]
 });
 
-// Count records
-await service.count([Filter.eq("status", "active")]);
+// Count records (typesafe for team table)
+await service.count([Filter.eq<"team", string>("organizationId", "org-123")]);
 ```
 
 ### **Advanced Query Methods**
 
 ```typescript
-// Search with all options
+// Search with all options (typesafe for team table)
 await service.search({
-  filters: [Filter.eq("organizationId", "org-123")],
-  search: { columns: ["name", "description"], term: "marketing" },
-  sort: [Sort.asc("name")],
+  filters: [Filter.eq<"team", string>("organizationId", "org-123")],
+  search: { columns: ["name"], term: "marketing" },
+  sort: [Sort.asc<"team">("name")],
   pagination: { limit: 20 }
 });
 
-// Paginated search
+// Paginated search (typesafe for team table)
 await service.searchPaginated({
-  filters: [Filter.eq("organizationId", "org-123")],
+  filters: [Filter.eq<"team", string>("organizationId", "org-123")],
   page: 1,
   limit: 10,
-  sort: [Sort.desc("createdAt")]
+  sort: [Sort.desc<"team">("createdAt")]
 });
 
-// Find by multiple fields
+// Find by multiple fields (typesafe for team table)
 await service.findByFields({
   organizationId: "org-123",
-  status: "active"
+  name: "Marketing"
 });
 
-// Find by IN operator
-await service.findByIn("status", ["active", "pending"]);
+// Find by IN operator (typesafe for team table)
+await service.findByIn("id", ["dept-1", "dept-2"]);
 
-// Text search across multiple columns
+// Text search across multiple columns (typesafe for team table)
 await service.searchText(
-  ["name", "description"],
+  ["name"],
   "marketing",
-  { filters: [Filter.eq("organizationId", "org-123")] }
+  { filters: [Filter.eq<"team", string>("organizationId", "org-123")] }
 );
 ```
 
@@ -75,19 +107,24 @@ await service.searchText(
 ### **1. Dashboard Data Loading**
 
 ```typescript
-// Get recent departments with pagination
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instance
+const teamFilters = createTableFilters<"team">();
+
+// Get recent departments with pagination (typesafe for team table)
 const departments = await departmentService.search({
-  filters: [Filter.eq("organizationId", organizationId)],
-  sort: [Sort.desc("createdAt")],
+  filters: [teamFilters.eq("organizationId", organizationId)],
+  sort: [Sort.desc<"team">("createdAt")],
   pagination: { limit: 10 }
 });
 
-// Get counts for statistics
-const [total, active] = await Promise.all([
-  departmentService.count([Filter.eq("organizationId", organizationId)]),
+// Get counts for statistics (typesafe for team table)
+const [total, recent] = await Promise.all([
+  departmentService.count([teamFilters.eq("organizationId", organizationId)]),
   departmentService.count([
-    Filter.eq("organizationId", organizationId),
-    Filter.eq("status", "active")
+    teamFilters.eq("organizationId", organizationId),
+    teamFilters.gte("createdAt", "2024-01-01")
   ])
 ]);
 ```
@@ -95,17 +132,22 @@ const [total, active] = await Promise.all([
 ### **2. Search with UI Filters**
 
 ```typescript
-// Handle search from UI
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instance
+const teamFilters = createTableFilters<"team">();
+
+// Handle search from UI (typesafe for team table)
 const results = await departmentService.search({
   filters: [
-    Filter.eq("organizationId", organizationId),
-    ...(status ? [Filter.eq("status", status)] : [])
+    teamFilters.eq("organizationId", organizationId),
+    ...(createdAfter ? [teamFilters.gte("createdAt", createdAfter)] : [])
   ],
   search: searchTerm ? {
-    columns: ["name", "description"],
+    columns: ["name"],
     term: searchTerm
   } : undefined,
-  sort: sortBy ? [Sort[sortOrder](sortBy)] : undefined,
+  sort: sortBy ? [Sort[sortOrder]<"team">(sortBy)] : undefined,
   pagination: limit ? { limit } : undefined
 });
 ```
@@ -113,17 +155,22 @@ const results = await departmentService.search({
 ### **3. Complex Filtering**
 
 ```typescript
-// Complex nested filters
-const complexFilters = Filter.and(
-  Filter.eq("organizationId", organizationId),
-  Filter.or(
-    Filter.and(
-      Filter.eq("status", "active"),
-      Filter.gte("memberCount", 5)
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instance
+const teamFilters = createTableFilters<"team">();
+
+// Complex nested filters (typesafe for team table)
+const complexFilters = teamFilters.and(
+  teamFilters.eq("organizationId", organizationId),
+  teamFilters.or(
+    teamFilters.and(
+      teamFilters.gte("createdAt", "2024-01-01"),
+      teamFilters.lte("createdAt", "2024-06-30")
     ),
-    Filter.and(
-      Filter.eq("status", "pending"),
-      Filter.lt("memberCount", 3)
+    teamFilters.and(
+      teamFilters.gte("updatedAt", "2024-07-01"),
+      teamFilters.lte("updatedAt", "2024-12-31")
     )
   )
 );
@@ -136,16 +183,69 @@ const departments = await departmentService.find({
 ### **4. Paginated Results**
 
 ```typescript
-// Get paginated results with metadata
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instance
+const teamFilters = createTableFilters<"team">();
+
+// Get paginated results with metadata (typesafe for team table)
 const result = await departmentService.searchPaginated({
-  filters: [Filter.eq("organizationId", organizationId)],
+  filters: [teamFilters.eq("organizationId", organizationId)],
   search: { columns: ["name"], term: "marketing" },
   page: 1,
   limit: 20,
-  sort: [Sort.asc("name")]
+  sort: [Sort.asc<"team">("name")]
 });
 
 // Result includes: { data, total, page, limit, totalPages }
+```
+
+## 🔒 **Type Safety Features**
+
+### **Column Validation**
+All column references are validated at compile time:
+
+```typescript
+import { createTableFilters } from "../lib/query-builder";
+
+const teamFilters = createTableFilters<"team">();
+
+// ✅ Valid - these columns exist in the team table
+teamFilters.eq("organizationId", "org-123")
+teamFilters.eq("name", "Marketing")
+teamFilters.gte("createdAt", "2024-01-01")
+
+// ❌ Invalid - these columns don't exist in the team table
+teamFilters.eq("status", "active")        // Error: 'status' not in team table
+teamFilters.eq("description", "text")     // Error: 'description' not in team table
+teamFilters.eq("memberCount", 5)          // Error: 'memberCount' not in team table
+```
+
+### **Available Columns for Team Table**
+- `id` - Primary key
+- `name` - Department name
+- `organizationId` - Foreign key to organization
+- `createdAt` - Creation timestamp
+- `updatedAt` - Last update timestamp
+
+### **Generic Type Parameters**
+```typescript
+import { createTableFilters } from "../lib/query-builder";
+
+// Create table-specific filter instance
+const teamFilters = createTableFilters<"team">();
+
+// All methods are type-safe for the specific table
+teamFilters.eq("organizationId", "org-123")
+teamFilters.eq("name", "Marketing")
+teamFilters.gte("createdAt", "2024-01-01")
+
+// Sort.asc<TableName>(column)
+Sort.asc<"team">("name")
+Sort.desc<"team">("createdAt")
+
+// FilterGroup<TableName>
+const filters: FilterGroup<"team"> = teamFilters.and(...)
 ```
 
 ## 🔧 **Service Implementation**
@@ -216,7 +316,7 @@ class DepartmentService {
   async getActiveDepartments(organizationId: string) {
     return this.findAllWithFilters([
       Filter.eq("organizationId", organizationId),
-      Filter.eq("status", "active")
+      Filter.eq("status", "active")  // ❌ 'status' doesn't exist in team table
     ]);
   }
 
@@ -230,40 +330,50 @@ class DepartmentService {
 }
 ```
 
-### **After (Generic Methods)**
+### **After (Generic Methods with Type Safety)**
 
 ```typescript
-// New way - use generic methods
+import { createTableFilters } from "../lib/query-builder";
+
+// New way - use generic methods with type safety
 class DepartmentService extends BaseService<"team"> {
   // No custom query methods needed!
 
-  // Just use the generic methods directly
-  async getActiveDepartments(organizationId: string) {
+  // Just use the generic methods directly with type safety
+  async getRecentDepartments(organizationId: string) {
+    const teamFilters = createTableFilters<"team">();
+    
     return this.find({
       filters: [
-        Filter.eq("organizationId", organizationId),
-        Filter.eq("status", "active")
+        teamFilters.eq("organizationId", organizationId),
+        teamFilters.gte("createdAt", "2024-01-01")  // ✅ Type-safe column
       ]
     });
   }
 }
 
-// Or even better - use directly in your components
+// Or even better - use directly in your components with type safety
+const teamFilters = createTableFilters<"team">();
 const departments = await departmentService.find({
   filters: [
-    Filter.eq("organizationId", organizationId),
-    Filter.eq("status", "active")
+    teamFilters.eq("organizationId", organizationId),
+    teamFilters.gte("createdAt", "2024-01-01")  // ✅ Type-safe column
   ]
 });
 ```
 
 ## ✨ **Best Practices**
 
-1. **Use Generic Methods**: Prefer the inherited methods over custom ones
-2. **Compose Filters**: Build complex filters using `Filter.and()` and `Filter.or()`
-3. **Use Helper Functions**: Leverage `QueryHelpers` for common patterns
-4. **Type-Safe Queries**: Use `createDepartmentQuery` for complex scenarios
-5. **Consistent Naming**: Use the same patterns across all services
+1. **Use Table-Specific Filter Instances**: Create filter instances with `createTableFilters<TableName>()`
+2. **Use Generic Methods**: Prefer the inherited methods over custom ones
+3. **Always Use Type Parameters**: Include table and value types for type safety
+4. **Compose Filters**: Build complex filters using `filterInstance.and()` and `filterInstance.or()`
+5. **Use Helper Functions**: Leverage `QueryHelpers` for common patterns
+6. **Type-Safe Queries**: Use `createDepartmentQuery` for complex scenarios
+7. **Consistent Naming**: Use the same patterns across all services
+8. **Validate Columns**: Always check that columns exist in your table schema
+9. **Use Table-Specific Types**: Each service should only reference its table's columns
+10. **Reuse Filter Instances**: Create filter instances once and reuse them across methods
 
 ## 🎯 **Performance Tips**
 
@@ -273,4 +383,4 @@ const departments = await departmentService.find({
 - Combine filters efficiently
 - Use `count` for pagination metadata
 
-This robust system eliminates the need for custom query methods while providing maximum flexibility and type safety!
+This robust system eliminates the need for custom query methods while providing maximum flexibility, type safety, and compile-time column validation. No more runtime errors from referencing non-existent columns!
