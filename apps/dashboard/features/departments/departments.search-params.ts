@@ -1,4 +1,8 @@
-import { createLoader, parseAsString } from "nuqs/server";
+import {
+	createLoader,
+	createSearchParamsCache,
+	parseAsString,
+} from "nuqs/server";
 
 export const departmentSearchParamsParser = {
 	name: parseAsString.withDefault("").withOptions({
@@ -8,5 +12,9 @@ export const departmentSearchParamsParser = {
 };
 
 export const departmentSearchLoader = createLoader(
+	departmentSearchParamsParser,
+);
+
+export const departmentSearchCache = createSearchParamsCache(
 	departmentSearchParamsParser,
 );
