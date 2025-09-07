@@ -79,18 +79,18 @@ export function MemberSelector({
 									}}
 								>
 									<Flex align="center" gap="2">
-										<Avatar className="size-6">
+										<Avatar className="size-6 mr-2">
 											<AvatarImage src={member.user.image} />
 											<AvatarFallback>
 												{member.user.name.charAt(0)}
 											</AvatarFallback>
 										</Avatar>
-										{member.user.name}
+										<span>{member.user.name}</span>
 									</Flex>
 									<Check
 										className={cn(
 											"ml-auto h-4 w-4",
-											value === member.id ? "opacity-100" : "opacity-0",
+											value === member.user.id ? "opacity-100" : "opacity-0",
 										)}
 									/>
 								</CommandItem>
