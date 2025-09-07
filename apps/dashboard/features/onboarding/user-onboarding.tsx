@@ -99,7 +99,6 @@ function UserForm({ countryCode }: { countryCode: string }) {
 			image: session?.user.image ?? "",
 		},
 
-		// biome-ignore lint/suspicious/noExplicitAny: zod resolver having issues with zod v4
 		resolver: zodResolver(userInsertSchema as any),
 	});
 

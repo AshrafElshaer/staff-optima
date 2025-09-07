@@ -18,7 +18,9 @@
 		"./validations/*": "./src/validations/*.ts",
 		"./clients/*": "./src/clients/*.ts",
 		"./utils/*": "./src/utils/*.ts",
-		"./services": "./src/services/index.ts"
+		"./services": "./src/services/index.ts",
+		"./lib": "./src/lib/index.ts",
+		"./lib/*": "./src/lib/*.ts"
 	},
 	"devDependencies": {
 		"@types/bun": "latest"

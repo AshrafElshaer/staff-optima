@@ -110,25 +110,29 @@ export function CompanyProfileForm({
 			toast.warning("Domain has changed. Please re-verify your domain.");
 		}
 
-		updateOrganizationMutation(payload, {
-			onSuccess: (result) => {
-				setTimeout(() => {
-					form.reset(
-						result
-							? (Object.fromEntries(
-									Object.entries(result).map(([key, value]) => [
-										key,
-										value === null ? undefined : value,
-									]),
-								) as OrganizationFormValues)
-							: undefined,
-						{
-							keepDirty: false,
-						},
-					);
-				}, 3000);
+		// Ensure payload.id is always a string (not undefined) to satisfy type requirements
+		updateOrganizationMutation(
+			{ ...payload, id: payload.id ?? "" },
+			{
+				onSuccess: (result) => {
+					setTimeout(() => {
+						form.reset(
+							result
+								? (Object.fromEntries(
+										Object.entries(result).map(([key, value]) => [
+											key,
+											value === null ? undefined : value,
+										]),
+									) as OrganizationFormValues)
+								: undefined,
+							{
+								keepDirty: false,
+							},
+						);
+					}, 3000);
+				},
 			},
-		});
+		);
 	}
 
 	async function uploadLogo(file: File) {

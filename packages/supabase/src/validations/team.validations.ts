@@ -12,7 +12,7 @@ export const teamSchema = z.object({
 		.optional()
 		.or(z.literal("").transform(() => undefined)),
 	organizationId: z.uuid({ message: "Invalid organization ID." }),
-	managerId: z.uuid({ message: "Invalid manager ID." }),
+	managerId: z.uuid({ message: "Manager is required." }),
 });
 
 export const updateTeamSchema = teamSchema.partial().required({

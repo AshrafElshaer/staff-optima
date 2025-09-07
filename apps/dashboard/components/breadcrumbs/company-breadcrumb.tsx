@@ -10,6 +10,7 @@ import {
 } from "@optima/ui/components/breadcrumb";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 
 const SEGMENTS_MAP = new Map([
 	["company", "Profile"],
@@ -59,15 +60,18 @@ export function CompanyBreadcrumb() {
 					const displayName = SEGMENTS_MAP.get(segment) || segment;
 
 					return (
-						<BreadcrumbItem key={`${segment}-${index.toString()}`}>
-							{isLast ? (
-								<BreadcrumbPage>{displayName}</BreadcrumbPage>
-							) : (
-								<BreadcrumbLink asChild>
-									<Link href={href}>{displayName}</Link>
-								</BreadcrumbLink>
-							)}
-						</BreadcrumbItem>
+						<Fragment key={`${segment}-${index.toString()}`}>
+							<BreadcrumbItem>
+								{isLast ? (
+									<BreadcrumbPage>{displayName}</BreadcrumbPage>
+								) : (
+									<BreadcrumbLink asChild>
+										<Link href={href}>{displayName}</Link>
+									</BreadcrumbLink>
+								)}
+							</BreadcrumbItem>
+							{!isLast && <BreadcrumbSeparator />}
+						</Fragment>
 					);
 				})}
 			</BreadcrumbList>

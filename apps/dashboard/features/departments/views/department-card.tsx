@@ -35,8 +35,8 @@ export function DepartmentCard({ department }: { department: Department }) {
 	return (
 		<Card
 			key={department.id}
-			className=" group h-fit"
-			// onClick={handleNavigate}
+			className=" group h-fit cursor-pointer"
+			onClick={handleNavigate}
 		>
 			<CardHeader>
 				<Text size="4" weight="medium" mr="auto">

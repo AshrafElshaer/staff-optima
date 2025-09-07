@@ -44,11 +44,6 @@ export function NewDepartment() {
 	const formContext = useForm({
 		// biome-ignore lint/suspicious/noExplicitAny: zodResolver is not typed
 		resolver: zodResolver(createTeamSchema as any),
-		defaultValues: {
-			name: "",
-			description: "",
-			managerId: "",
-		},
 	});
 
 	function onSubmit(data: z.infer<typeof createTeamSchema>) {
