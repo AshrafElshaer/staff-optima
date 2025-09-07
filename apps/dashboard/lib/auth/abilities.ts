@@ -34,10 +34,3 @@ export type SubjectType = Exclude<Subjects, "all">;
 
 // Helper type to get all possible actions
 export type ActionType = Actions;
-
-import { createContextualCan } from "@casl/react";
-import { createContext } from "react";
-
-export const AbilityContext = createContext<AppAbility>({} as AppAbility);
-
-export const Can = createContextualCan(AbilityContext.Consumer);

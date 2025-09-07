@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@optima/editor/src/index";
+import { useServices } from "@optima/supabase/clients/use-services";
 import { useSupabase } from "@optima/supabase/clients/use-supabase";
 import type { OrganizationRow } from "@optima/supabase/types";
 import { uploadOrganizationLogo } from "@optima/supabase/utils/upload-file";
@@ -10,7 +11,6 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@optima/ui/components/avatar";
-
 import { buttonVariants } from "@optima/ui/components/button";
 import {
 	type DropzoneOptions,
@@ -44,7 +44,6 @@ import type { z } from "zod";
 import { OnChangeToast } from "@/components/toasts/on-change-toast";
 import { useActionToast } from "@/hooks/use-actions-toast";
 import { useCompany } from "@/hooks/use-company";
-import { useServices } from "@optima/supabase/clients/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 import { getDirtyFields } from "@/lib/form/get-dirty-fields";
 import { DomainVerification } from "./domain-verification";
@@ -88,7 +87,8 @@ export function CompanyProfileForm({
 	}, [company]);
 
 	const form = useForm<OrganizationFormValues>({
-		resolver: zodResolver(organizationUpdateSchema),
+		// biome-ignore lint/suspicious/noExplicitAny: zod resolver having issues with zod v4
+		resolver: zodResolver(organizationUpdateSchema as any),
 		defaultValues,
 	});
 

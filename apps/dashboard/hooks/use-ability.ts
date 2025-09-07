@@ -1,5 +1,5 @@
 import { useAbility as useCaslAbility } from "@casl/react";
-import { AbilityContext } from "@/lib/auth/abilities";
+import { AbilityContext } from "@/lib/auth/abilities.context";
 
 export const useAbility = () => {
 	const ability = useCaslAbility(AbilityContext);

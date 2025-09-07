@@ -1,4 +1,5 @@
 import { getServerServices } from "@optima/supabase/clients/server-services";
+import { Grid, Text } from "@radix-ui/themes";
 import { headers } from "next/headers";
 import { departmentSearchCache } from "../departments.search-params";
 import { DepartmentCard } from "./department-card";
@@ -16,16 +17,23 @@ export async function DepartmentsList() {
 	if (departments.length === 0) {
 		return (
 			<div className="flex flex-col gap-2 flex-1 items-center justify-center">
-				<p className="text-muted-foreground">No departments found</p>
+				<Text className="text-muted-foreground">No departments found</Text>
 			</div>
 		);
 	}
 
 	return (
-		<section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+		<Grid
+			columns={{
+				initial: "1",
+				md: "2",
+				lg: "3",
+			}}
+			gap="4"
+		>
 			{departments.map((department) => (
 				<DepartmentCard key={department.id} department={department} />
 			))}
-		</section>
+		</Grid>
 	);
 }

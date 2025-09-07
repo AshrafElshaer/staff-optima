@@ -186,7 +186,6 @@ export const auth = betterAuth({
 			prompt: "select_account",
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
-			callbackURL: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 		},
 	},
 	plugins: [

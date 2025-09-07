@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { countries } from "@optima/location";
+import { useServices } from "@optima/supabase/clients/use-services";
 import { organizationInsertSchema } from "@optima/supabase/validations/organization.validations";
 import { Button } from "@optima/ui/components/button";
 import { Form } from "@optima/ui/components/form";
@@ -21,7 +22,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useCountdown } from "usehooks-ts";
 import type { z } from "zod";
-import { useServices } from "@optima/supabase/clients/use-services";
 import { authClient } from "@/lib/auth/auth.client";
 
 export function OrganizationOnboarding() {
@@ -72,7 +72,7 @@ const EMPLOYEE_COUNT_OPTIONS = [
 	{ label: "11-50", value: "11-50" },
 	{ label: "51-200", value: "51-200" },
 	{ label: "201-500", value: "201-500" },
-	{ label: "+ 500", value: "+ 500" },
+	{ label: "500+", value: "500+" },
 ];
 type OrganizationFormValues = z.infer<typeof organizationInsertSchema>;
 
@@ -83,7 +83,8 @@ function OrganizationForm() {
 	const router = useRouter();
 	const { data: session } = authClient.useSession();
 	const form = useForm<OrganizationFormValues>({
-		resolver: zodResolver(organizationInsertSchema),
+		// biome-ignore lint/suspicious/noExplicitAny: zod resolver having issues with zod v4
+		resolver: zodResolver(organizationInsertSchema as any),
 		defaultValues: {
 			country: "",
 			address1: "",

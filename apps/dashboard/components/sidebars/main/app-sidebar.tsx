@@ -20,7 +20,7 @@ import {
 import type * as React from "react";
 import { HugeIcon } from "@/components/huge-icon";
 import { CommandMenu } from "@/features/cmdk/command-menu";
-import { Can } from "@/lib/auth/abilities";
+import { Can } from "@/lib/auth/abilities.context";
 import { NavMain } from "./nav-main";
 import { OrganizationLogo } from "./organization-logo";
 

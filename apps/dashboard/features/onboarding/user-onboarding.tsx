@@ -98,7 +98,9 @@ function UserForm({ countryCode }: { countryCode: string }) {
 			phoneNumber: session?.user.phoneNumber ?? "",
 			image: session?.user.image ?? "",
 		},
-		resolver: zodResolver(userInsertSchema),
+
+		// biome-ignore lint/suspicious/noExplicitAny: zod resolver having issues with zod v4
+		resolver: zodResolver(userInsertSchema as any),
 	});
 
 	useEffect(() => {

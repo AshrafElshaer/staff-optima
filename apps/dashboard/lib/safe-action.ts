@@ -1,5 +1,6 @@
 // import { getUser } from "@optima/supabase/queries";
 
+import { createMongoAbility } from "@casl/ability";
 // import { setupAnalytics } from "@optima/analytics/server";
 import { ratelimit } from "@optima/kv/ratelimit";
 import { createServerClient } from "@optima/supabase/clients/server";
@@ -10,6 +11,7 @@ import {
 	DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
 import { z } from "zod";
+import { type AppAbility, createAbility } from "@/lib/auth/abilities";
 import { auth } from "@/lib/auth/auth.server";
 import { resend } from "@/lib/resend";
 import { ServiceFactory } from "../../../packages/supabase/src/services/service.factory";
@@ -114,6 +116,10 @@ export const authActionClient = actionClientWithMeta
 		const supabase = await createServerClient();
 		const services = ServiceFactory.getInstance(supabase);
 
+		const abilities = createAbility(
+			JSON.parse(session.session.permissions || "[]"),
+		);
+
 		// if (metadata) {
 		// 	const analytics = await setupAnalytics({
 		// 		userId: user.id,
@@ -127,6 +133,7 @@ export const authActionClient = actionClientWithMeta
 				session,
 				services,
 				supabase,
+				abilities,
 			},
 		});
 

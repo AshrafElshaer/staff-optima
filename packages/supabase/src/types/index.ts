@@ -36,6 +36,10 @@ export type Department = Tables<"team">;
 export type DepartmentUpdate = TablesUpdate<"team">;
 export type DepartmentInsert = TablesInsert<"team">;
 
+export type DepartmentMember = Tables<"teamMember">;
+export type DepartmentMemberUpdate = TablesUpdate<"teamMember">;
+export type DepartmentMemberInsert = TablesInsert<"teamMember">;
+
 // export type WorkspaceMember = Tables<"member">;
 // export type Project = Tables<"projects">;
 // export type ProjectMember = Tables<"project_members">;

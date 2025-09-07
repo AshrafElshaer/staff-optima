@@ -5,6 +5,7 @@ import { departmentSearchCache } from "@/features/departments/departments.search
 import { DepartmentsList } from "@/features/departments/views/departments-list";
 import { DepartmentsLoading } from "@/features/departments/views/departments-loading";
 import { DepartmentSearch } from "@/features/departments/views/departments-search";
+import { NewDepartment } from "@/features/departments/views/new-department";
 
 export const metadata: Metadata = {
 	title: "Departments",
@@ -23,7 +24,7 @@ export default async function OrganizationDepartmentsPage({
 		<div className="flex flex-col gap-4 flex-1 p-4">
 			<section className="flex items-center gap-4 justify-between">
 				<DepartmentSearch />
-				{/* <NewDepartment /> */}
+				<NewDepartment />
 			</section>
 			<Suspense fallback={<DepartmentsLoading />}>
 				<DepartmentsList />

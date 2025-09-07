@@ -85,6 +85,16 @@ export const permissions = [
 	{ action: "view:performance", subject: "reporting" },
 	{ action: "export", subject: "reporting" },
 
+	// Department permissions
+	{ action: "create", subject: "department" },
+	{ action: "view", subject: "department", conditions: { scope: "any" } },
+	{ action: "view", subject: "department", conditions: { scope: "own" } },
+	{ action: "update", subject: "department", conditions: { scope: "any" } },
+	{ action: "update", subject: "department", conditions: { scope: "own" } },
+	{ action: "delete", subject: "department", conditions: { scope: "any" } },
+	{ action: "delete", subject: "department", conditions: { scope: "own" } },
+	{ action: "manage", subject: "department" },
+
 	// Organization permissions
 	{ action: "manage", subject: "organization" },
 	{ action: "manage", subject: "billing" },

@@ -1,4 +1,6 @@
+import { createTableFilters } from "../lib/query-builder";
 import type {
+	DepartmentMember,
 	MembershipInsert,
 	MembershipRow,
 	MembershipUpdate,
@@ -10,6 +12,9 @@ export class MembershipService extends BaseService<"member"> {
 	constructor(supabase: SupabaseInstance) {
 		super(supabase, "member");
 	}
+
+	private readonly memberFilters = createTableFilters<"member">();
+	private readonly departmentMemberFilters = createTableFilters<"teamMember">();
 
 	async getById(id: string): Promise<MembershipRow> {
 		return this.findById(id);

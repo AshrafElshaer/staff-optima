@@ -7,7 +7,8 @@ import { useMemo } from "react";
 import { CompanySidebar } from "@/components/sidebars/company/company-sidebar";
 import { DashboardInset } from "@/components/sidebars/dashboard-inset";
 import { AppSidebar } from "@/components/sidebars/main/app-sidebar";
-import { AbilityContext, createAbility } from "@/lib/auth/abilities";
+import { AbilityContext } from "@/lib/auth/abilities.context";
+import { createAbility } from "@/lib/auth/abilities";
 import { authClient } from "@/lib/auth/auth.client";
 
 export default function PlatformLayout({

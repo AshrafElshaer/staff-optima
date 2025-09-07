@@ -4,6 +4,7 @@ import {
 	type FilterGroup,
 	Sort,
 } from "../lib/query-builder";
+import { build, many, one, select } from "../lib/select-builder";
 import type { Department, DepartmentInsert, SupabaseInstance } from "../types";
 import type { Tables } from "../types/database";
 import { BaseService } from "./base.service";
