@@ -4,14 +4,19 @@ import {
 	type FilterGroup,
 	Sort,
 } from "../lib/query-builder";
-import { build, many, one, select } from "../lib/select-builder";
 import type { Department, DepartmentInsert, SupabaseInstance } from "../types";
 import type { Tables } from "../types/database";
 import { BaseService } from "./base.service";
+import type { TeamMemberService } from "./team-member.service";
 
 export class DepartmentService extends BaseService<"team"> {
-	constructor(supabase: SupabaseInstance) {
+	private readonly teamMemberService: TeamMemberService;
+	constructor(
+		supabase: SupabaseInstance,
+		teamMemberService: TeamMemberService,
+	) {
 		super(supabase, "team");
+		this.teamMemberService = teamMemberService;
 	}
 
 	/**
@@ -181,6 +186,11 @@ export class DepartmentService extends BaseService<"team"> {
 	}
 
 	async create(department: DepartmentInsert): Promise<Department> {
-		return this.create(department);
+		const team = await super.create(department);
+		await this.teamMemberService.create({
+			teamId: team.id,
+			userId: team.managerId as string,
+		});
+		return team;
 	}
 }

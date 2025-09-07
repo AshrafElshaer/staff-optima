@@ -395,26 +395,39 @@ export type Database = {
 			team: {
 				Row: {
 					createdAt: string;
+					description: string | null;
 					id: string;
+					managerId: string | null;
 					name: string;
 					organizationId: string;
 					updatedAt: string;
 				};
 				Insert: {
 					createdAt?: string;
+					description?: string | null;
 					id?: string;
+					managerId?: string | null;
 					name: string;
 					organizationId: string;
 					updatedAt?: string;
 				};
 				Update: {
 					createdAt?: string;
+					description?: string | null;
 					id?: string;
+					managerId?: string | null;
 					name?: string;
 					organizationId?: string;
 					updatedAt?: string;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "team_managerId_fkey";
+						columns: ["managerId"];
+						isOneToOne: false;
+						referencedRelation: "user";
+						referencedColumns: ["id"];
+					},
 					{
 						foreignKeyName: "team_organizationId_fkey";
 						columns: ["organizationId"];

@@ -91,7 +91,10 @@ export class ServiceFactory {
 		const key = "department";
 		let service = this.services.get(key) as DepartmentService;
 		if (!service) {
-			service = new DepartmentService(this.supabase);
+			service = new DepartmentService(
+				this.supabase,
+				this.getTeamMemberService(),
+			);
 			this.services.set(key, service);
 		}
 		return service;

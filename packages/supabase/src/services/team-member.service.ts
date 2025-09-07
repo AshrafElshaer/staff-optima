@@ -1,5 +1,9 @@
 import { createTableFilters } from "../lib/query-builder";
-import type { DepartmentMember, SupabaseInstance } from "../types";
+import type {
+	DepartmentMember,
+	SupabaseInstance,
+	DepartmentMemberInsert,
+} from "../types";
 import { BaseService } from "./base.service";
 
 export class TeamMemberService extends BaseService<"teamMember"> {
@@ -13,5 +17,9 @@ export class TeamMemberService extends BaseService<"teamMember"> {
 		return this.find({
 			filters: [this.teamMemberFilters.eq("teamId", teamId)],
 		});
+	}
+
+	async create(teamMember: DepartmentMemberInsert): Promise<DepartmentMember> {
+		return super.create(teamMember);
 	}
 }

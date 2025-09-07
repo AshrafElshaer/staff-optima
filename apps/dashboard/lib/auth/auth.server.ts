@@ -317,6 +317,23 @@ export const auth = betterAuth({
 						},
 					},
 				},
+				team: {
+					additionalFields: {
+						description: {
+							type: "string",
+							required: false,
+						},
+						managerId: {
+							type: "string",
+							required: false,
+							references: {
+								model: "user",
+								field: "id",
+								onDelete: "set null",
+							},
+						},
+					},
+				},
 			},
 
 			cancelPendingInvitationsOnReInvite: true,

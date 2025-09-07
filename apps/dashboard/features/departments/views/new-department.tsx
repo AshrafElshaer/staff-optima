@@ -1,5 +1,7 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DashboardSquareAddIcon } from "@hugeicons/core-free-icons";
+import { createTeamSchema } from "@optima/supabase/validations/team.validations";
 import { Button } from "@optima/ui/components/button";
 import {
 	Dialog,
@@ -12,14 +14,19 @@ import {
 	DialogTrigger,
 } from "@optima/ui/components/dialog";
 import { Form } from "@optima/ui/components/form";
-import { FormInput } from "@optima/ui/components/form-controls";
+import {
+	FormFieldWrapper,
+	FormInput,
+	FormTextarea,
+} from "@optima/ui/components/form-controls";
 import { Icons } from "@optima/ui/components/icons";
-import { Separator } from "@optima/ui/components/separator";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { z } from "zod";
 import { HugeIcon } from "@/components/huge-icon";
+import { MemberSelector } from "@/components/member-selector";
 import { Can } from "@/lib/auth/abilities.context";
 import { createDepartment } from "../department.actions";
 
@@ -34,10 +41,19 @@ export function NewDepartment() {
 			toast.error(error.serverError);
 		},
 	});
-	const formContext = useForm();
+	const formContext = useForm({
+		// biome-ignore lint/suspicious/noExplicitAny: zodResolver is not typed
+		resolver: zodResolver(createTeamSchema as any),
+		defaultValues: {
+			name: "",
+			description: "",
+			managerId: "",
+		},
+	});
 
-	function onSubmit(data: any) {
-		execute({ name: data.name });
+	function onSubmit(data: z.infer<typeof createTeamSchema>) {
+		console.log(data);
+		execute(data);
 	}
 	return (
 		<Can I="create" a="team">
@@ -58,8 +74,6 @@ export function NewDepartment() {
 							Create a new department to organize your jobs.
 						</DialogDescription>
 					</DialogHeader>
-					{/* <Separator /> */}
-					{/* <DepartmentForm setOpen={setOpen} /> */}
 
 					<Form {...formContext}>
 						<form
@@ -68,9 +82,21 @@ export function NewDepartment() {
 						>
 							<FormInput
 								name="name"
-								label="Department Name"
-								placeholder="IT , Accounting, etc."
+								label="Name"
+								placeholder="e.g. IT, Accounting"
 							/>
+							<FormTextarea
+								name="description"
+								label="Description"
+								placeholder="e.g. Handles all IT infrastructure and support for the company"
+								isOptional
+							/>
+							<FormFieldWrapper name="managerId" label="Manager">
+								<MemberSelector
+									value={formContext.watch("managerId")}
+									onChange={(value) => formContext.setValue("managerId", value)}
+								/>
+							</FormFieldWrapper>
 							<DialogFooter>
 								<DialogClose asChild>
 									<Button size="sm" variant="outline" disabled={isExecuting}>

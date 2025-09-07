@@ -26,7 +26,9 @@ import {
 } from "@optima/ui/components/select";
 import { CountrySelector } from "@optima/ui/components/selectors/country-selector";
 import { TimezoneSelector } from "@optima/ui/components/selectors/timezone-selector";
+import { Textarea } from "@optima/ui/components/textarea";
 import type { SelectProps } from "@radix-ui/react-select";
+import type { TextAreaProps } from "@radix-ui/themes";
 import { type FieldValues, type Path, useFormContext } from "react-hook-form";
 
 type BaseFormProps<T extends FieldValues> = {
@@ -45,6 +47,64 @@ type FormSelectProps<T extends FieldValues> = BaseFormProps<T> &
 		placeholder?: string;
 	};
 
+type FormTextareaProps<T extends FieldValues> = BaseFormProps<T> &
+	Omit<TextAreaProps, "name">;
+
+type FormFieldWrapperProps<T extends FieldValues> = BaseFormProps<T> & {
+	children: React.ReactNode;
+};
+
+function Label({
+	name,
+	label,
+	isOptional,
+	helperText,
+}: {
+	name: string;
+	label: string | undefined;
+	isOptional: boolean | undefined;
+	helperText: string | undefined;
+}) {
+	if (!label) return null;
+	return (
+		<FormLabel htmlFor={name}>
+			{label}
+			{isOptional && (
+				<span className="text-muted-foreground text-sm">( Optional )</span>
+			)}
+			{helperText && <FormDescription>{helperText}</FormDescription>}
+		</FormLabel>
+	);
+}
+
+export function FormFieldWrapper<T extends FieldValues>({
+	name,
+	label,
+	isOptional,
+	helperText,
+	children,
+}: FormFieldWrapperProps<T>) {
+	const formContext = useFormContext<T>();
+	return (
+		<FormField
+			control={formContext.control}
+			name={name}
+			render={({ field }) => (
+				<FormItem className="space-y-2 w-full">
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
+					<FormControl>{children}</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+}
+
 export function FormInput<T extends FieldValues>({
 	name,
 	label,
@@ -59,17 +119,44 @@ export function FormInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="space-y-2 w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-						{helperText && <FormDescription>{helperText}</FormDescription>}
-					</FormLabel>
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
 					<FormControl>
 						<Input id={name} placeholder="John Doe" {...field} {...props} />
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+}
+
+export function FormTextarea<T extends FieldValues>({
+	name,
+	label,
+	isOptional,
+	helperText,
+	...props
+}: FormTextareaProps<T>) {
+	const formContext = useFormContext<T>();
+	return (
+		<FormField
+			control={formContext.control}
+			name={name}
+			render={({ field }) => (
+				<FormItem className="space-y-2 w-full">
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
+					<FormControl>
+						<Textarea id={name} placeholder="John Doe" {...field} {...props} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>
@@ -83,6 +170,7 @@ export function FormPhoneInput<T extends FieldValues>({
 	name,
 	countryCode,
 	isOptional,
+	helperText,
 	...props
 }: FormInputProps<T> & {
 	countryCode?: CountryCode;
@@ -94,14 +182,12 @@ export function FormPhoneInput<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="space-y-2 w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-					</FormLabel>
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
 					<FormControl className="w-full">
 						<PhoneInput
 							className="w-full"
@@ -132,6 +218,7 @@ export function FormAddOnInput<T extends FieldValues>({
 	addOn,
 	addOnDirection,
 	wrapperClassName,
+	helperText,
 	...props
 }: FormInputProps<T> & InputWithAddOnProps) {
 	const formContext = useFormContext<T>();
@@ -142,14 +229,12 @@ export function FormAddOnInput<T extends FieldValues>({
 			render={({ field }) => (
 				<FormItem className="w-full">
 					{label && (
-						<FormLabel htmlFor={name}>
-							{label}
-							{isOptional && (
-								<span className="text-muted-foreground text-sm">
-									( Optional )
-								</span>
-							)}
-						</FormLabel>
+						<Label
+							name={name}
+							label={label}
+							isOptional={isOptional}
+							helperText={helperText}
+						/>
 					)}
 					<FormControl>
 						<InputWithAddOn
@@ -172,6 +257,7 @@ export function FormSelect<T extends FieldValues>({
 	label,
 	name,
 	isOptional,
+	helperText,
 	options,
 	placeholder,
 	...props
@@ -183,14 +269,12 @@ export function FormSelect<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-					</FormLabel>
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
 					<FormControl>
 						<Select
 							value={field.value ?? undefined}
@@ -225,6 +309,7 @@ export function FormCountrySelector<T extends FieldValues>({
 	label,
 	name,
 	isOptional,
+	helperText,
 }: FormInputProps<T>) {
 	const formContext = useFormContext<T>();
 	return (
@@ -233,14 +318,12 @@ export function FormCountrySelector<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-					</FormLabel>
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
 					<FormControl>
 						<CountrySelector
 							value={field.value ?? null}
@@ -261,6 +344,7 @@ export function FormTimezoneSelector<T extends FieldValues>({
 	label,
 	name,
 	isOptional,
+	helperText,
 }: FormInputProps<T>) {
 	const formContext = useFormContext<T>();
 	return (
@@ -269,14 +353,12 @@ export function FormTimezoneSelector<T extends FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="w-full">
-					<FormLabel htmlFor={name}>
-						{label}
-						{isOptional && (
-							<span className="text-muted-foreground text-sm">
-								( Optional )
-							</span>
-						)}
-					</FormLabel>
+					<Label
+						name={name}
+						label={label}
+						isOptional={isOptional}
+						helperText={helperText}
+					/>
 					<FormControl>
 						<TimezoneSelector
 							value={field.value}

@@ -107,6 +107,8 @@ create table "team" (
     "id" uuid not null primary key default gen_random_uuid(),
     "name" text not null,
     "organizationId" uuid not null references "organization" ("id") on delete cascade,
+    "description" text,
+    "managerId" uuid references "user" ("id") on delete set null,
     "createdAt" timestamp with time zone not null default now(),
     "updatedAt" timestamp with time zone not null default now()
 );

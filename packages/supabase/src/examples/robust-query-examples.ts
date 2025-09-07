@@ -10,6 +10,7 @@ import { createServerClient } from "../clients/server";
 import type { FilterCondition, FilterGroup } from "../lib/query-builder";
 import { Filter, Sort } from "../lib/query-builder";
 import { DepartmentService } from "../services";
+import { TeamMemberService } from "../services/team-member.service";
 
 // ============================================================================
 // GENERIC SERVICE USAGE EXAMPLES
@@ -414,19 +415,21 @@ export const usageExamples = {
 	 * Simple department listing
 	 */
 	async getDepartments(organizationId: string) {
-		const departmentService = new DepartmentService(supabase);
+		const departmentService = new DepartmentService(
+			supabase,
+			new TeamMemberService(supabase),
+		);
 		return departmentService.findBy("organizationId", organizationId);
 	},
 
 	/**
 	 * Search with filters
 	 */
-	async searchDepartments(
-		organizationId: string,
-		searchTerm: string,
-		status?: string,
-	) {
-		const departmentService = new DepartmentService(supabase);
+	async searchDepartments(organizationId: string, searchTerm: string) {
+		const departmentService = new DepartmentService(
+			supabase,
+			new TeamMemberService(supabase),
+		);
 		const queryOptions = createDepartmentQuery({
 			organizationId,
 			searchTerm,
@@ -443,7 +446,10 @@ export const usageExamples = {
 		page: number,
 		limit: number,
 	) {
-		const departmentService = new DepartmentService(supabase);
+		const departmentService = new DepartmentService(
+			supabase,
+			new TeamMemberService(supabase),
+		);
 		return departmentService.searchPaginated({
 			filters: [Filter.eq("organizationId", organizationId)],
 			page,
@@ -455,7 +461,10 @@ export const usageExamples = {
 	 * Complex analytics query
 	 */
 	async getDepartmentAnalytics(organizationId: string) {
-		const departmentService = new DepartmentService(supabase);
+		const departmentService = new DepartmentService(
+			supabase,
+			new TeamMemberService(supabase),
+		);
 
 		const [total, recent, updated] = await Promise.all([
 			departmentService.count([
