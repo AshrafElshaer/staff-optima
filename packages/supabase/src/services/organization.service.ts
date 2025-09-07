@@ -1,16 +1,32 @@
+import { createTableFilters } from "../lib/query-builder";
+import { build, type InferSelect, many, select } from "../lib/select-builder";
 import type {
 	OrganizationRow,
 	OrganizationUpdate,
 	SupabaseInstance,
-	Tables,
 } from "../types";
 import { BaseService } from "./base.service";
 import type { DomainService } from "./domain.service";
 import type { RoleService } from "./role.service";
 
+const selectOrganizationWithRoles = select({
+	table: "organization",
+	fields: ["*"],
+	relations: [
+		many("roles", select({ table: "role", fields: ["*"] }), {
+			foreignFrom: "organization",
+			foreignKey: "organizationId",
+			nullable: false,
+		}),
+	],
+});
+
+type OrganizationWithRoles = InferSelect<typeof selectOrganizationWithRoles>;
+
 export class OrganizationService extends BaseService<"organization"> {
 	private readonly roleService: RoleService;
 	private readonly domainService: DomainService;
+	private readonly Filters = createTableFilters<"organization">();
 
 	constructor(
 		supabase: SupabaseInstance,
@@ -26,12 +42,11 @@ export class OrganizationService extends BaseService<"organization"> {
 		return this.findById(id);
 	}
 
-	async getOrganizationWithRoles(
-		id: string,
-	): Promise<OrganizationRow & { roles: Tables<"role">[] }> {
-		const organization = await this.getById(id);
-		const roles = await this.roleService.getByOrganization(id);
-		return { ...organization, roles };
+	async getOrganizationWithRoles(id: string): Promise<OrganizationWithRoles> {
+		return await this.findOne({
+			filters: [this.Filters.eq("id", id)],
+			select: build(selectOrganizationWithRoles),
+		});
 	}
 
 	async updateOrganization(
