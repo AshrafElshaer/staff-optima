@@ -151,13 +151,7 @@ export abstract class BaseService<T extends TableName> {
 	protected async findWithConfig<TReturn = Row<T>[]>(
 		config: QueryConfig<T>,
 	): Promise<TReturn[]> {
-		let query: any = this.createBaseQuery();
-
-		// Always apply select first (required for Supabase queries)
-		query = QueryBuilder.applySelect(
-			query,
-			(config.select || "*") as keyof Tables<T>,
-		);
+		let query = this.createBaseQuery().select(config.select || "*");
 
 		// Apply filters
 		if (config.filters) {
@@ -194,13 +188,7 @@ export abstract class BaseService<T extends TableName> {
 	protected async findOneWithConfig<TReturn = Row<T>>(
 		config: Omit<QueryConfig<T>, "pagination">,
 	): Promise<TReturn> {
-		let query: any = this.createBaseQuery();
-
-		// Always apply select first (required for Supabase queries)
-		query = QueryBuilder.applySelect(
-			query,
-			(config.select || "*") as keyof Tables<T>,
-		);
+		let query = this.createBaseQuery().select(config.select || "*");
 
 		// Apply filters
 		if (config.filters) {
@@ -232,19 +220,16 @@ export abstract class BaseService<T extends TableName> {
 	protected async countWithFilters(
 		filters?: FilterGroup<T> | FilterCondition<T>[],
 	): Promise<number> {
-		let query: any = this.createBaseQuery();
-
-		// Apply select first
-		query = query.select("*");
+		let query = this.createBaseQuery().select("*", {
+			count: "exact",
+			head: true,
+		});
 
 		if (filters) {
 			query = QueryBuilder.applyFilters(query, filters);
 		}
 
-		const { count, error } = await query.select("*", {
-			count: "exact",
-			head: true,
-		});
+		const { count, error } = await query;
 
 		if (error) {
 			throw error;

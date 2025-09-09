@@ -23,12 +23,12 @@ export class DepartmentService extends BaseService<"team"> {
 	 * Pre-configured filter factory for the team table
 	 * Eliminates need to specify generics every time
 	 */
-	private readonly Filters = createTableFilters<"team">();
+	Filters = createTableFilters<"team">();
 
 	/**
 	 * Pre-configured sort factory for the team table
 	 */
-	private readonly teamSort = {
+	TeamSort = {
 		asc: (column: keyof Tables<"team">) => Sort.asc<"team">(column),
 		desc: (column: keyof Tables<"team">) => Sort.desc<"team">(column),
 	};
@@ -65,7 +65,7 @@ export class DepartmentService extends BaseService<"team"> {
 		];
 
 		const sort = options?.sortBy
-			? [this.teamSort[options.sortOrder || "asc"](options.sortBy)]
+			? [this.TeamSort[options.sortOrder || "asc"](options.sortBy)]
 			: undefined;
 
 		return this.search({
@@ -84,6 +84,7 @@ export class DepartmentService extends BaseService<"team"> {
 	 */
 	async getDepartmentsPaginated(
 		organizationId: string,
+
 		page: number,
 		limit: number,
 		options?: {
@@ -103,7 +104,7 @@ export class DepartmentService extends BaseService<"team"> {
 		];
 
 		const sort = options?.sortBy
-			? [this.teamSort[options.sortOrder || "asc"](options.sortBy)]
+			? [this.TeamSort[options.sortOrder || "asc"](options.sortBy)]
 			: undefined;
 
 		return this.searchPaginated({
