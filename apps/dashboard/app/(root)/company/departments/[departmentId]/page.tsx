@@ -1,6 +1,5 @@
 import { getServerServices } from "@optima/supabase/clients/server-services";
 
-
 type PageParams = {
 	departmentId: string;
 };

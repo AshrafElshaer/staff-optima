@@ -1,8 +1,7 @@
-import { createTableFilters } from "../lib/query-builder";
 import type {
 	DepartmentMember,
-	SupabaseInstance,
 	DepartmentMemberInsert,
+	SupabaseInstance,
 } from "../types";
 import { BaseService } from "./base.service";
 
@@ -11,12 +10,8 @@ export class TeamMemberService extends BaseService<"teamMember"> {
 		super(supabase, "teamMember");
 	}
 
-	private readonly teamMemberFilters = createTableFilters<"teamMember">();
-
 	async getTeamMembers(teamId: string): Promise<DepartmentMember[]> {
-		return this.find({
-			filters: [this.teamMemberFilters.eq("teamId", teamId)],
-		});
+		return this.findAll({ teamId });
 	}
 
 	async create(teamMember: DepartmentMemberInsert): Promise<DepartmentMember> {

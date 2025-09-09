@@ -1,14 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: because we need to use any to avoid type errors */
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
-import {
-	Filter,
-	type FilterCondition,
-	type FilterGroup,
-	type PaginationConfig,
-	QueryBuilder,
-	type QueryConfig,
-	type SortConfig,
-} from "../lib/query-builder";
 import type { SupabaseInstance } from "../types";
 import type {
 	Database,
@@ -49,34 +40,34 @@ export abstract class BaseService<T extends TableName> {
 	// }
 
 	/**
-	 * Generic find one method with filters
+	 * Find by ID
 	 */
-	async findOne<TReturn = Row<T>>(options: {
-		filters: FilterGroup<T> | FilterCondition<T>[];
-		select?: string;
-	}): Promise<TReturn> {
-		return this.findOneWithConfig<TReturn>({
-			filters: options.filters,
-			select: options.select || "*",
-		});
-	}
-
 	protected async findById<TReturn = Row<T>>(
 		id: string,
 		select?: string,
 	): Promise<TReturn> {
-		return this.findOne<TReturn>({
-			filters: [Filter.eq<T, string>("id", id)],
-			select,
-		});
+		const result = (await this.supabase
+			.from(this.tableName)
+			.select(select || "*")
+			.eq("id" as any, id)
+			.single()) as PostgrestSingleResponse<TReturn>;
+
+		if (result.error) {
+			throw result.error;
+		}
+
+		return result.data;
 	}
+	/**
+	 * Find all records with simple match
+	 */
 	protected async findAll<TReturn = Row<T>[]>(
 		query: Record<string, unknown>,
 		select?: string,
 	): Promise<TReturn[]> {
 		const result = await this.supabase
 			.from(this.tableName)
-			.select(select)
+			.select(select || "*")
 			.match(query);
 
 		if (result.error) {
@@ -136,306 +127,5 @@ export abstract class BaseService<T extends TableName> {
 		}
 
 		return data as Row<T>;
-	}
-
-	/**
-	 * Create a base query for advanced querying
-	 */
-	protected createBaseQuery() {
-		return this.supabase.from(this.tableName);
-	}
-
-	/**
-	 * Find records with advanced filtering, sorting, and pagination
-	 */
-	protected async findWithConfig<TReturn = Row<T>[]>(
-		config: QueryConfig<T>,
-	): Promise<TReturn[]> {
-		let query = this.createBaseQuery().select(config.select || "*");
-
-		// Apply filters
-		if (config.filters) {
-			query = QueryBuilder.applyFilters(query, config.filters);
-		}
-
-		// Apply search
-		if (config.search) {
-			query = QueryBuilder.applySearch(query, config.search);
-		}
-
-		// Apply sorting
-		if (config.sort) {
-			query = QueryBuilder.applySort(query, config.sort);
-		}
-
-		// Apply pagination
-		if (config.pagination) {
-			query = QueryBuilder.applyPagination(query, config.pagination);
-		}
-
-		const { data, error } = await query;
-
-		if (error) {
-			throw error;
-		}
-
-		return (data || []) as TReturn[];
-	}
-
-	/**
-	 * Find a single record with advanced filtering
-	 */
-	protected async findOneWithConfig<TReturn = Row<T>>(
-		config: Omit<QueryConfig<T>, "pagination">,
-	): Promise<TReturn> {
-		let query = this.createBaseQuery().select(config.select || "*");
-
-		// Apply filters
-		if (config.filters) {
-			query = QueryBuilder.applyFilters(query, config.filters);
-		}
-
-		// Apply search
-		if (config.search) {
-			query = QueryBuilder.applySearch(query, config.search);
-		}
-
-		// Apply sorting
-		if (config.sort) {
-			query = QueryBuilder.applySort(query, config.sort);
-		}
-
-		const { data, error } = await query.single();
-
-		if (error) {
-			throw error;
-		}
-
-		return data as TReturn;
-	}
-
-	/**
-	 * Count records with filters
-	 */
-	protected async countWithFilters(
-		filters?: FilterGroup<T> | FilterCondition<T>[],
-	): Promise<number> {
-		let query = this.createBaseQuery().select("*", {
-			count: "exact",
-			head: true,
-		});
-
-		if (filters) {
-			query = QueryBuilder.applyFilters(query, filters);
-		}
-
-		const { count, error } = await query;
-
-		if (error) {
-			throw error;
-		}
-
-		return count || 0;
-	}
-
-	/**
-	 * Find records with simple filters (backward compatibility)
-	 */
-	protected async findAllWithFilters<TReturn = Row<T>[]>(
-		filters: FilterGroup<T> | FilterCondition<T>[],
-		select?: string,
-	): Promise<TReturn[]> {
-		return this.findWithConfig<TReturn>({
-			filters,
-			select: select || "*",
-		});
-	}
-
-	// ============================================================================
-	// GENERIC QUERY METHODS - No need to define in each service
-	// ============================================================================
-
-	/**
-	 * Generic search method with filters, sorting, pagination, and search
-	 */
-	async search<TReturn = Row<T>[]>(options: {
-		filters?: FilterGroup<T> | FilterCondition<T>[];
-		search?: {
-			columns: (keyof Tables<T>)[];
-			term: string;
-		};
-		sort?: SortConfig<T>[];
-		pagination?: PaginationConfig;
-		select?: string;
-	}): Promise<TReturn[]> {
-		return this.findWithConfig<TReturn>({
-			filters: options.filters,
-			search: options.search,
-			sort: options.sort,
-			pagination: options.pagination,
-			select: options.select || "*",
-		});
-	}
-
-	/**
-	 * Generic find method with filters only
-	 */
-	async find<TReturn = Row<T>[]>(options: {
-		filters: FilterGroup<T> | FilterCondition<T>[];
-		select?: string;
-	}): Promise<TReturn[]> {
-		return this.findWithConfig<TReturn>({
-			filters: options.filters,
-			select: options.select || "*",
-		});
-	}
-
-	/**
-	 * Generic count method with filters
-	 */
-	async count(
-		filters?: FilterGroup<T> | FilterCondition<T>[],
-	): Promise<number> {
-		return this.countWithFilters(filters);
-	}
-
-	/**
-	 * Generic paginated search method
-	 */
-	async searchPaginated<TReturn = Row<T>[]>(options: {
-		filters?: FilterGroup<T> | FilterCondition<T>[];
-		search?: {
-			columns: (keyof Tables<T>)[];
-			term: string;
-		};
-		sort?: SortConfig<T>[];
-		page: number;
-		limit: number;
-		select?: string;
-	}): Promise<{
-		data: TReturn[];
-		total: number;
-		page: number;
-		limit: number;
-		totalPages: number;
-	}> {
-		const offset = (options.page - 1) * options.limit;
-
-		const queryConfig: QueryConfig<T> = {
-			filters: options.filters,
-			search: options.search,
-			sort: options.sort,
-			pagination: { limit: options.limit, offset },
-			select: options.select || "*",
-		};
-
-		const [data, total] = await Promise.all([
-			this.findWithConfig<TReturn[]>(queryConfig),
-			this.countWithFilters(options.filters),
-		]);
-
-		return {
-			data: data as TReturn[],
-			total,
-			page: options.page,
-			limit: options.limit,
-			totalPages: Math.ceil(total / options.limit),
-		};
-	}
-
-	/**
-	 * Generic method to find by a single field
-	 */
-	async findBy<TReturn = Row<T>[]>(
-		field: keyof Row<T>,
-		value: unknown,
-		options?: {
-			select?: string;
-			sort?: SortConfig<T>[];
-			limit?: number;
-		},
-	): Promise<TReturn[]> {
-		const filters: FilterCondition<T>[] = [
-			Filter.eq<T, unknown>(field as keyof Tables<T>, value),
-		];
-
-		return this.findWithConfig<TReturn>({
-			filters,
-			select: options?.select || "*",
-			sort: options?.sort,
-			pagination: options?.limit ? { limit: options.limit } : undefined,
-		});
-	}
-
-	/**
-	 * Generic method to find by multiple fields
-	 */
-	async findByFields<TReturn = Row<T>[]>(
-		fields: Record<keyof Row<T>, unknown>,
-		options?: {
-			select?: string;
-			sort?: SortConfig<T>[];
-			limit?: number;
-		},
-	): Promise<TReturn[]> {
-		const filters: FilterCondition<T>[] = Object.entries(fields).map(
-			([key, value]) => Filter.eq<T, unknown>(key as keyof Tables<T>, value),
-		);
-
-		return this.findWithConfig<TReturn>({
-			filters,
-			select: options?.select || "*",
-			sort: options?.sort,
-			pagination: options?.limit ? { limit: options.limit } : undefined,
-		});
-	}
-
-	/**
-	 * Generic method to find by field with IN operator
-	 */
-	async findByIn<TReturn = Row<T>[]>(
-		field: keyof Row<T>,
-		values: unknown[],
-		options?: {
-			select?: string;
-			sort?: SortConfig<T>[];
-			limit?: number;
-		},
-	): Promise<TReturn[]> {
-		const filters: FilterCondition<T>[] = [
-			Filter.in<T, unknown>(field as keyof Tables<T>, values),
-		];
-
-		return this.findWithConfig<TReturn>({
-			filters,
-			select: options?.select || "*",
-			sort: options?.sort,
-			pagination: options?.limit ? { limit: options.limit } : undefined,
-		});
-	}
-
-	/**
-	 * Generic method to search by text across multiple columns
-	 */
-	async searchText<TReturn = Row<T>[]>(
-		columns: (keyof Row<T>)[],
-		term: string,
-		options?: {
-			filters?: FilterGroup<T> | FilterCondition<T>[];
-			select?: string;
-			sort?: SortConfig<T>[];
-			limit?: number;
-		},
-	): Promise<TReturn[]> {
-		return this.findWithConfig<TReturn>({
-			filters: options?.filters,
-			search: {
-				columns: columns as (keyof Tables<T>)[],
-				term,
-			},
-			select: options?.select || "*",
-			sort: options?.sort,
-			pagination: options?.limit ? { limit: options.limit } : undefined,
-		});
 	}
 }

@@ -1,4 +1,3 @@
-import { createTableFilters } from "../lib/query-builder";
 import { build, type InferSelect, many, select } from "../lib/select-builder";
 import type {
 	OrganizationRow,
@@ -26,7 +25,6 @@ type OrganizationWithRoles = InferSelect<typeof selectOrganizationWithRoles>;
 export class OrganizationService extends BaseService<"organization"> {
 	private readonly roleService: RoleService;
 	private readonly domainService: DomainService;
-	private readonly Filters = createTableFilters<"organization">();
 
 	constructor(
 		supabase: SupabaseInstance,
@@ -43,10 +41,20 @@ export class OrganizationService extends BaseService<"organization"> {
 	}
 
 	async getOrganizationWithRoles(id: string): Promise<OrganizationWithRoles> {
-		return await this.findOne({
-			filters: [this.Filters.eq("id", id)],
-			select: build(selectOrganizationWithRoles),
-		});
+		const result = await this.supabase
+			.from(this.tableName)
+			.select(`
+				*,
+				roles:role(*)
+			`)
+			.eq("id", id)
+			.single();
+
+		if (result.error) {
+			throw result.error;
+		}
+
+		return result.data as OrganizationWithRoles;
 	}
 
 	async updateOrganization(
