@@ -8,6 +8,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@optima/ui/components/breadcrumb";
+import { Skeleton } from "@optima/ui/components/skeleton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
@@ -77,13 +78,15 @@ export function CompanyBreadcrumb() {
 							<BreadcrumbItem>
 								{isLast ? (
 									<BreadcrumbPage>
-										{isLoading ? "Loading..." : displayName}
+										{isLoading ? (
+											<Skeleton className="w-20 h-4" />
+										) : (
+											displayName
+										)}
 									</BreadcrumbPage>
 								) : (
 									<BreadcrumbLink asChild>
-										<Link href={href}>
-											{isLoading ? "Loading..." : displayName}
-										</Link>
+										<Link href={href}>{displayName}</Link>
 									</BreadcrumbLink>
 								)}
 							</BreadcrumbItem>
