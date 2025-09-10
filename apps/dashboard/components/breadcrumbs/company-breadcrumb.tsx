@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
+import { useDynamicBreadcrumb } from "@/hooks/use-dynamic-breadcrumb";
+import type { DynamicSegmentConfig } from "./types";
 
 const SEGMENTS_MAP = new Map([
 	["company", "Profile"],
@@ -22,22 +24,32 @@ const SEGMENTS_MAP = new Map([
 	["email-templates", "Email Templates"],
 ]);
 
+const DYNAMIC_SEGMENTS = new Map<string, DynamicSegmentConfig>([
+	[
+		"departments",
+		{
+			service: "getDepartmentService",
+			method: "getById",
+			nameField: "name",
+			queryKey: "department",
+		},
+	],
+]);
+
 export function CompanyBreadcrumb() {
 	const pathname = usePathname();
-
-	if (!pathname.includes("/company")) {
-		return null;
-	}
-
 	const segments = pathname.split("/").filter(Boolean);
 	const companyIndex = segments.indexOf("company");
+	const companySegments = segments.slice(companyIndex + 1);
 
-	if (companyIndex === -1) {
+	const { dynamicNames, isLoading } = useDynamicBreadcrumb({
+		segments: companySegments,
+		segmentConfigs: DYNAMIC_SEGMENTS,
+	});
+
+	if (companyIndex === -1 || !pathname.includes("/company")) {
 		return null;
 	}
-
-	// Get only the segments after "company"
-	const companySegments = segments.slice(companyIndex + 1);
 
 	if (companySegments.length === 0) {
 		return (
@@ -57,16 +69,21 @@ export function CompanyBreadcrumb() {
 				{companySegments.map((segment, index) => {
 					const isLast = index === companySegments.length - 1;
 					const href = `/company/${companySegments.slice(0, index + 1).join("/")}`;
-					const displayName = SEGMENTS_MAP.get(segment) || segment;
+					const displayName =
+						dynamicNames[segment] || SEGMENTS_MAP.get(segment) || segment;
 
 					return (
 						<Fragment key={`${segment}-${index.toString()}`}>
 							<BreadcrumbItem>
 								{isLast ? (
-									<BreadcrumbPage>{displayName}</BreadcrumbPage>
+									<BreadcrumbPage>
+										{isLoading ? "Loading..." : displayName}
+									</BreadcrumbPage>
 								) : (
 									<BreadcrumbLink asChild>
-										<Link href={href}>{displayName}</Link>
+										<Link href={href}>
+											{isLoading ? "Loading..." : displayName}
+										</Link>
 									</BreadcrumbLink>
 								)}
 							</BreadcrumbItem>

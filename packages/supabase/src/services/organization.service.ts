@@ -2,25 +2,16 @@ import { build, type InferSelect, many, select } from "../lib/select-builder";
 import type {
 	OrganizationRow,
 	OrganizationUpdate,
+	RoleRow,
 	SupabaseInstance,
 } from "../types";
 import { BaseService } from "./base.service";
 import type { DomainService } from "./domain.service";
 import type { RoleService } from "./role.service";
 
-const selectOrganizationWithRoles = select({
-	table: "organization",
-	fields: ["*"],
-	relations: [
-		many("roles", select({ table: "role", fields: ["*"] }), {
-			foreignFrom: "organization",
-			foreignKey: "organizationId",
-			nullable: false,
-		}),
-	],
-});
-
-type OrganizationWithRoles = InferSelect<typeof selectOrganizationWithRoles>;
+type OrganizationWithRoles = OrganizationRow & {
+	roles: RoleRow[];
+};
 
 export class OrganizationService extends BaseService<"organization"> {
 	private readonly roleService: RoleService;
@@ -40,7 +31,7 @@ export class OrganizationService extends BaseService<"organization"> {
 		return this.findById(id);
 	}
 
-	async getOrganizationWithRoles(id: string): Promise<OrganizationWithRoles> {
+	async getOrganizationWithRoles(id: string): Promise<OrganizationRow> {
 		const result = await this.supabase
 			.from(this.tableName)
 			.select(`

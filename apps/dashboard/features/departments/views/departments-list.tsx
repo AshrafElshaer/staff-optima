@@ -11,6 +11,7 @@ export async function DepartmentsList() {
 	const departmentService = (await getServerServices()).getDepartmentService();
 	const departments = await departmentService.getAllByOrganizationId(
 		organizationId ?? "",
+		filters,
 	);
 
 	if (departments.length === 0) {

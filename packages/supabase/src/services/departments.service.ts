@@ -16,28 +16,38 @@ export class DepartmentService extends BaseService<"team"> {
 		return this.findById(id);
 	}
 
-	// ============================================================================
-	// BASIC CRUD METHODS - Build your own filtering logic
-	// ============================================================================
-
 	/**
 	 * Get all departments (you can add your own filtering)
 	 */
-	async getAll(): Promise<Department[]> {
-		const result = await this.supabase.from(this.tableName).select("*");
+	async getAll({
+		organizationId,
+	}: {
+		organizationId: string;
+	}): Promise<Department[]> {
+		return this.findAll({ select: "*", match: { organizationId } });
+	}
+
+	/**
+	 * Get departments by organization ID (simple match)
+	 */
+	async getAllByOrganizationId(
+		organizationId: string,
+		filters?: {
+			name?: string;
+		},
+	): Promise<Department[]> {
+		const query = this.createBaseQuery().select("*").match({ organizationId });
+		if (filters?.name) {
+			query.ilike("name", `%${filters.name}%`);
+		}
+
+		const result = await query;
 
 		if (result.error) {
 			throw result.error;
 		}
 
 		return result.data || [];
-	}
-
-	/**
-	 * Get departments by organization ID (simple match)
-	 */
-	async getAllByOrganizationId(organizationId: string): Promise<Department[]> {
-		return this.findAll({ organizationId });
 	}
 
 	async create(department: DepartmentInsert): Promise<Department> {

@@ -22,22 +22,9 @@ export abstract class BaseService<T extends TableName> {
 		this.tableName = tableName;
 	}
 
-	// protected async findOne<TReturn = Row<T>>(
-	// 	query: Record<string, unknown>,
-	// 	select?: string,
-	// ): Promise<TReturn> {
-	// 	const result = (await this.supabase
-	// 		.from(this.tableName)
-	// 		.select(select)
-	// 		.match(query)
-	// 		.single()) as PostgrestSingleResponse<TReturn>;
-
-	// 	if (result.error) {
-	// 		throw result.error;
-	// 	}
-
-	// 	return result.data;
-	// }
+	createBaseQuery() {
+		return this.supabase.from(this.tableName);
+	}
 
 	/**
 	 * Find by ID
@@ -65,8 +52,7 @@ export abstract class BaseService<T extends TableName> {
 		query: Record<string, unknown>,
 		select?: string,
 	): Promise<TReturn[]> {
-		const result = await this.supabase
-			.from(this.tableName)
+		const result = await this.createBaseQuery()
 			.select(select || "*")
 			.match(query);
 
@@ -82,8 +68,7 @@ export abstract class BaseService<T extends TableName> {
 		value: string | number | symbol,
 		data: Update<T>,
 	): Promise<Row<T>> {
-		const result = (await this.supabase
-			.from(this.tableName)
+		const result = (await this.createBaseQuery()
 			.update(data as any)
 			.eq(key as string, value as any)
 			.select()
@@ -127,5 +112,18 @@ export abstract class BaseService<T extends TableName> {
 		}
 
 		return data as Row<T>;
+	}
+
+	protected async getCount(query: Record<string, unknown>): Promise<number> {
+		const { count, error } = await this.supabase
+			.from(this.tableName)
+			.select("*", { count: "exact", head: true })
+			.match(query);
+
+		if (error) {
+			throw error;
+		}
+
+		return count ?? 0;
 	}
 }
